@@ -1,0 +1,115 @@
+\def\sphinxdocclass{report}
+\documentclass[letterpaper,10pt,english]{sphinxmanual}
+\ifdefined\pdfpxdimen
+   \let\sphinxpxdimen\pdfpxdimen\else\newdimen\sphinxpxdimen
+\fi \sphinxpxdimen=.75bp\relax
+
+\PassOptionsToPackage{warn}{textcomp}
+\usepackage[utf8]{inputenc}
+\ifdefined\DeclareUnicodeCharacter
+% support both utf8 and utf8x syntaxes
+\edef\sphinxdqmaybe{\ifdefined\DeclareUnicodeCharacterAsOptional\string"\fi}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe00A0}{\nobreakspace}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe2500}{\sphinxunichar{2500}}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe2502}{\sphinxunichar{2502}}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe2514}{\sphinxunichar{2514}}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe251C}{\sphinxunichar{251C}}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe2572}{\textbackslash}
+\fi
+
+% PREAMBLE DEFINITIONS
+\usepackage{ marvosym }
+\setcounter{secnumdepth}{0}
+
+% SPHINX TEMPLATE
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amstext}
+\usepackage{babel}
+\usepackage{times}
+\usepackage[Conny]{fncychap}
+\usepackage{sphinx}
+\usepackage{titlesec}
+
+\fvset{fontsize=\small}
+\usepackage{geometry}
+
+% CITATIONS AND REFERENCES : LOAD
+\usepackage{cite}         % to summarise multiple citations
+\usepackage{hyperref} % to make references and citations clickable
+\renewcommand{\thefootnote}{\fnsymbol{footnote}} % allow one to choose footnote symbol
+\usepackage{hypcap}  % part of the sphinx template
+\urlstyle{same}             % ass. from sphinx template
+
+% DEFINITIONS
+\newcommand{\supscr}[1]{\ensuremath{^{\textrm{#1}}}}
+\newcommand{\subscr}[1]{\ensuremath{_{\textrm{#1}}}}
+\newcommand{\pids}[1]{\supscr{{\footnotesize \texttt{#1}}}}
+\newcommand{\pidt}[1]{\ensuremath{\vcenter{\hbox{\textbf{{\small \texttt{#1}}}}}}}
+\newcommand{\st}[0]{\supscr{ste}}
+\newcommand{\de}[0]{\supscr{de}}
+\newcommand{\nl}{\nolinebreak[3]}
+\newcommand{\rom}[1]{\uppercase\expandafter{\romannumeral #1\relax}}
+\newcommand{\foo}{\color{LightSteelBlue3}\makebox[0pt]{\textbullet}\hskip-0.5pt\vrule width 1pt\hspace{\labelsep}}
+
+% SPHINX TEMPLATE (MODIFIED)
+\addto\captionsenglish{\renewcommand{\figurename}{Fig.\@ }}
+\makeatletter
+\def\fnum@figure{\figurename\thefigure{}}
+\makeatother
+\addto\captionsenglish{\renewcommand{\tablename}{Table }}
+\makeatletter
+\def\fnum@table{\tablename\thetable{}}
+\makeatother
+\addto\captionsenglish{\renewcommand{\literalblockname}{Listing}}
+
+\addto\captionsenglish{\renewcommand{\literalblockcontinuedname}{continued from previous page}}
+\addto\captionsenglish{\renewcommand{\literalblockcontinuesname}{continues on next page}}
+\addto\captionsenglish{\renewcommand{\sphinxnonalphabeticalgroupname}{Non-alphabetical}}
+\addto\captionsenglish{\renewcommand{\sphinxsymbolsname}{Symbols}}
+\addto\captionsenglish{\renewcommand{\sphinxnumbersname}{Numbers}}
+\addto\extrasenglish{\def\pageautorefname{page}}
+
+\let\origpart\part
+\newcommand{\parttitle}{}
+\renewcommand{\part}[3][]{\origpart[#1]{#2}\label{#3}\renewcommand{\parttitle}{Part \ref{#3}. #1}}
+\newcommand{\partline}{\renewcommand{\parttitle}{}}
+
+% redefinition of sphinx's chapter & part definition
+\makeatletter
+\let\stdchapter\chapter
+\renewcommand*\chapter{%
+  \@ifstar{\starchapter}{\@dblarg\nostarchapter}}
+\newcommand*\starchapter[1]{\stdchapter*{#1}}
+\def\nostarchapter[#1]#2{\stdchapter[{#1}]{{\huge #2}}}
+\makeatother
+\makeatletter\@addtoreset{chapter}{part}\makeatother
+\makeatletter\@openrightfalse\makeatother
+
+% SETUP PARAMETERS
+\title{On the origin of Sunder's}
+\author{M.P.A. Sunder, MSc. \pids{(A.2.1.3.6.2.1)}}
+ 
+\begin{document}
+
+% CONSTRUCT PREAMBLE
+\maketitle
+
+% roman numbering in the table of contents section
+%\pagenumbering{roman}
+%\raggedbottom
+%\maketitle
+
+\pagestyle{plain}
+\sphinxtableofcontents
+\pagestyle{normal}
+
+% in the main part of the document use standard arabic numbers. Page counter resets to 1.
+%\pagenumbering{arabic}
+
+
+%%%%%%%%%%%%%%%%% TECHNICAL DESCRIPTIONS  %%%%%%%%%%%%%%%%
+%\chapter{}
+\include{description}
+
+\end{document}
