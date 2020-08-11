@@ -1,11 +1,12 @@
 import unittest
 
-class ExtendedTestCase(unittest.TestCase):
-    def _assertSpyWasRunWithActionsAndArguments(self,actions,arguments=[]):
-        assertion = (self._spyObject.wereActionsCalled(actions) and\
-                     self._spyObject.wereArgumentsCalled(arguments))
-        self.assertThatIsTrue(assertion)
+class ExtendedTestCase(unittest.TestCase):        
+    def _assertActualEqualsExpected(self,actual,expected):
+        assertion = (actual == expected)
+        if not assertion: self.__reportActualAndExpected(actual,expected)
+        self.assertTrue(assertion)     
         
-    def assertThatIsTrue(self,assertion):
-        if not assertion: self._spyObject.dumpActionsAndArguments()
-        super().assertTrue(assertion)  
+    @staticmethod    
+    def __reportActualAndExpected(actual,expected):
+        print('\nactual:',actual)
+        print('expected:',expected)

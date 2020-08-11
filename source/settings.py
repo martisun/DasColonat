@@ -1,10 +1,24 @@
 class Settings(object):
-    def __init__(self,inputDict):
-        self.INPUT_DIR = './input'
-        self.filesToLoadFrom = inputDict['filesToLoadFrom']
+    @staticmethod
+    def setTo(inputDict):
+        theSettings = Settings()
+        theSettings.__updateWith(inputDict)
+        return theSettings
+    
+    def __init__(self):
+        defaultSettings = {'filesToLoadFrom':[],'filesToSaveTo':None,'language':'en'}
+        self.__updateWith(defaultSettings)
+    
+    def setGUITo(self,theGUI):
+        self.__GUI = theGUI 
+    
+    def removeUnloadedFileName(self,fileNameInSetting):
+        removeFromSettings = self.__GUI.askToRemoveFileFromSetting(fileNameInSetting)
+        if removeFromSettings: self.filesToLoadFrom.remove(fileNameInSetting)  
         
     def isFileInFilesToLoadFrom(self,fileName):
         return (fileName in self.filesToLoadFrom)
-        
-    def removeFileFromFilesToLoadFrom(self,fileName):
-        self.filesToLoadFrom.remove(fileName)
+    
+    def __updateWith(self,inputDict):
+        for setting in inputDict:
+            setattr(self,setting,inputDict[setting])
