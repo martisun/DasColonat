@@ -1,3 +1,5 @@
+from source.phrase_writer import PhraseWriter
+
 class Settings(object):
     @staticmethod
     def setTo(inputDict):
@@ -8,6 +10,9 @@ class Settings(object):
     def __init__(self):
         defaultSettings = {'filesToLoadFrom':[],'filesToSaveTo':None,'language':'en'}
         self.updateWith(defaultSettings)
+    
+    def getPhraseWriter(self):
+        return PhraseWriter.inLanguage(self.language)
     
     def setGUITo(self,theGUI):
         self.__GUI = theGUI 

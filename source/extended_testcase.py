@@ -8,5 +8,12 @@ class ExtendedTestCase(unittest.TestCase):
         
     @staticmethod    
     def __reportActualAndExpected(actual,expected):
-        print('\nactual:',actual)
-        print('expected:',expected)
+        print('\nactual:',ExtendedTestCase.__getStringRep(actual))
+        print('expected:',ExtendedTestCase.__getStringRep(expected))
+        
+    @staticmethod
+    def __getStringRep(objectToPrint):
+        printRepOfObject = str(objectToPrint)
+        printRepOfObject = printRepOfObject.replace('\t','\\t')
+        printRepOfObject = printRepOfObject.replace('\r','\\r')
+        return printRepOfObject.replace('\b','\\b')
