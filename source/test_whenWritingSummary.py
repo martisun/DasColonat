@@ -18,10 +18,10 @@ class MockPhraseWriter(object):
     def addChildListing(self):
         return """{childListing}"""
     
-    def childListingIntro(self):
+    def childListingIntroForParents(self,main,spouse):
         return """{childListingIntro}"""
     
-    def sectionHeader(self):
+    def sectionHeader(self,main):
         return """{sectionHeader}"""
     
 class whenWritingSummary(ExtendedTestCase):
@@ -30,6 +30,7 @@ class whenWritingSummary(ExtendedTestCase):
         includes consecutively the inputfile content and a child 
         listing."""
         summaryWriter = SummaryWriter()
+        summaryWriter.setPeopleTo({'main':{},'spouse':{}})
         summaryWriter.setPhraseWriterTo(MockPhraseWriter())
         actual = summaryWriter.getSummary()
         self._assertActualEqualsExpected(actual,SUMMARY_STRUCTURE)
