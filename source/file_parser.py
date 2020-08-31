@@ -1,6 +1,6 @@
 class FileParser(object):
     __lineSeperator = '\n'
-    __itemSeperator = ';'
+    __cellSeperator = ';'
     
     @staticmethod
     def withFileToParseSetTo(fileToParse):
@@ -10,28 +10,52 @@ class FileParser(object):
         
     def parse(self):
         if self.__isContentParseable():
-            updateForDict = self.__getUpdateForDict()
-            self.__updateDictWith(updateForDict)          
+            self.__splitContentIntoCells()
+            self.__parseColumnSelectionsIntoDict()
         return self.__dict
     
+    def __parseColumnSelectionsIntoDict(self):
+        for columnSelection in self.__getColumnSelections():
+            self.__parseToDictRoleFromSelection(columnSelection)
+    
+    def __getColumnSelections(self):
+        startSelection = [column for column in range(len(self.__rolesInHeader))\
+                           if self.__rolesInHeader[column] != '']
+        nextSelection  = startSelection[1:]+[len(self.__rolesInHeader)]
+        return [(startSelection[i],nextSelection[i]) for i in range(len(startSelection))]
+    
+    def __parseToDictRoleFromSelection(self,columnSelection):
+        updateForDict = self.__buildDictWithHeaderAndRecord(columnSelection)
+        self.__addToDictRoleWithData(columnSelection[0],updateForDict)
+    
     def __setFileToParseTo(self,fileToParse):
-        stringContent,dictContent = fileToParse.getContent()
-        self.__content = stringContent
-        self.__dict    = dictContent
+        self.__stringContent = fileToParse.getContent()
+        self.__dict          = {}
             
+    def __splitContentIntoCells(self):
+        rowsOfContent =   self.__stringContent.split(FileParser.__lineSeperator)
+        cellsOfContent = [self.__splitIntoCells(line) for line in rowsOfContent]
+        self.__rolesInHeader      = cellsOfContent[0]
+        self.__nameFieldsInHeader = cellsOfContent[1]
+        self.__recordValues       = cellsOfContent[2]
+                
     def __isContentParseable(self):
-        return self.__content != ''
+        return self.__stringContent != ''
     
     @staticmethod
-    def __splitIntoItems(string):
-        return string.split(FileParser.__itemSeperator)    
+    def __splitIntoCells(string):
+        return string.split(FileParser.__cellSeperator)    
     
-    def __updateDictWith(self,updateForDict):
-        self.__dict[self.__role]=updateForDict
+    def __buildDictWithHeaderAndRecord(self,columnSelection):
+        headerCells  = self.__getSelectionOfList(columnSelection,self.__nameFieldsInHeader)
+        recordValues = self.__getSelectionOfList(columnSelection,self.__recordValues)
+        return dict(zip(headerCells,recordValues))
     
-    def __getUpdateForDict(self):
-        lines = self.__content.split(FileParser.__lineSeperator)
-        self.__role = self.__splitIntoItems(lines[0])[0]
-        headerItems = self.__splitIntoItems(lines[1])
-        recordItems = self.__splitIntoItems(lines[2])
-        return dict(zip(headerItems,recordItems))
+    @staticmethod
+    def __getSelectionOfList(selection,listValues):
+        startOfSelection,endOfSelection = selection[0],selection[1]
+        return listValues[startOfSelection:endOfSelection]
+    
+    def __addToDictRoleWithData(self,roleColumn,updateForDict):
+        role = self.__rolesInHeader[roleColumn]
+        self.__dict[role]=updateForDict

@@ -33,37 +33,27 @@ class whenUsingFileLoader(whenUsingMockFile):
     def setUp(self):
         self.folderAdapter = MockFolderAdapter()
     
-    def test_whenWritingSectionForFatherGivenMain(self):
-        """Tests whether given the minimal input of the baptism record in 
-        a string representation of the summary writer input to a MockFile 
-        the same output is returned."""
-        MOD_FATHER_INPUT = {'main':{'PID':'(Fr0)','firstName':'Jois',
-                                    'lastName':'Sunder', 'gender':'m'}}
-        STR_MOTHER_INPUT = 'mother;;\nPID;firstName\nx1(Fr0);Alheid'
-        self._writeContentToFileWithName((STR_MOTHER_INPUT,MOD_FATHER_INPUT),
-                                          GOLD_SETTINGS['filesToLoadFrom'][0])
+    def test_whenWritingSectionForFatherGivenAll(self):
+        """Tests whether given the minimal input for both father and mother
+        of the baptism record in a string representation of the summary writer 
+        input to a Mockfile the expected output is returned."""
+        STR_INPUT = 'father;;;mother;\n'+\
+                    'PID;firstName;lastName;PID;firstName\n'+\
+                    '(Fr0);Jois;Sunder;x1(Fr0);Alheid'
+        self._writeContentToFileWithName(STR_INPUT,GOLD_SETTINGS['filesToLoadFrom'][0])
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('father')
-        self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTING) 
+        self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTING)  
         
-    def test_whenWritingSectionForFatherGivenSpouse(self):
-        """Tests whether given the minimal input of the baptism record in 
-        a string representation of the summary writer input to a MockFile 
-        the same output is returned."""
-        MOD_FATHER_INPUT = {'spouse':{'PID':'x1(Fr0)','firstName':'Alheid'}}
-        self._writeContentToFileWithName((STR_FATHER_INPUT,MOD_FATHER_INPUT),
-                                          GOLD_SETTINGS['filesToLoadFrom'][0])
-        actual = self.__setupAndRunTaskManagerThenGetOutputAsText('father')
-        self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTING)         
-        
-    def test_whenWritingSectionForMotherGivenMain(self):
-        """Tests whether given the minimal input of the baptism record in 
-        a string representation of the summary writer input to a MockFile 
-        the same output is returned."""
-        MOD_MOTHER_INPUT = {'main':{'PID':'x1(Fr0)','firstName':'Alheid','gender':'v'}}
-        self._writeContentToFileWithName((STR_FATHER_INPUT,MOD_MOTHER_INPUT),
-                                          GOLD_SETTINGS['filesToLoadFrom'][0])
+    def test_whenWritingSectionForMotherGivenAll(self):
+        """Tests whether given the minimal input for both father and mother
+        of the baptism record in a string representation of the summary writer 
+        input to a Mockfile the expected output is returned."""
+        STR_INPUT = 'father;;;mother;\n'+\
+                    'PID;firstName;lastName;PID;firstName\n'+\
+                    '(Fr0);Jois;Sunder;x1(Fr0);Alheid'
+        self._writeContentToFileWithName(STR_INPUT,GOLD_SETTINGS['filesToLoadFrom'][0])
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('mother')
-        self._assertActualEqualsExpected(actual,MOTHER_OUTPUT+CHILD_LISTING) 
+        self._assertActualEqualsExpected(actual,MOTHER_OUTPUT+CHILD_LISTING)      
         
     def __setupAndRunTaskManagerThenGetOutputAsText(self,roleOfMain):
         settings = Settings.setTo(GOLD_SETTINGS)
@@ -80,8 +70,6 @@ class whenUsingFileLoader(whenUsingMockFile):
 
 GOLD_SETTINGS = {'filesToLoadFrom':['baptism.csv'],\
                  'filesToSaveTo':'summary.tex'}
-
-STR_FATHER_INPUT   = 'father;;\nPID;firstName;lastName\n(Fr0);Jois;Sunder'
 
 FATHER_INPUT = {'main':{'PID':'(Fr0)','firstName':'Jois','lastName':'Sunder','gender':'m'},
                 'spouse':{'PID':'x1(Fr0)','firstName':'Alheid'}}
