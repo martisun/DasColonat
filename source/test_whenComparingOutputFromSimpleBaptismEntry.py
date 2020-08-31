@@ -37,9 +37,6 @@ class whenUsingFileLoader(whenUsingMockFile):
         """Tests whether given the minimal input for both father and mother
         of the baptism record in a string representation of the summary writer 
         input to a Mockfile the expected output is returned."""
-        STR_INPUT = 'father;;;mother;\n'+\
-                    'PID;firstName;lastName;PID;firstName\n'+\
-                    '(Fr0);Jois;Sunder;x1(Fr0);Alheid'
         self._writeContentToFileWithName(STR_INPUT,GOLD_SETTINGS['filesToLoadFrom'][0])
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('father')
         self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTING)  
@@ -48,9 +45,6 @@ class whenUsingFileLoader(whenUsingMockFile):
         """Tests whether given the minimal input for both father and mother
         of the baptism record in a string representation of the summary writer 
         input to a Mockfile the expected output is returned."""
-        STR_INPUT = 'father;;;mother;\n'+\
-                    'PID;firstName;lastName;PID;firstName\n'+\
-                    '(Fr0);Jois;Sunder;x1(Fr0);Alheid'
         self._writeContentToFileWithName(STR_INPUT,GOLD_SETTINGS['filesToLoadFrom'][0])
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('mother')
         self._assertActualEqualsExpected(actual,MOTHER_OUTPUT+CHILD_LISTING)      
@@ -70,6 +64,10 @@ class whenUsingFileLoader(whenUsingMockFile):
 
 GOLD_SETTINGS = {'filesToLoadFrom':['baptism.csv'],\
                  'filesToSaveTo':'summary.tex'}
+
+STR_INPUT = 'father;;;mother;\n'+\
+            'PID;firstName;lastName;PID;firstName\n'+\
+            '(Fr0);Jois;Sunder;x1(Fr0);Alheid'
 
 FATHER_INPUT = {'main':{'PID':'(Fr0)','firstName':'Jois','lastName':'Sunder','gender':'m'},
                 'spouse':{'PID':'x1(Fr0)','firstName':'Alheid'}}

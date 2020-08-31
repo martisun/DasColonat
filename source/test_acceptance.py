@@ -9,7 +9,7 @@ from source.phrase_writer import PhraseWriter
 from source.mock_gui import MockGUI
 from source.mock_file import MockFolderAdapter
 from source.test_whenUsingMockFile import whenUsingMockFile
-from source.test_whenComparingOutputFromSimpleBaptismEntry import MOTHER_INPUT, FATHER_INPUT
+from source.test_whenComparingOutputFromSimpleBaptismEntry import STR_INPUT, MOTHER_INPUT, FATHER_INPUT
 
 class whenCheckingAgainstGoldStandard(whenUsingMockFile):
     def setUp(self):
@@ -76,17 +76,19 @@ class whenReadingAndWritingWithTaskManager(whenUsingMockFile):
         template when requesting a summary for the mother
         of a single baptism record."""
         self.__template  = MOTHER_INPUT 
-        self.__useTaskManagerToFillTemplateWithIOFileNames('baptism.csv','summary.tex')
+        self.__useTaskManagerToFillTemplateWithIOFileNames('baptism.csv','summary.tex','mother')
     
     def __useLanguageInSettings(self,tag):
         self.__writeTemplateToFileWithName('baptism.csv')
         self.__setTaskManagerSettingsWithUpdate({'language':tag})
         self.__assertTaskManagerOutputEqualsContentOfFileWithName('summary.tex')       
         
-    def __useTaskManagerToFillTemplateWithIOFileNames(self,inputFileName,outputFileName):
+    def __useTaskManagerToFillTemplateWithIOFileNames(self,inputFileName,outputFileName,
+                                                      roleOfMain='father'):
         self.__writeTemplateToFileWithName(inputFileName)
-        self.__setTaskManagerSettingsWithUpdate({'filesToLoadFrom':[inputFileName],\
-                                                 'filesToSaveTo':outputFileName})
+        self.__setTaskManagerSettingsWithUpdate({'filesToLoadFrom':[inputFileName],
+                                                 'filesToSaveTo':outputFileName,
+                                                 'roleOfMain':roleOfMain})
         self.__assertTaskManagerOutputEqualsContentOfFileWithName(outputFileName)
         
     def __assertTaskManagerOutputEqualsContentOfFileWithName(self,outputFileName):    
@@ -107,8 +109,9 @@ class whenReadingAndWritingWithTaskManager(whenUsingMockFile):
         self.taskManager.setSettingsTo(self.theSettings)
 
     def __writeTemplateToFileWithName(self,fileName):
-        self._writeContentToFileWithName(('',self.__template),fileName)
+        self._writeContentToFileWithName(STR_INPUT,fileName)
     
-GOLD_SETTINGS = {'filesToLoadFrom':['baptism.csv'],\
-                 'filesToSaveTo':'summary.tex'}
+GOLD_SETTINGS = {'filesToLoadFrom':['baptism.csv'],
+                 'filesToSaveTo':'summary.tex',
+                 'roleOfMain':'father'}
 
