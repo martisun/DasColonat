@@ -1,16 +1,22 @@
 class LatexTemplater(object):
     @staticmethod
+    def bold(text):
+        return '\textbf{%s}'%text
+    
+    @staticmethod
     def compileListingOf(items):
         prefixedItems = LatexTemplater.__itemsWithPrefix(items)
         return '\begin{itemize}\n%s\n\end{itemize}'%prefixedItems
     
     @staticmethod
     def firstLetterBold(text):
-        return '\textbf{%s}%s'%(text[0],text[1:])
+        firstLetter = LatexTemplater.bold(text[0])
+        remainder   = text[1:]
+        return firstLetter+remainder
     
     @staticmethod
     def genderSymbol(genderIndicator):
-        genderSymbols = {'m':'~\Mars','v':'~\Venus'}
+        genderSymbols = {'m':'\Mars','v':'\Venus','':'?'}
         return genderSymbols[genderIndicator]
     
     @staticmethod
@@ -25,7 +31,11 @@ class LatexTemplater(object):
     def nameInTitle(firstName,lastName):
         reversedName = LatexTemplater.reversedName(firstName,lastName)
         return '-- %s --'%reversedName
-            
+    
+    @staticmethod
+    def replaceSpecialCharacters(text):
+        return text.replace('ä','\"{a}')
+    
     @staticmethod
     def reversedName(firstName,lastName):
         if lastName == '': return firstName
@@ -34,6 +44,10 @@ class LatexTemplater(object):
     @staticmethod
     def section(title):
         return '\section{%s}'%title
+    
+    @staticmethod
+    def space():
+        return '~'
     
     @staticmethod
     def superScript(text):

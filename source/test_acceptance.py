@@ -9,7 +9,8 @@ from source.phrase_writer import PhraseWriter
 from source.mock_gui import MockGUI
 from source.mock_file import MockFolderAdapter
 from source.test_whenUsingMockFile import whenUsingMockFile
-from source.test_whenComparingOutputFromSimpleBaptismEntry import STR_INPUT, MOTHER_INPUT, FATHER_INPUT
+from source.test_whenUsingFileParser import STR_INPUT
+from source.test_whenUsingEnglishPhraseWriter import FATHER_INPUT,MOTHER_INPUT
 
 class whenCheckingAgainstGoldStandard(whenUsingMockFile):
     def setUp(self):
@@ -114,4 +115,3 @@ class whenReadingAndWritingWithTaskManager(whenUsingMockFile):
 GOLD_SETTINGS = {'filesToLoadFrom':['baptism.csv'],
                  'filesToSaveTo':'summary.tex',
                  'roleOfMain':'father'}
-

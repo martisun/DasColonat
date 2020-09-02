@@ -12,9 +12,10 @@ class PhraseWriter(object):
         self.__sentences = sentences
         self.__templater = LatexTemplater()       
     
-    def addChildListing(self):
+    def addChildListing(self,child):
         self.__sentences.selectSentenceWithTag('childReference')
-        inputData ={'child':'Wolterus~(\textbf{?})~\pids{(Fr0.1)}',
+        childName = self.__compileFirstNameWithPIDAndGenderOf(child)
+        inputData ={'child':childName,
                     'day_th': '18','year':'1661',
                     'nameOfParish_it': 'St. Vitus','town': 'Freren'}
         addChildren = self.__sentences.fillOutBlanksWith(inputData)
@@ -28,10 +29,27 @@ class PhraseWriter(object):
                      'nameOfOtherParent':nameOfOtherParent}
         return self.__sentences.fillOutBlanksWith(inputData)
     
+    def replaceSpecialCharacters(self,text):
+        return self.__templater.replaceSpecialCharacters(text)
+    
     def sectionHeader(self,person):
         section = self.__compileSection(person)
         label   = self.__compileLabel(person)
         return section+label
+    
+    def __compileFirstNameWithPIDAndGenderOf(self,person):
+        firstName   = person.get('firstName')
+        PIDinText   = self.__templater.textPID(person.get('PID'))
+        genderSymbolInText = self.__compileGenderSymbolInText(person)
+        spaceInText = self.__templater.space() 
+        return firstName+genderSymbolInText+spaceInText+PIDinText
+    
+    def __compileGenderSymbolInText(self,person):
+        spaceInText  = self.__templater.space() 
+        genderSymbol = person.get('gender')
+        genderSymbolInText     = self.__templater.genderSymbol(genderSymbol)
+        boldGenderSymbolInText = self.__templater.bold(genderSymbolInText)
+        return spaceInText+'(%s)'%boldGenderSymbolInText
     
     def __compileNameWithPIDInTextOf(self,person):
         firstName = person.get('firstName')
@@ -50,13 +68,14 @@ class PhraseWriter(object):
     
     def __compileTitle(self,person):
         pidInTitle   = self.__compilePIDInTitle(person)
-        nameInTitle  = self.__compileNameInTitle(person)
+        nameInTitle  = self.__compileNameInTitle(person) 
         genderSymbol = self.__compileGenderSymbolInTitle(person)
         return pidInTitle+nameInTitle+genderSymbol
 
     def __compileGenderSymbolInTitle(self,person):
+        spaceInText  = self.__templater.space()
         genderSymbol = person.get('gender')
-        return self.__templater.genderSymbol(genderSymbol)
+        return spaceInText+self.__templater.genderSymbol(genderSymbol)
     
     def __compileNameInTitle(self,person):
         firstName = person.get('firstName')
