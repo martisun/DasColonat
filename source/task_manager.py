@@ -2,6 +2,7 @@ from source.file_handler import FileHandler
 from source.file_loader import FileLoader
 from source.file_parser import FileParser
 from source.file_writer import FileWriter
+from source.record_interpreter import RecordInterpreter
 from source.summary_writer import SummaryWriter
 
 class TaskManager(FileHandler):
@@ -15,10 +16,11 @@ class TaskManager(FileHandler):
         self.__initializeSummaryWriter()
     
     def __go(self):
-        filesToLoad = self.__fileLoader.getFileToLoadFrom()
-        parsedFile  = self.__parseFile(filesToLoad[0])
-        people      = self.__collectPeopleFrom(parsedFile)
-        self.__summaryWriter.setPeopleTo(people)
+        filesToLoad  = self.__fileLoader.getFileToLoadFrom()
+        parsedRecord      = self.__parseFile(filesToLoad[0])
+        interpretedRecord = self.__interpretRecord(parsedRecord)
+        peopleData        = self.__collectPeopleFrom(interpretedRecord)
+        self.__summaryWriter.setPeopleTo(peopleData)
         textToSave = self.__summaryWriter.getSummary()
         self.__fileWriter.writeTextToFileToSaveTo(textToSave)
     
@@ -41,19 +43,23 @@ class TaskManager(FileHandler):
     
     def __parseFile(self,fileToParse):
         fileParser = FileParser.withFileToParseSetTo(fileToParse)
-        return fileParser.parse()
+        return fileParser.parse()      
     
-    def __collectPeopleFrom(self,parsedFile):
+    def __interpretRecord(self,parsedRecord):
+        recordInterpreter = RecordInterpreter.withRecordToInterpretSetTo(parsedRecord)
+        return recordInterpreter.interpret()
+    
+    def __collectPeopleFrom(self,interpretedRecord):
+        # getMain     : _settings.roleOfMain
+        # getSpouse  :  father -> mother / mother -> father
+        # getChildren : father/mother -> child 
         returnDict = {}
-        for role in parsedFile:
+        for role in interpretedRecord:
             if role in ['father','mother']:
                 summaryRole = self.__getRoleInSummaryFor(role)
-                returnDict[summaryRole] = parsedFile[role]
-                if role == 'father': returnDict[summaryRole]['gender']='m'
-                else:                returnDict[summaryRole]['gender']='v'
+                returnDict[summaryRole] = interpretedRecord[role]
             elif role == 'child':
-                returnDict['children'] = [parsedFile[role]]
-            else: returnDict[role]=parsedFile[role]    
+                returnDict['children'] = [interpretedRecord[role]] 
         return returnDict
     
     def __getRoleInSummaryFor(self,role):
