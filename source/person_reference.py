@@ -1,14 +1,23 @@
 class PersonReference(object):
     @staticmethod
-    def fromDict(inputData):
+    def makeFrom(inputData):
+        if type(inputData) == list: return PersonReference.__fromList(inputData)
+        else:                       return PersonReference.__fromDict(inputData)
+    
+    @staticmethod
+    def __fromList(inputList):
+        return [PersonReference.__fromDict(inputDict) for inputDict in inputList]
+    
+    @staticmethod
+    def __fromDict(inputDict):
         personReference = PersonReference()
-        personReference.setFromDict(inputData)
-        return personReference
+        personReference.__setFromDict(inputDict)
+        return personReference  
     
     def __init__(self):
         self.__inputDict = {}
     
-    def setFromDict(self,inputDict):
+    def __setFromDict(self,inputDict):
         self.__inputDict = inputDict
         
     def get(self,nameOfAttribute):

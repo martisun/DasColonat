@@ -7,19 +7,19 @@ from source.mock_file import MockFolderAdapter
 SUMMARY_STRUCTURE ="""
 {sectionHeader}
 
-{childListingIntro}
-{childListing}
+{childrenListingIntro}
+{childrenDescriptionsInListing}
 """   
     
 class MockPhraseWriter(object):
     def fillOut(self,content):
         return content
     
-    def addChildListing(self,name):
-        return """{childListing}"""
+    def childrenDescriptionsInListing(self,name):
+        return """{childrenDescriptionsInListing}"""
     
-    def childListingIntroForParents(self,main,spouse):
-        return """{childListingIntro}"""
+    def childrenListingIntroForParents(self,main,spouse):
+        return """{childrenListingIntro}"""
     
     def sectionHeader(self,main):
         return """{sectionHeader}"""
@@ -33,7 +33,7 @@ class whenWritingSummary(ExtendedTestCase):
         includes consecutively the inputfile content and a child 
         listing."""
         summaryWriter = SummaryWriter()
-        summaryWriter.setPeopleTo({'main':{},'spouse':{},'child':{}})
+        summaryWriter.setPeopleTo({'main':{},'spouse':{},'children':[{}]})
         summaryWriter.setPhraseWriterTo(MockPhraseWriter())
         actual = summaryWriter.getSummary()
         self._assertActualEqualsExpected(actual,SUMMARY_STRUCTURE)

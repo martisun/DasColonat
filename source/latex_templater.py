@@ -6,7 +6,8 @@ class LatexTemplater(object):
     @staticmethod
     def compileListingOf(items):
         prefixedItems = LatexTemplater.__itemsWithPrefix(items)
-        return '\begin{itemize}\n%s\n\end{itemize}'%prefixedItems
+        joinedItems   = '\n'.join(prefixedItems)
+        return '\begin{itemize}\n%s\n\end{itemize}'%joinedItems
     
     @staticmethod
     def firstLetterBold(text):
@@ -63,4 +64,4 @@ class LatexTemplater(object):
     
     @staticmethod
     def __itemsWithPrefix(items):
-        return '\item[\emph{\rom{1}.}] %s'%items
+        return ['\item[\emph{\rom{%d}.}] %s'%(i+1,item) for i,item in enumerate(items)]

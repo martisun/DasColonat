@@ -16,8 +16,9 @@ class TaskManager(FileHandler):
     
     def __go(self):
         filesToLoad = self.__fileLoader.getFileToLoadFrom()
-        dictContent = self.__parseFileIntoDict(filesToLoad[0])
-        self.__summaryWriter.setPeopleTo(dictContent)
+        parsedFile  = self.__parseFile(filesToLoad[0])
+        people      = self.__collectPeopleFrom(parsedFile)
+        self.__summaryWriter.setPeopleTo(people)
         textToSave = self.__summaryWriter.getSummary()
         self.__fileWriter.writeTextToFileToSaveTo(textToSave)
     
@@ -38,17 +39,21 @@ class TaskManager(FileHandler):
         fileHandler.setSettingsTo(self._settings)
         return fileHandler
     
-    def __parseFileIntoDict(self,fileToParse):
+    def __parseFile(self,fileToParse):
         fileParser = FileParser.withFileToParseSetTo(fileToParse)
-        parsedDict = fileParser.parse()
+        return fileParser.parse()
+    
+    def __collectPeopleFrom(self,parsedFile):
         returnDict = {}
-        for role in parsedDict:
+        for role in parsedFile:
             if role in ['father','mother']:
                 summaryRole = self.__getRoleInSummaryFor(role)
-                returnDict[summaryRole] = parsedDict[role]
+                returnDict[summaryRole] = parsedFile[role]
                 if role == 'father': returnDict[summaryRole]['gender']='m'
                 else:                returnDict[summaryRole]['gender']='v'
-            else: returnDict[role]=parsedDict[role]    
+            elif role == 'child':
+                returnDict['children'] = [parsedFile[role]]
+            else: returnDict[role]=parsedFile[role]    
         return returnDict
     
     def __getRoleInSummaryFor(self,role):

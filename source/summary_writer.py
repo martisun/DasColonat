@@ -6,23 +6,23 @@ class SummaryWriter(object):
         
     def setPeopleTo(self,people):
         for role in people:
-            nameOfAttribute = self.__getNameOfAttributeForRole(role)
-            personReference = PersonReference.fromDict(people[role])
-            setattr(self,nameOfAttribute,personReference)
+            nameOfAttribute  = self.__getNameOfAttributeForRole(role)
+            personReferences = PersonReference.makeFrom(people[role])
+            setattr(self,nameOfAttribute,personReferences)
         
     def getSummary(self):
-        sectionHeader     = self.__compileSectionHeader()
-        childListingIntro = self.__compileChildListingIntro()
-        addChildListing   = self.__compileAddChildListing()
-        summary =  sectionHeader+childListingIntro+addChildListing
+        sectionHeader                 = self.__compileSectionHeader()
+        childrenListingIntro          = self.__compileChildrenListingIntro()
+        childrenDescriptionsInListing = self.__compileChildrenDescriptionsInListing()
+        summary =  sectionHeader+childrenListingIntro+childrenDescriptionsInListing
         return self.__phraseWriter.replaceSpecialCharacters(summary)
     
-    def __compileAddChildListing(self):
-        addChildListing   = self.__phraseWriter.addChildListing(self.__child)
+    def __compileChildrenDescriptionsInListing(self):
+        addChildListing   = self.__phraseWriter.childrenDescriptionsInListing(self.__children)
         return '\n%s\n'%addChildListing
     
-    def __compileChildListingIntro(self):
-        return self.__phraseWriter.childListingIntroForParents(self.__main,self.__spouse)
+    def __compileChildrenListingIntro(self):
+        return self.__phraseWriter.childrenListingIntroForParents(self.__main,self.__spouse)
     
     def __compileSectionHeader(self):
         sectionHeader     = self.__phraseWriter.sectionHeader(self.__main)

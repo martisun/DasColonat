@@ -29,18 +29,31 @@ class whenUsingEnglishPhraseWriter(ExtendedTestCase):
         """Tests whether the summary writer can also put out a section
         centred around the father of a baptism entry given a different 
         child."""
-        peopleData = {**FATHER_INPUT,'child':{'PID':'(Fr0.2)','firstName':'Hermännus'}}
+        peopleData = {**FATHER_INPUT,'children':[HERMAN_INPUT]}
         self.summaryWriter.setPeopleTo(peopleData)
         actual = self.summaryWriter.getSummary()
         self._assertActualEqualsExpected(actual,FATHER_OUTPUT+OTHER_CHILD_LISTING)
+        
+    def test_whenWritingSectionForFatherOfBothChildren(self):
+        """Tests whether the summary writer put out a section centred
+        around the father in two baptism entries. Combining previous
+        tests for each seperate child."""
+        peopleData = {'main':{'PID':'(Fr0)','firstName':'Jois','lastName':'Sunder','gender':'m'},
+                      'spouse':{'PID':'x1(Fr0)','firstName':'Alheid'},
+                      'children':[WOLTER_INPUT,HERMAN_INPUT]}
+        self.summaryWriter.setPeopleTo(peopleData)
+        actual = self.summaryWriter.getSummary()
+        self._assertActualEqualsExpected(actual,FATHER_OUTPUT+COMBINED_CHILDREN_LISTING)    
 
+WOLTER_INPUT = {'PID':'(Fr0.1)','firstName':'Wolterus','day':18,'month':12,'year':1661}
+HERMAN_INPUT = {'PID':'(Fr0.2)','firstName':'Hermännus','day':1,'month':6,'year':1666}        
+        
 MOTHER_INPUT = {'main':{'PID':'x1(Fr0)','firstName':'Alheid','gender':'v'},
                 'spouse':{'PID':'(Fr0)','firstName':'Jois','lastName':'Sunder'},
-                'child':{'PID':'(Fr0.1)','firstName':'Wolterus'}}        
+                'children':[WOLTER_INPUT]}  
 
 FATHER_INPUT = {'main':{'PID':'(Fr0)','firstName':'Jois','lastName':'Sunder','gender':'m'},
-                'spouse':{'PID':'x1(Fr0)','firstName':'Alheid'},
-                'child':{'PID':'(Fr0.1)','firstName':'Wolterus'}}           
+                'spouse':{'PID':'x1(Fr0)','firstName':'Alheid'},'children':[WOLTER_INPUT]} 
         
 FATHER_OUTPUT="""
 \section{\pidt{(Fr0)}-- Sunder, Jois --~\Mars}\label{sec:(Fr0)}
@@ -60,12 +73,13 @@ CHILD_LISTING = """
 
 OTHER_CHILD_LISTING = """
 \begin{itemize}
-\item[\emph{\rom{1}.}] Herm\"{a}nnus~(\textbf{?})~\pids{(Fr0.2)} was baptised on the 18\supscr{th} of December 1661 before the catholic church of the {\it St. Vitus} parish at Freren.
+\item[\emph{\rom{1}.}] Herm\"{a}nnus~(\textbf{?})~\pids{(Fr0.2)} was baptised on the 1\supscr{st} of June 1666 before the catholic church of the {\it St. Vitus} parish at Freren.
 \end{itemize}
 """
 
-DESIRED_OTHER_CHILD_LISTING = """
+COMBINED_CHILDREN_LISTING = """
 \begin{itemize}
-\item[\emph{\rom{1}.}] Herm\"{a}nnus~(\textbf{?})~\pids{(Fr0.2)} was baptised on the 1\supscr{st} of June 1666 before the catholic church of the {\it St. Vitus} parish at Freren. 
+\item[\emph{\rom{1}.}] Wolterus~(\textbf{?})~\pids{(Fr0.1)} was baptised on the 18\supscr{th} of December 1661 before the catholic church of the {\it St. Vitus} parish at Freren.
+\item[\emph{\rom{2}.}] Herm\"{a}nnus~(\textbf{?})~\pids{(Fr0.2)} was baptised on the 1\supscr{st} of June 1666 before the catholic church of the {\it St. Vitus} parish at Freren.
 \end{itemize}
 """

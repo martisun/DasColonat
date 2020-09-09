@@ -41,6 +41,6 @@ class whenUsingFileParser(whenUsingMockFile):
 GOLD_SETTINGS = {'filesToLoadFrom':['baptism.csv'],\
                  'filesToSaveTo':'summary.tex'}    
     
-STR_INPUT = 'father;;;mother;;child;\n'+\
-            'PID;firstName;lastName;PID;firstName;PID;firstName\n'+\
-            '(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.1);Wolterus'    
+STR_INPUT = 'father;;;mother;;child;;;;\n'+\
+            'PID;firstName;lastName;PID;firstName;PID;firstName;day;month;year\n'+\
+            '(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.1);Wolterus;18;12;1661'    
