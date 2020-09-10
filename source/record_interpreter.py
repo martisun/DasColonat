@@ -17,4 +17,4 @@ class RecordInterpreter(object):
          
     def __updateDictForRole(self,role):
         if role in self.__roleSpecificImplicitData:
-            self.__dict[role].update(self.__roleSpecificData[role])
+            self.__dict[role].update(self.__roleSpecificImplicitData[role])

@@ -4,6 +4,7 @@ from source.file_parser import FileParser
 from source.file_writer import FileWriter
 from source.record_interpreter import RecordInterpreter
 from source.summary_writer import SummaryWriter
+from source.role_interpreter import RoleInterpreter
 
 class TaskManager(FileHandler):
     def run(self):
@@ -14,6 +15,7 @@ class TaskManager(FileHandler):
         self.__initializeFileLoader()
         self.__initializeFileWriter()
         self.__initializeSummaryWriter()
+        RoleInterpreter.initialize()
     
     def __go(self):
         filesToLoad  = self.__fileLoader.getFileToLoadFrom()
@@ -29,7 +31,7 @@ class TaskManager(FileHandler):
         
     def __initializeFileWriter(self):
         self.__fileWriter = self.__getInitializedFileHandler(FileWriter())
-        
+    
     def __initializeSummaryWriter(self):
         self.__summaryWriter = SummaryWriter()
         self.__phraseWriter = self._settings.getPhraseWriter()
@@ -49,20 +51,18 @@ class TaskManager(FileHandler):
         recordInterpreter = RecordInterpreter.withRecordToInterpretSetTo(parsedRecord)
         return recordInterpreter.interpret()
     
-    def __collectPeopleFrom(self,interpretedRecord):
-        # getMain     : _settings.roleOfMain
-        # getSpouse  :  father -> mother / mother -> father
-        # getChildren : father/mother -> child 
-        returnDict = {}
-        for role in interpretedRecord:
-            if role in ['father','mother']:
-                summaryRole = self.__getRoleInSummaryFor(role)
-                returnDict[summaryRole] = interpretedRecord[role]
-            elif role == 'child':
-                returnDict['children'] = [interpretedRecord[role]] 
-        return returnDict
+    def __collectPeopleFrom(self,record):
+        roleInterpreter = RoleInterpreter.forRole(self._settings.roleOfMain)
+        peopleData = {}
+        for role in ['main','spouse','children']:
+            peopleData[role] = roleInterpreter.getRelativeRoleFromRecord(role,record)
+        return peopleData
     
-    def __getRoleInSummaryFor(self,role):
-        if self._settings.roleOfMain == role:   return 'main'
-        else:                                   return 'spouse'
+        
+    
+    
+    
+        
+        
+        
     
