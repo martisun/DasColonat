@@ -55,8 +55,8 @@ class EnglishSentences(Sentences):
     _months    = {6:'June',12:'December'}
     
     def _getOrdinalOf(self,value):
-        if value == 1: ordinal = 'st'
-        else:          ordinal = 'th'
+        if int(value) == 1: ordinal = 'st'
+        else:               ordinal = 'th'
         return str(value)+self._templater.superScript(ordinal)
 
 class DutchSentences(Sentences):    
@@ -66,8 +66,8 @@ class DutchSentences(Sentences):
     _months    = {6:'juni',12:'december'}
     
     def _getOrdinalOf(self,value):
-        if value == 1: ordinal = 'ste'
-        else:          ordinal = 'de'
+        if int(value) == 1: ordinal = 'ste'
+        else:               ordinal = 'de'
         return str(value)+self._templater.superScript(ordinal)
 
 class GermanSentences(Sentences):   

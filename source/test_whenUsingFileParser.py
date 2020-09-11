@@ -1,5 +1,5 @@
 from source.test_whenUsingMockFile import whenUsingMockFile
-from source.test_whenUsingEnglishPhraseWriter import FATHER_OUTPUT,MOTHER_OUTPUT,CHILD_LISTING
+from source.test_whenUsingEnglishPhraseWriter import FATHER_OUTPUT,MOTHER_OUTPUT,CHILD_LISTING,OTHER_CHILD_LISTING,COMBINED_CHILDREN_LISTING
 
 from source.task_manager import TaskManager
 from source.settings import Settings
@@ -14,7 +14,8 @@ class whenUsingFileParser(whenUsingMockFile):
         """Tests whether given the minimal input for both father and mother
         of the baptism record in a string representation of the summary writer 
         input to a Mockfile the expected output is returned."""
-        self._writeContentToFileWithName(STR_INPUT,GOLD_SETTINGS['filesToLoadFrom'][0])
+        self._writeContentToFileWithName(STR_HEADER+STR_WOLTERUS,
+                                         GOLD_SETTINGS['filesToLoadFrom'][0])
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('father')
         self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTING)  
         
@@ -22,9 +23,26 @@ class whenUsingFileParser(whenUsingMockFile):
         """Tests whether given the minimal input for both father and mother
         of the baptism record in a string representation of the summary writer 
         input to a Mockfile the expected output is returned."""
-        self._writeContentToFileWithName(STR_INPUT,GOLD_SETTINGS['filesToLoadFrom'][0])
+        self._writeContentToFileWithName(STR_HEADER+STR_WOLTERUS,
+                                         GOLD_SETTINGS['filesToLoadFrom'][0])
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('mother')
-        self._assertActualEqualsExpected(actual,MOTHER_OUTPUT+CHILD_LISTING)      
+        self._assertActualEqualsExpected(actual,MOTHER_OUTPUT+CHILD_LISTING)
+        
+    def test_whenWritingSectionForFatherGivenOtherChild(self):
+        """Tests the same as `test_whenWritingSectionForFatherGivenAll` for a
+        different baptism record of the same couple."""
+        self._writeContentToFileWithName(STR_HEADER+STR_HERMANNUS,
+                                         GOLD_SETTINGS['filesToLoadFrom'][0])
+        actual = self.__setupAndRunTaskManagerThenGetOutputAsText('father')
+        self._assertActualEqualsExpected(actual,FATHER_OUTPUT+OTHER_CHILD_LISTING) 
+        
+    def test_whenWritingSectionForFatherOfBothChildren(self):
+        """Tests whether given baptism input for two children, we can write a 
+        single summary section that includes them both."""
+        self._writeContentToFileWithName(STR_HEADER+STR_WOLTERUS+STR_HERMANNUS,
+                                         GOLD_SETTINGS['filesToLoadFrom'][0])
+        actual = self.__setupAndRunTaskManagerThenGetOutputAsText('father')
+        self._assertActualEqualsExpected(actual,FATHER_OUTPUT+COMBINED_CHILDREN_LISTING) 
         
     def __setupAndRunTaskManagerThenGetOutputAsText(self,roleOfMain):
         settings = Settings.setTo(GOLD_SETTINGS)
@@ -41,6 +59,10 @@ class whenUsingFileParser(whenUsingMockFile):
 GOLD_SETTINGS = {'filesToLoadFrom':['baptism.csv'],\
                  'filesToSaveTo':'summary.tex'}    
     
-STR_INPUT = 'father;;;mother;;child;;;;\n'+\
-            'PID;firstName;lastName;PID;firstName;PID;firstName;day;month;year\n'+\
-            '(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.1);Wolterus;18;12;1661'    
+STR_HEADER = 'father;;;mother;;child;;;;\n'+\
+             'PID;firstName;lastName;PID;firstName;PID;firstName;day;month;year' 
+        
+STR_WOLTERUS  = '\n(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.1);Wolterus;18;12;1661' 
+STR_HERMANNUS = '\n(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.2);Hermännus;1;6;1666'       
+        
+        
