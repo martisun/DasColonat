@@ -19,10 +19,18 @@ class TaskManager(FileHandler):
     
     def __go(self):
         filesToLoad  = self.__fileLoader.getFileToLoadFrom()
-        parsedRecord      = self.__parseFile(filesToLoad[0])
-        interpretedRecord = self.__interpretRecord(parsedRecord)
-        peopleData        = self.__collectPeopleFrom(interpretedRecord)
-        self.__summaryWriter.setPeopleTo(peopleData)
+        parsedRecords      = self.__parseFile(filesToLoad[0])
+        print('l.23 task_manager.py clean')
+        allPeopleData = {}
+        for parsedRecord in parsedRecords:
+            interpretedRecord = self.__interpretRecord(parsedRecord)
+            peopleData        = self.__collectPeopleFrom(interpretedRecord)
+            for person in peopleData:
+                if not person in allPeopleData:
+                    allPeopleData[person] = peopleData[person]
+                elif person == 'children':
+                    allPeopleData[person]+= peopleData[person]
+        self.__summaryWriter.setPeopleTo(allPeopleData)
         textToSave = self.__summaryWriter.getSummary()
         self.__fileWriter.writeTextToFileToSaveTo(textToSave)
     
