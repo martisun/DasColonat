@@ -1,20 +1,31 @@
+from source.role_interpreter import RoleInterpreter
+
 class RecordInterpreter(object):
+    __rolesForSummary          = ['main','spouse','children'] 
     __roleSpecificImplicitData = {'father':{'gender':'m'},
                                   'mother':{'gender':'v'}}
     
-    @staticmethod
-    def withRecordToInterpretSetTo(parsedRecord):
-        recordInterpreter = RecordInterpreter()
-        recordInterpreter.__setParsedRecordTo(parsedRecord)
-        return recordInterpreter
-    
     def interpret(self):
-        for role in self.__dict: self.__updateDictForRole(role)
-        return self.__dict  
+        self.__interpretRoleSpecificImplicitData()
+        peopleData = self.__collectRolesForSummary()
+        return peopleData
     
-    def __setParsedRecordTo(self,parsedRecord):
-        self.__dict = parsedRecord  
+    def setParsedRecordTo(self,parsedRecord):
+        self.__record = parsedRecord  
+        
+    def setRoleOfMainTo(self,roleOfMain):
+        self.__roleInterpreter = RoleInterpreter.forRole(roleOfMain)
+        self.__roleInterpreter.setRecordTo(self.__record)
+        
+    def __collectRolesForSummary(self):
+        peopleData = {}
+        for role in RecordInterpreter.__rolesForSummary:
+            peopleData[role] = self.__roleInterpreter.getRelativeRoleInRecord(role)
+        return peopleData 
          
-    def __updateDictForRole(self,role):
+    def __interpretRoleSpecificImplicitData(self):
+        for role in self.__record: self.__updateRecordForRole(role)
+    
+    def __updateRecordForRole(self,role):
         if role in self.__roleSpecificImplicitData:
-            self.__dict[role].update(self.__roleSpecificImplicitData[role])
+            self.__record[role].update(self.__roleSpecificImplicitData[role])      

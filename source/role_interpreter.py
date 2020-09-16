@@ -2,6 +2,7 @@ class RoleInterpreter(object):
     __relativeRoleData = {'father':{'spouse':'mother','children':'child'},
                           'mother':{'spouse':'father','children':'child'}}
     __uniqueRoles  = ['main','spouse']
+    nonUniqueRole = 'children'
     __roleInterpreters = {}
     
     @staticmethod
@@ -16,12 +17,17 @@ class RoleInterpreter(object):
         return RoleInterpreter.__roleInterpreters[role]
     
     def __init__(self,relativeRoleDict):
-        self.__dict = relativeRoleDict        
+        self.__dict = relativeRoleDict   
+        
+    def setRecordTo(self,record):
+        self.__record = record
     
-    def getRelativeRoleFromRecord(self,name,record):
+    def getRelativeRoleInRecord(self,name):
         relativeRole = self.__getRelativeRoleWithName(name)
-        if name in RoleInterpreter.__uniqueRoles: return record[relativeRole]
-        else:                                     return [record[relativeRole]]
+        if name in RoleInterpreter.__uniqueRoles: return self.__record[relativeRole]
+        else:                                     return [self.__record[relativeRole]]
         
     def __getRelativeRoleWithName(self,name):
         return self.__dict[name]
+    
+RoleInterpreter.initialize()    

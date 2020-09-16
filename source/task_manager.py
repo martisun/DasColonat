@@ -2,9 +2,8 @@ from source.file_handler import FileHandler
 from source.file_loader import FileLoader
 from source.file_parser import FileParser
 from source.file_writer import FileWriter
-from source.record_interpreter import RecordInterpreter
+from source.record_reader import RecordReader
 from source.summary_writer import SummaryWriter
-from source.role_interpreter import RoleInterpreter
 
 class TaskManager(FileHandler):
     def run(self):
@@ -15,21 +14,11 @@ class TaskManager(FileHandler):
         self.__initializeFileLoader()
         self.__initializeFileWriter()
         self.__initializeSummaryWriter()
-        RoleInterpreter.initialize()
     
     def __go(self):
-        filesToLoad  = self.__fileLoader.getFileToLoadFrom()
-        parsedRecords      = self.__parseFile(filesToLoad[0])
-        print('l.23 task_manager.py clean')
-        allPeopleData = {}
-        for parsedRecord in parsedRecords:
-            interpretedRecord = self.__interpretRecord(parsedRecord)
-            peopleData        = self.__collectPeopleFrom(interpretedRecord)
-            for person in peopleData:
-                if not person in allPeopleData:
-                    allPeopleData[person] = peopleData[person]
-                elif person == 'children':
-                    allPeopleData[person]+= peopleData[person]
+        filesToLoad    = self.__fileLoader.getFileToLoadFrom()
+        parsedRecords  = self.__parseFile(filesToLoad[0])        
+        allPeopleData  = self.__readPeopleFromRecords(parsedRecords)
         self.__summaryWriter.setPeopleTo(allPeopleData)
         textToSave = self.__summaryWriter.getSummary()
         self.__fileWriter.writeTextToFileToSaveTo(textToSave)
@@ -53,19 +42,12 @@ class TaskManager(FileHandler):
     
     def __parseFile(self,fileToParse):
         fileParser = FileParser.withFileToParseSetTo(fileToParse)
-        return fileParser.parse()      
-    
-    def __interpretRecord(self,parsedRecord):
-        recordInterpreter = RecordInterpreter.withRecordToInterpretSetTo(parsedRecord)
-        return recordInterpreter.interpret()
-    
-    def __collectPeopleFrom(self,record):
-        roleInterpreter = RoleInterpreter.forRole(self._settings.roleOfMain)
-        peopleData = {}
-        for role in ['main','spouse','children']:
-            peopleData[role] = roleInterpreter.getRelativeRoleFromRecord(role,record)
-        return peopleData
-    
+        return fileParser.parse()
+     
+    def __readPeopleFromRecords(self,parsedRecords):
+        recordReader = RecordReader(self._settings.roleOfMain)
+        return recordReader.readPeopleFrom(parsedRecords)
+        
         
     
     
