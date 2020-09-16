@@ -43,7 +43,14 @@ class whenUsingEnglishPhraseWriter(ExtendedTestCase):
                       'children':[WOLTER_INPUT,HERMAN_INPUT]}
         self.summaryWriter.setPeopleTo(peopleData)
         actual = self.summaryWriter.getSummary()
-        self._assertActualEqualsExpected(actual,FATHER_OUTPUT+COMBINED_CHILDREN_LISTING)    
+        self._assertActualEqualsExpected(actual,COMBINED_CHILDREN_LISTING)  
+        
+    def test_whenWritingSecondSection(self):
+        """This test asserts that the second section can be written, sub tests will be split of
+        and this test will remain as acceptance test."""
+        self.summaryWriter.setPeopleTo(TEST_INPUT)
+        actual = self.summaryWriter.getSummary()
+        self._assertActualEqualsExpected(actual,TEST_OUTPUT)          
 
 WOLTER_INPUT = {'PID':'(Fr0.1)','firstName':'Wolterus','day':18,'month':12,'year':1661}
 HERMAN_INPUT = {'PID':'(Fr0.2)','firstName':'Hermännus','day':1,'month':6,'year':1666}        
@@ -78,8 +85,24 @@ OTHER_CHILD_LISTING = """
 """
 
 COMBINED_CHILDREN_LISTING = """
+\section{\pidt{(Fr0)}-- Sunder, Jois --~\Mars}\label{sec:(Fr0)}
+
+From a relationship between Jois \textbf{S}under\pids{(Fr0)} and Alheid\pids{x1(Fr0)} were brought forth:
 \begin{itemize}
 \item[\emph{\rom{1}.}] Wolterus~(\textbf{?})~\pids{(Fr0.1)} was baptised on the 18\supscr{th} of December 1661 before the catholic church of the {\it St. Vitus} parish at Freren.
 \item[\emph{\rom{2}.}] Herm\"{a}nnus~(\textbf{?})~\pids{(Fr0.2)} was baptised on the 1\supscr{st} of June 1666 before the catholic church of the {\it St. Vitus} parish at Freren.
+\end{itemize}
+"""
+
+TEST_INPUT = {'main':{'PID':'(Fr1)','firstName':'Jan','lastName':'Sunder','gender':'m'},
+              'spouse':{'PID':'x1(Fr1)','firstName':'Tela','lastName':'Mouwe'},
+              'children':[{'PID':'x1(Fr1.1)','firstName':'Jan','day':13,'month':12,'year':1711}]} 
+
+TEST_OUTPUT = """
+\section{\pidt{(Fr1)}-- Sunder, Jan --~\Mars}\label{sec:(Fr1)}
+
+From a relationship between Jan \textbf{S}under\pids{(Fr1)} and Tela \textbf{M}ouwe\pids{x1(Fr1)} was brought forth:
+\begin{itemize}
+\item[\emph{\rom{1}.}] Jan~(\Mars)~\pids{(Fr1.1)} was baptised on the 13\supscr{th} of December 1711 before the catholic church of the {\it St. Vitus} parish and the reformed church, both at Freren.
 \end{itemize}
 """

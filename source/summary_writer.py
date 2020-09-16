@@ -22,7 +22,10 @@ class SummaryWriter(object):
         return '\n%s\n'%addChildListing
     
     def __compileChildrenListingIntro(self):
-        return self.__phraseWriter.childrenListingIntroForParents(self.__main,self.__spouse)
+        if len(self.__children) == 1:
+            return self.__phraseWriter.childListingIntroForParents(self.__main,self.__spouse)
+        else:
+            return self.__phraseWriter.childrenListingIntroForParents(self.__main,self.__spouse)
     
     def __compileSectionHeader(self):
         sectionHeader     = self.__phraseWriter.sectionHeader(self.__main)

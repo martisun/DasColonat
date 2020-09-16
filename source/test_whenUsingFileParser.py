@@ -42,7 +42,7 @@ class whenUsingFileParser(whenUsingMockFile):
         self._writeContentToFileWithName(STR_HEADER+STR_WOLTERUS+STR_HERMANNUS,
                                          GOLD_SETTINGS['filesToLoadFrom'][0])
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('father')
-        self._assertActualEqualsExpected(actual,FATHER_OUTPUT+COMBINED_CHILDREN_LISTING) 
+        self._assertActualEqualsExpected(actual,COMBINED_CHILDREN_LISTING) 
         
     def __setupAndRunTaskManagerThenGetOutputAsText(self,roleOfMain):
         settings = Settings.setTo(GOLD_SETTINGS)

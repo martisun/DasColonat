@@ -16,12 +16,19 @@ class PhraseWriter(object):
         childrenListing = [self.__compileChildDescriptionInListingOf(child) for child in children]
         return self.__templater.compileListingOf(childrenListing)
     
-    def childrenListingIntroForParents(self,mainParent,otherParent):
-        nameOfMainParent  = self.__compileNameWithPIDInTextOf(mainParent)
-        nameOfOtherParent = self.__compileNameWithPIDInTextOf(otherParent) 
-        inputData = {'nameOfMainParent':nameOfMainParent,
-                     'nameOfOtherParent':nameOfOtherParent}
-        self.__sentences.selectSentenceWithTag('childListingIntro')
+    def childListingIntroForParents(self,mainParent,otherParent):        
+        relationshipClause = self.__compileRelationshipClause(mainParent,otherParent)
+        return self.__fillOutRelationshipClauseIntoSentenceWithTag(relationshipClause,
+                                                                   'childListingIntro')
+    
+    def childrenListingIntroForParents(self,mainParent,otherParent):        
+        relationshipClause = self.__compileRelationshipClause(mainParent,otherParent)
+        return self.__fillOutRelationshipClauseIntoSentenceWithTag(relationshipClause,
+                                                                   'childrenListingIntro')
+    
+    def __fillOutRelationshipClauseIntoSentenceWithTag(self,relationshipClause,sentenceTag):
+        inputData = {'FromARelationshipOfCouple':relationshipClause}
+        self.__sentences.selectSentenceWithTag(sentenceTag)
         return self.__sentences.fillOutBlanksWith(inputData)
     
     def replaceSpecialCharacters(self,text):
@@ -71,6 +78,14 @@ class PhraseWriter(object):
         lastName = person.get('lastName')
         if lastName != '': lastName = ' %s'%self.__templater.firstLetterBold(lastName)
         return lastName 
+    
+    def __compileRelationshipClause(self,mainParent,otherParent):
+        nameOfMainParent  = self.__compileNameWithPIDInTextOf(mainParent)
+        nameOfOtherParent = self.__compileNameWithPIDInTextOf(otherParent) 
+        inputData = {'nameOfMainParent':nameOfMainParent,
+                     'nameOfOtherParent':nameOfOtherParent}
+        self.__sentences.selectClauseWithTag('FromARelationshipOfCouple')
+        return self.__sentences.fillOutBlanksWith(inputData)
     
     def __compileSection(self,person):
         title = self.__compileTitle(person)

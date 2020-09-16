@@ -50,8 +50,10 @@ class Sentences(object):
     
 class EnglishSentences(Sentences):    
     _sentences = {'childReference':'$child was baptised $onTheDate before the catholic church of the $nameOfParish_it parish at $town.',
-                  'childListingIntro':'From a relationship between $nameOfMainParent and $nameOfOtherParent was brought forth:'}
-    _clauses   = {'onTheDate':'on the $day_th of $month $year'}
+                  'childListingIntro':'$FromARelationshipOfCouple was brought forth:',
+                  'childrenListingIntro':'$FromARelationshipOfCouple were brought forth:'}
+    _clauses   = {'FromARelationshipOfCouple':'From a relationship between $nameOfMainParent and $nameOfOtherParent',
+                  'onTheDate':'on the $day_th of $month $year'}
     _months    = {6:'June',12:'December'}
     
     def _getOrdinalOf(self,value):
@@ -61,8 +63,10 @@ class EnglishSentences(Sentences):
 
 class DutchSentences(Sentences):    
     _sentences = {'childReference':'$child is gedoopt $onTheDate voor de katholieke kerk van de $nameOfParish_it parochie te $town.',
-                  'childListingIntro':'Uit een relatie tussen $nameOfMainParent en $nameOfOtherParent is voortgebracht:'}
-    _clauses   = {'onTheDate':'op de $day_th $month $year'}
+                  'childListingIntro':'$FromARelationshipOfCouple is voortgebracht:',
+                  'childrenListingIntro':'$FromARelationshipOfCouple zijn voortgebracht:'}
+    _clauses   = {'FromARelationshipOfCouple':'Uit een relatie tussen $nameOfMainParent en $nameOfOtherParent',
+                  'onTheDate':'op de $day_th $month $year'}
     _months    = {6:'juni',12:'december'}
     
     def _getOrdinalOf(self,value):
@@ -72,8 +76,10 @@ class DutchSentences(Sentences):
 
 class GermanSentences(Sentences):   
     _sentences = {'childReference':'$child ist $onTheDate getauft vor dem katholischen Kirche der $nameOfParish_it Pfarrei zu $town.',
-                  'childListingIntro':'Aus einer Beziehung zwischen $nameOfMainParent und $nameOfOtherParent ist geboren worden:'}
-    _clauses   = {'onTheDate':'am $day_th $month $year'}
+                  'childListingIntro':'$FromARelationshipOfCouple ist geboren worden:',
+                  'childrenListingIntro':'$FromARelationshipOfCouple sind geboren worden:'}
+    _clauses   = {'FromARelationshipOfCouple':'From a relationship between $nameOfMainParent and $nameOfOtherParent',
+                  'onTheDate':'am $day_th $month $year'}
     _months    = {6:'Juni',12:'Dezember'}
     
     def _getOrdinalOf(self,value):
