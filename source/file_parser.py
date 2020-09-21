@@ -1,3 +1,5 @@
+import re
+
 class FileParser(object):
     __lineSeperator = '\n'
     __cellSeperator = ';'
@@ -92,8 +94,11 @@ class HeaderNode(object):
                 break
     
     def buildWith(self,record):
-        if self.__children: 
-            return {child.name:child.buildWith(record) for child in self.__children}
+        if self.__children:         
+            recordBuilder = RecordBuilder()
+            for child in self.__children: 
+                recordBuilder.addKeyWithValue(child.name,child.buildWith(record))            
+            return recordBuilder.makeDictionary()
         else:
             return self.__selection.sliceFrom(record)[0]
     
@@ -108,6 +113,37 @@ class HeaderNode(object):
     
     def __isSelectionLengthOne(self):
         return self.__selection.isComplete() and len(self.__selection) == 1
+        
+class RecordBuilder(object):
+    def __init__(self):
+        self.__outputDict = {}
+        self.__listElements = {}
+    
+    def addKeyWithValue(self,key,value):
+        listCriterium = re.findall('(\w+)\_(\d+)',key)
+        if listCriterium: self.__setListToValue(listCriterium[0],value)
+        else:             self.__setDictKeyToValue(key,value)
+    
+    def makeDictionary(self):
+        self.__addListElementsToOutputDict()
+        return self.__outputDict
+    
+    def __setDictKeyToValue(self,key,value):
+        self.__outputDict[key] = value
+        
+    def __setListToValue(self,listCriterium,value):
+        listKey,index = listCriterium
+        if not listKey in self.__listElements: self.__listElements[listKey] = {}
+        self.__listElements[listKey][index] = value
+        
+    def __addListElementsToOutputDict(self):
+        for listKey in self.__listElements:
+            listKeyElements = self.__collectListElementsWithKey(listKey)
+            self.__setDictKeyToValue(listKey,listKeyElements) 
+    
+    def __collectListElementsWithKey(self,listKey):
+        indices=sorted(self.__listElements[listKey])
+        return [self.__listElements[listKey][index] for index in indices]
         
 class Selection(object):
     @staticmethod

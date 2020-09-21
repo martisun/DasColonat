@@ -4,12 +4,17 @@ from source.summary_writer import SummaryWriter
 
 from source.mock_file import MockFolderAdapter
 
-SUMMARY_STRUCTURE ="""
+SUMMARY_STRUCTURE ={'default':"""
+{sectionHeader}
+
+{childListingIntro}
+{childrenDescriptionsInListing}
+""",'multiple children':"""
 {sectionHeader}
 
 {childrenListingIntro}
 {childrenDescriptionsInListing}
-"""   
+"""}   
     
 class MockPhraseWriter(object):
     def fillOut(self,content):
@@ -17,6 +22,9 @@ class MockPhraseWriter(object):
     
     def childrenDescriptionsInListing(self,name):
         return """{childrenDescriptionsInListing}"""
+    
+    def childListingIntroForParents(self,main,spouse):
+        return """{childListingIntro}"""
     
     def childrenListingIntroForParents(self,main,spouse):
         return """{childrenListingIntro}"""
@@ -36,6 +44,16 @@ class whenWritingSummary(ExtendedTestCase):
         summaryWriter.setPeopleTo({'main':{},'spouse':{},'children':[{}]})
         summaryWriter.setPhraseWriterTo(MockPhraseWriter())
         actual = summaryWriter.getSummary()
-        self._assertActualEqualsExpected(actual,SUMMARY_STRUCTURE)
+        self._assertActualEqualsExpected(actual,SUMMARY_STRUCTURE['default'])
+        
+    def test_summaryWriterUsesDifferentChildListingIntro(self):
+        """Tests whether the text written by the summary writer 
+        includes a special child listing intro if in fact there is
+        only one child to treat."""
+        summaryWriter = SummaryWriter()
+        summaryWriter.setPeopleTo({'main':{},'spouse':{},'children':[{},{}]})
+        summaryWriter.setPhraseWriterTo(MockPhraseWriter())
+        actual = summaryWriter.getSummary()
+        self._assertActualEqualsExpected(actual,SUMMARY_STRUCTURE['multiple children'])    
         
       

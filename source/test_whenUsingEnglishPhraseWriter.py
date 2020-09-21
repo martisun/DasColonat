@@ -15,7 +15,7 @@ class whenUsingEnglishPhraseWriter(ExtendedTestCase):
         output of the file parser."""
         self.summaryWriter.setPeopleTo(FATHER_INPUT)
         actual = self.summaryWriter.getSummary()
-        self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTING)
+        self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTINGS['default'])
         
     def test_whenWritingSectionForMother(self):
         """Tests whether the summary writer puts out a correct section
@@ -23,7 +23,7 @@ class whenUsingEnglishPhraseWriter(ExtendedTestCase):
         output of the file parser."""
         self.summaryWriter.setPeopleTo(MOTHER_INPUT)
         actual = self.summaryWriter.getSummary()
-        self._assertActualEqualsExpected(actual,MOTHER_OUTPUT+CHILD_LISTING)
+        self._assertActualEqualsExpected(actual,MOTHER_OUTPUT+CHILD_LISTINGS['default'])
         
     def test_whenWritingSectionForFatherForOtherChild(self):
         """Tests whether the summary writer can also put out a section
@@ -43,7 +43,26 @@ class whenUsingEnglishPhraseWriter(ExtendedTestCase):
                       'children':[WOLTER_INPUT,HERMAN_INPUT]}
         self.summaryWriter.setPeopleTo(peopleData)
         actual = self.summaryWriter.getSummary()
-        self._assertActualEqualsExpected(actual,COMBINED_CHILDREN_LISTING)  
+        self._assertActualEqualsExpected(actual,COMBINED_CHILDREN_LISTING)
+        
+    def test_whenBaptismSourceHasDifferentChurchDenomination(self):
+        """Tests whether the summary writer puts out a section based on 
+        a child baptism record for other than just the catholic denomination."""
+        childData  = {**WOLTER_INPUT,'denom':['ref']}
+        peopleData = {**FATHER_INPUT,'children':[childData]}
+        self.summaryWriter.setPeopleTo(peopleData)
+        actual = self.summaryWriter.getSummary()
+        self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTINGS['reformed church'])
+
+    def test_whenBaptismSourceHasMultipleChurchDenomination(self):
+        """Tests whether the summary writer puts out a section based on 
+        a child baptism record in case a child was baptised (on the same date)
+        befor both the catholic and the reformed faith."""
+        childData  = {**WOLTER_INPUT,'denom':['rc','ref']}
+        peopleData = {**FATHER_INPUT,'children':[childData]}
+        self.summaryWriter.setPeopleTo(peopleData)
+        actual = self.summaryWriter.getSummary()
+        self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTINGS['both churches'])    
         
     def test_whenWritingSecondSection(self):
         """This test asserts that the second section can be written, sub tests will be split of
@@ -52,8 +71,8 @@ class whenUsingEnglishPhraseWriter(ExtendedTestCase):
         actual = self.summaryWriter.getSummary()
         self._assertActualEqualsExpected(actual,TEST_OUTPUT)          
 
-WOLTER_INPUT = {'PID':'(Fr0.1)','firstName':'Wolterus','day':18,'month':12,'year':1661}
-HERMAN_INPUT = {'PID':'(Fr0.2)','firstName':'Hermännus','day':1,'month':6,'year':1666}        
+WOLTER_INPUT = {'PID':'(Fr0.1)','firstName':'Wolterus','day':18,'month':12,'year':1661, 'nameOfParish':'St. Vitus','denom':['rc']}
+HERMAN_INPUT = {'PID':'(Fr0.2)','firstName':'Hermännus','day':1,'month':6,'year':1666, 'nameOfParish':'St. Vitus','denom':['rc']}        
         
 MOTHER_INPUT = {'main':{'PID':'x1(Fr0)','firstName':'Alheid','gender':'v'},
                 'spouse':{'PID':'(Fr0)','firstName':'Jois','lastName':'Sunder'},
@@ -72,11 +91,20 @@ MOTHER_OUTPUT="""
 
 From a relationship between Alheid\pids{x1(Fr0)} and Jois \textbf{S}under\pids{(Fr0)} was brought forth:"""
 
-CHILD_LISTING = """
+CHILD_LISTINGS = {
+    'default':"""
 \begin{itemize}
 \item[\emph{\rom{1}.}] Wolterus~(\textbf{?})~\pids{(Fr0.1)} was baptised on the 18\supscr{th} of December 1661 before the catholic church of the {\it St. Vitus} parish at Freren.
 \end{itemize}
-"""
+""",'reformed church':"""
+\begin{itemize}
+\item[\emph{\rom{1}.}] Wolterus~(\textbf{?})~\pids{(Fr0.1)} was baptised on the 18\supscr{th} of December 1661 before the reformed church at Freren.
+\end{itemize}
+""",'both churches':"""
+\begin{itemize}
+\item[\emph{\rom{1}.}] Wolterus~(\textbf{?})~\pids{(Fr0.1)} was baptised on the 18\supscr{th} of December 1661 before the catholic church of the {\it St. Vitus} parish and the reformed church, both at Freren.
+\end{itemize}
+"""}
 
 OTHER_CHILD_LISTING = """
 \begin{itemize}
@@ -96,13 +124,14 @@ From a relationship between Jois \textbf{S}under\pids{(Fr0)} and Alheid\pids{x1(
 
 TEST_INPUT = {'main':{'PID':'(Fr1)','firstName':'Jan','lastName':'Sunder','gender':'m'},
               'spouse':{'PID':'x1(Fr1)','firstName':'Tela','lastName':'Mouwe'},
-              'children':[{'PID':'x1(Fr1.1)','firstName':'Jan','day':13,'month':12,'year':1711}]} 
+              'children':[{'PID':'(Fr1.1)','firstName':'Jan','day':13,'month':12,'year':1711,
+                           'nameOfParish':'St. Vitus','gender':'m','denom':['rc','ref']}]} 
 
 TEST_OUTPUT = """
 \section{\pidt{(Fr1)}-- Sunder, Jan --~\Mars}\label{sec:(Fr1)}
 
 From a relationship between Jan \textbf{S}under\pids{(Fr1)} and Tela \textbf{M}ouwe\pids{x1(Fr1)} was brought forth:
 \begin{itemize}
-\item[\emph{\rom{1}.}] Jan~(\Mars)~\pids{(Fr1.1)} was baptised on the 13\supscr{th} of December 1711 before the catholic church of the {\it St. Vitus} parish and the reformed church, both at Freren.
+\item[\emph{\rom{1}.}] Jan~(\textbf{\Mars})~\pids{(Fr1.1)} was baptised on the 13\supscr{th} of December 1711 before the catholic church of the {\it St. Vitus} parish and the reformed church, both at Freren.
 \end{itemize}
 """

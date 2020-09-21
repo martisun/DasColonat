@@ -40,19 +40,17 @@ class PhraseWriter(object):
         return section+label
 
     def __compileChildDescriptionInListingOf(self,child):        
-        childName     = self.__compileFirstNameWithPIDAndGenderOf(child)
-        dateOfBaptism = self.__compileDateOfEvent(child) 
-        inputData ={'child':childName,'onTheDate':dateOfBaptism,
-                    'nameOfParish_it': 'St. Vitus','town': 'Freren'}
+        childName      = self.__compileFirstNameWithPIDAndGenderOf(child)
+        dateOfBaptism  = self.__compileDateOfEvent(child) 
+        placeOfBaptism = self.__compilePlaceOfEvent(child)
+        inputData ={'child':childName,'onTheDate':dateOfBaptism,'beforeChurches':placeOfBaptism,
+                    'town': 'Freren'}
         self.__sentences.selectSentenceWithTag('childReference')
         return self.__sentences.fillOutBlanksWith(inputData)    
     
     def __compileDateOfEvent(self,person):
-        inputData = {'day_th':person.get('day'),
-                     'month':person.get('month'),
-                     'year':person.get('year') }
         self.__sentences.selectClauseWithTag('onTheDate')
-        return self.__sentences.fillOutBlanksWith(inputData)
+        return self.__sentences.fillBlanksWith(person)
     
     def __compileFirstNameWithPIDAndGenderOf(self,person):
         firstName   = person.get('firstName')
@@ -79,6 +77,26 @@ class PhraseWriter(object):
         if lastName != '': lastName = ' %s'%self.__templater.firstLetterBold(lastName)
         return lastName 
     
+    def __compileParishName(self,child):
+        if child.get('denom')[0] == 'rc':
+            self.__sentences.selectClauseWithTag('ofTheNamedParish')
+            return self.__sentences.fillBlanksWith(child)
+        else: return ''
+    
+    def __compilePlaceOfEvent(self,child):
+        parishName = self.__compileParishName(child)
+        inputData = {'denom_0':child.get('denom'),'ofTheNamedParish':parishName,
+                     'andChurchBoth':''}
+        if len(inputData['denom_0']) > 1:
+            additionalChurchReference = self.__compileAdditionalChurch(child)
+            inputData = {**inputData,'andChurchBoth':additionalChurchReference}
+        self.__sentences.selectClauseWithTag('beforeTheChurches')
+        return self.__sentences.fillOutBlanksWith(inputData)        
+    
+    def __compileAdditionalChurch(self,child):
+        self.__sentences.selectClauseWithTag('andChurchBoth')
+        return self.__sentences.fillBlanksWith(child)
+        
     def __compileRelationshipClause(self,mainParent,otherParent):
         nameOfMainParent  = self.__compileNameWithPIDInTextOf(mainParent)
         nameOfOtherParent = self.__compileNameWithPIDInTextOf(otherParent) 
