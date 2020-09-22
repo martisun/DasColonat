@@ -39,7 +39,7 @@ class PhraseWriter(object):
         label   = self.__compileLabel(person)
         return section+label
 
-    def __compileChildDescriptionInListingOf(self,child):        
+    def __compileChildDescriptionInListingOf(self,child):  
         childName      = self.__compileFirstNameWithPIDAndGenderOf(child)
         dateOfBaptism  = self.__compileDateOfEvent(child) 
         placeOfBaptism = self.__compilePlaceOfEvent(child)
@@ -53,7 +53,7 @@ class PhraseWriter(object):
         return self.__sentences.fillBlanksWith(person)
     
     def __compileFirstNameWithPIDAndGenderOf(self,person):
-        firstName   = person.get('firstName')
+        firstName   = person.get('foreNames')
         PIDinText   = self.__templater.textPID(person.get('PID'))
         genderSymbolInText = self.__compileGenderSymbolInText(person)
         spaceInText = self.__templater.space() 
@@ -67,7 +67,7 @@ class PhraseWriter(object):
         return spaceInText+'(%s)'%boldGenderSymbolInText
     
     def __compileNameWithPIDInTextOf(self,person):
-        firstName = person.get('firstName')
+        firstName = person.get('foreNames')
         lastName  = self.__compileLastNameInTextOf(person) 
         PIDinText = self.__templater.textPID(person.get('PID'))
         return firstName+lastName+PIDinText
@@ -87,7 +87,7 @@ class PhraseWriter(object):
         parishName = self.__compileParishName(child)
         inputData = {'denom_0':child.get('denom'),'ofTheNamedParish':parishName,
                      'andChurchBoth':''}
-        if len(inputData['denom_0']) > 1:
+        if len([elem for elem in inputData['denom_0'] if elem != '']) > 1:
             additionalChurchReference = self.__compileAdditionalChurch(child)
             inputData = {**inputData,'andChurchBoth':additionalChurchReference}
         self.__sentences.selectClauseWithTag('beforeTheChurches')
@@ -121,7 +121,7 @@ class PhraseWriter(object):
         return spaceInText+self.__templater.genderSymbol(genderSymbol)
     
     def __compileNameInTitle(self,person):
-        firstName = person.get('firstName')
+        firstName = person.get('foreNames')
         lastName  = person.get('lastName')
         return self.__templater.nameInTitle(firstName,lastName)
     

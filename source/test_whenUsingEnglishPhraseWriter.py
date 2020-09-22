@@ -38,8 +38,8 @@ class whenUsingEnglishPhraseWriter(ExtendedTestCase):
         """Tests whether the summary writer put out a section centred
         around the father in two baptism entries. Combining previous
         tests for each seperate child."""
-        peopleData = {'main':{'PID':'(Fr0)','firstName':'Jois','lastName':'Sunder','gender':'m'},
-                      'spouse':{'PID':'x1(Fr0)','firstName':'Alheid'},
+        peopleData = {'main':{'PID':'(Fr0)','foreNames':'Jois','lastName':'Sunder','gender':'m'},
+                      'spouse':{'PID':'x1(Fr0)','foreNames':'Alheid'},
                       'children':[WOLTER_INPUT,HERMAN_INPUT]}
         self.summaryWriter.setPeopleTo(peopleData)
         actual = self.summaryWriter.getSummary()
@@ -71,15 +71,15 @@ class whenUsingEnglishPhraseWriter(ExtendedTestCase):
         actual = self.summaryWriter.getSummary()
         self._assertActualEqualsExpected(actual,TEST_OUTPUT)          
 
-WOLTER_INPUT = {'PID':'(Fr0.1)','firstName':'Wolterus','day':18,'month':12,'year':1661, 'nameOfParish':'St. Vitus','denom':['rc']}
-HERMAN_INPUT = {'PID':'(Fr0.2)','firstName':'Hermännus','day':1,'month':6,'year':1666, 'nameOfParish':'St. Vitus','denom':['rc']}        
+WOLTER_INPUT = {'PID':'(Fr0.1)','foreNames':'Wolterus','day':18,'month':12,'year':1661, 'nameOfParish':'St. Vitus','denom':['rc']}
+HERMAN_INPUT = {'PID':'(Fr0.2)','foreNames':'Hermännus','day':1,'month':6,'year':1666, 'nameOfParish':'St. Vitus','denom':['rc']}        
         
-MOTHER_INPUT = {'main':{'PID':'x1(Fr0)','firstName':'Alheid','gender':'v'},
-                'spouse':{'PID':'(Fr0)','firstName':'Jois','lastName':'Sunder'},
+MOTHER_INPUT = {'main':{'PID':'x1(Fr0)','foreNames':'Alheid','gender':'f'},
+                'spouse':{'PID':'(Fr0)','foreNames':'Jois','lastName':'Sunder'},
                 'children':[WOLTER_INPUT]}  
 
-FATHER_INPUT = {'main':{'PID':'(Fr0)','firstName':'Jois','lastName':'Sunder','gender':'m'},
-                'spouse':{'PID':'x1(Fr0)','firstName':'Alheid'},'children':[WOLTER_INPUT]} 
+FATHER_INPUT = {'main':{'PID':'(Fr0)','foreNames':'Jois','lastName':'Sunder','gender':'m'},
+                'spouse':{'PID':'x1(Fr0)','foreNames':'Alheid'},'children':[WOLTER_INPUT]} 
         
 FATHER_OUTPUT="""
 \section{\pidt{(Fr0)}-- Sunder, Jois --~\Mars}\label{sec:(Fr0)}
@@ -122,16 +122,25 @@ From a relationship between Jois \textbf{S}under\pids{(Fr0)} and Alheid\pids{x1(
 \end{itemize}
 """
 
-TEST_INPUT = {'main':{'PID':'(Fr1)','firstName':'Jan','lastName':'Sunder','gender':'m'},
-              'spouse':{'PID':'x1(Fr1)','firstName':'Tela','lastName':'Mouwe'},
-              'children':[{'PID':'(Fr1.1)','firstName':'Jan','day':13,'month':12,'year':1711,
-                           'nameOfParish':'St. Vitus','gender':'m','denom':['rc','ref']}]} 
+TEST_INPUT = {'main':{'PID':'(Fr1)','foreNames':'Jan','lastName':'Sunder','gender':'m'},
+              'spouse':{'PID':'x1(Fr1)','foreNames':'Tela','lastName':'Mouwe'},
+              'children':[{'PID':'(Fr1.1)','foreNames':'Jan','day':13,'month':12,'year':1711,
+                           'nameOfParish':'St. Vitus','gender':'m','denom':['rc','ref']},
+                          {'PID':'(Fr1.2)','foreNames':'Maria Elisabet',
+                           'day':8,'month':7,'year':1714,'gender':'f','denom':['ref']},
+                          {'PID':'(Fr1.3)','foreNames':'Berend',
+                           'day':31,'month':5,'year':1717,'gender':'m','denom':['ref']},
+                          {'PID':'(Fr1.4)','foreNames':'Berend',
+                           'day':12,'month':2,'year':1719,'gender':'m','denom':['ref']}]} 
 
 TEST_OUTPUT = """
 \section{\pidt{(Fr1)}-- Sunder, Jan --~\Mars}\label{sec:(Fr1)}
 
-From a relationship between Jan \textbf{S}under\pids{(Fr1)} and Tela \textbf{M}ouwe\pids{x1(Fr1)} was brought forth:
+From a relationship between Jan \textbf{S}under\pids{(Fr1)} and Tela \textbf{M}ouwe\pids{x1(Fr1)} were brought forth:
 \begin{itemize}
 \item[\emph{\rom{1}.}] Jan~(\textbf{\Mars})~\pids{(Fr1.1)} was baptised on the 13\supscr{th} of December 1711 before the catholic church of the {\it St. Vitus} parish and the reformed church, both at Freren.
+\item[\emph{\rom{2}.}] Maria Elisabet~(\textbf{\Venus})~\pids{(Fr1.2)} was baptised on the 8\supscr{th} of July 1714 before the reformed church at Freren.
+\item[\emph{\rom{3}.}] Berend~(\textbf{\Mars})~\pids{(Fr1.3)} was baptised on the 31\supscr{st} of May 1717 before the reformed church at Freren.
+\item[\emph{\rom{4}.}] Berend~(\textbf{\Mars})~\pids{(Fr1.4)} was baptised on the 12\supscr{th} of February 1719 before the reformed church at Freren.
 \end{itemize}
 """

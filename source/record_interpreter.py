@@ -3,7 +3,7 @@ from source.role_interpreter import RoleInterpreter
 class RecordInterpreter(object):
     __rolesForSummary          = ['main','spouse','children'] 
     __roleSpecificImplicitData = {'father':{'gender':'m'},
-                                  'mother':{'gender':'v'}}
+                                  'mother':{'gender':'f'}}
     
     def interpret(self):
         self.__interpretRoleSpecificImplicitData()

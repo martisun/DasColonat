@@ -81,12 +81,12 @@ class EnglishSentences(Sentences):
                   'ofTheNamedParish':' of the $nameOfParish_it parish',
                   'beforeTheChurches':' before the $denom_0 church$ofTheNamedParish$andChurchBoth',
                   'andChurchBoth':' and the $denom_1 church, both'}
-    _months    = {6:'June',12:'December'}
+    _months    = {2:'February',5:'May',6:'June',7:'July',12:'December'}
     _denoms    = {'rc':'catholic','ref':'reformed'}
     
     def _getOrdinalOf(self,value):
-        if int(value) == 1: ordinal = 'st'
-        else:               ordinal = 'th'
+        if int(value)%10 == 1: ordinal = 'st'
+        else:                  ordinal = 'th'
         return str(value)+self._templater.superScript(ordinal)
 
 class DutchSentences(Sentences):    
@@ -98,12 +98,12 @@ class DutchSentences(Sentences):
                   'ofTheNamedParish':' van de $nameOfParish_it parochie',
                   'beforeTheChurches':' voor de $denom_0 kerk$ofTheNamedParish$andChurchBoth',
                   'andChurchBoth':' en de $denom_1 kerk, beide'}
-    _months    = {6:'juni',12:'december'}
+    _months    = {2:'februari',5:'mei',6:'juni',7:'juli',12:'december'}
     _denoms    = {'rc':'katholieke','ref':'gereformeerde'}
     
     def _getOrdinalOf(self,value):
-        if int(value) == 1: ordinal = 'ste'
-        else:               ordinal = 'de'
+        if int(value)%10 == 1: ordinal = 'ste'
+        else:                  ordinal = 'de'
         return str(value)+self._templater.superScript(ordinal)
 
 class GermanSentences(Sentences):   
@@ -115,7 +115,7 @@ class GermanSentences(Sentences):
                   'ofTheNamedParish':' der $nameOfParish_it Pfarrei',
                   'beforeTheChurches':' vor der $denom_0 Kirche$ofTheNamedParish$andChurchBoth',
                   'andChurchBoth':' und der $denom_1 Kirche, beiden'}
-    _months    = {6:'Juni',12:'Dezember'}
+    _months    = {2:'Februar',5:'Mai',6:'Juni',7:'Juli',12:'Dezember'}
     _denoms    = {'rc':'katholischen','ref':'reformierten'}
     
     def _getOrdinalOf(self,value):

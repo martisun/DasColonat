@@ -17,7 +17,7 @@ class LatexTemplater(object):
     
     @staticmethod
     def genderSymbol(genderIndicator):
-        genderSymbols = {'m':'\Mars','v':'\Venus','':'?'}
+        genderSymbols = {'m':'\Mars','f':'\Venus','':'?'}
         return genderSymbols[genderIndicator]
     
     @staticmethod
