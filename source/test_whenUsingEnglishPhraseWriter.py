@@ -67,9 +67,16 @@ class whenUsingEnglishPhraseWriter(ExtendedTestCase):
     def test_whenWritingSecondSection(self):
         """This test asserts that the second section can be written, sub tests will be split of
         and this test will remain as acceptance test."""
-        self.summaryWriter.setPeopleTo(TEST_INPUT)
+        self.summaryWriter.setPeopleTo(TEST_INPUT['(Fr1)'])
         actual = self.summaryWriter.getSummary()
-        self._assertActualEqualsExpected(actual,TEST_OUTPUT)          
+        self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1)'])  
+        
+    def test_whenWritingThirdSection(self):
+        """This test asserts that the third section can be written, sub tests will be split of
+        and this test will remain as acceptance test."""
+        self.summaryWriter.setPeopleTo(TEST_INPUT['(Fr1.1)'])
+        actual = self.summaryWriter.getSummary()
+        self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1.1)'])          
 
 WOLTER_INPUT = {'PID':'(Fr0.1)','foreNames':'Wolterus','day':18,'month':12,'year':1661, 'nameOfParish':'St. Vitus','denom':['rc']}
 HERMAN_INPUT = {'PID':'(Fr0.2)','foreNames':'Hermännus','day':1,'month':6,'year':1666, 'nameOfParish':'St. Vitus','denom':['rc']}        
@@ -122,7 +129,7 @@ From a relationship between Jois \textbf{S}under\pids{(Fr0)} and Alheid\pids{x1(
 \end{itemize}
 """
 
-TEST_INPUT = {'main':{'PID':'(Fr1)','foreNames':'Jan','lastName':'Sunder','gender':'m'},
+TEST_INPUT = {'(Fr1)':{'main':{'PID':'(Fr1)','foreNames':'Jan','lastName':'Sunder','gender':'m'},
               'spouse':{'PID':'x1(Fr1)','foreNames':'Tela','lastName':'Mouwe'},
               'children':[{'PID':'(Fr1.1)','foreNames':'Jan','day':13,'month':12,'year':1711,
                            'nameOfParish':'St. Vitus','gender':'m','denom':['rc','ref']},
@@ -131,9 +138,14 @@ TEST_INPUT = {'main':{'PID':'(Fr1)','foreNames':'Jan','lastName':'Sunder','gende
                           {'PID':'(Fr1.3)','foreNames':'Berend',
                            'day':31,'month':5,'year':1717,'gender':'m','denom':['ref']},
                           {'PID':'(Fr1.4)','foreNames':'Berend',
-                           'day':12,'month':2,'year':1719,'gender':'m','denom':['ref']}]} 
+                           'day':12,'month':2,'year':1719,'gender':'m','denom':['ref']}]},
+             '(Fr1.1)':{'main':{'PID':'(Fr1.1)','foreNames':'Jan','lastName':'Sunder',
+                                'day':13,'month':12,'year':1711,'nameOfParish':'St. Vitus',
+                                'gender':'m','denom':['rc','ref']},
+                        'father':{'PID':'(Fr1)','foreNames':'Jan','lastName':'Sunder'},
+                        'mother':{'PID':'x1(Fr1)','foreNames':'Tela','lastName':'Mouwe'}}} 
 
-TEST_OUTPUT = """
+TEST_OUTPUT = {'(Fr1)':"""
 \section{\pidt{(Fr1)}-- Sunder, Jan --~\Mars}\label{sec:(Fr1)}
 
 From a relationship between Jan \textbf{S}under\pids{(Fr1)} and Tela \textbf{M}ouwe\pids{x1(Fr1)} were brought forth:
@@ -143,4 +155,9 @@ From a relationship between Jan \textbf{S}under\pids{(Fr1)} and Tela \textbf{M}o
 \item[\emph{\rom{3}.}] Berend~(\textbf{\Mars})~\pids{(Fr1.3)} was baptised on the 31\supscr{st} of May 1717 before the reformed church at Freren.
 \item[\emph{\rom{4}.}] Berend~(\textbf{\Mars})~\pids{(Fr1.4)} was baptised on the 12\supscr{th} of February 1719 before the reformed church at Freren.
 \end{itemize}
-"""
+""",
+              '(Fr1.1)':"""
+\section{\pidt{(Fr1.1)}-- Sunder, Jan --~\Mars}\label{sec:(Fr1.1)}
+
+Jan \textbf{S}under\pids{(Fr1.1)}, son of Jan \textbf{S}under\pids{(Fr1)} and Tela \textbf{M}ouwe\pids{x1(Fr1)}, was baptised on the 13\supscr{th} of December 1711 before the catholic church of the {\it St. Vitus} parish and the reformed church, both at Freren.
+"""}

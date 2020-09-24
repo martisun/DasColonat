@@ -26,6 +26,10 @@ class PhraseWriter(object):
         return self.__fillOutRelationshipClauseIntoSentenceWithTag(relationshipClause,
                                                                    'childrenListingIntro')
     
+    def mainDescription(self,main,father,mother):
+        mainNameWithParents = self.__compileMainNameWithParentsClause(main,father,mother)
+        return self.__compileBaptismOnlyConcerning(mainNameWithParents,main)
+    
     def __fillOutRelationshipClauseIntoSentenceWithTag(self,relationshipClause,sentenceTag):
         inputData = {'FromARelationshipOfCouple':relationshipClause}
         self.__sentences.selectSentenceWithTag(sentenceTag)
@@ -41,11 +45,14 @@ class PhraseWriter(object):
 
     def __compileChildDescriptionInListingOf(self,child):  
         childName      = self.__compileFirstNameWithPIDAndGenderOf(child)
-        dateOfBaptism  = self.__compileDateOfEvent(child) 
-        placeOfBaptism = self.__compilePlaceOfEvent(child)
-        inputData ={'child':childName,'onTheDate':dateOfBaptism,'beforeChurches':placeOfBaptism,
-                    'town': 'Freren'}
-        self.__sentences.selectSentenceWithTag('childReference')
+        return self.__compileBaptismOnlyConcerning(childName,child)
+        
+    def __compileBaptismOnlyConcerning(self,usedName,person):    
+        dateOfBaptism  = self.__compileDateOfEvent(person) 
+        placeOfBaptism = self.__compilePlaceOfEvent(person)
+        inputData ={'usedName':usedName,'onTheDate':dateOfBaptism,
+                    'beforeChurches':placeOfBaptism,'town': 'Freren'}
+        self.__sentences.selectSentenceWithTag('baptismOnly')
         return self.__sentences.fillOutBlanksWith(inputData)    
     
     def __compileDateOfEvent(self,person):
@@ -65,6 +72,15 @@ class PhraseWriter(object):
         genderSymbolInText     = self.__templater.genderSymbol(genderSymbol)
         boldGenderSymbolInText = self.__templater.bold(genderSymbolInText)
         return spaceInText+'(%s)'%boldGenderSymbolInText
+    
+    def __compileMainNameWithParentsClause(self,main,father,mother):
+        nameOfMain       = self.__compileNameWithPIDInTextOf(main)
+        nameOfFather     = self.__compileNameWithPIDInTextOf(father)
+        nameOfMother     = self.__compileNameWithPIDInTextOf(mother)
+        inputData = {'nameOfMain':nameOfMain,'child':main.get('gender'),
+                     'nameOfFather':nameOfFather,'nameOfMother':nameOfMother}
+        self.__sentences.selectClauseWithTag('MainNameWithParents')
+        return self.__sentences.fillOutBlanksWith(inputData) 
     
     def __compileNameWithPIDInTextOf(self,person):
         firstName = person.get('foreNames')

@@ -49,7 +49,7 @@ class whenUsingFileParser(whenUsingMockFile):
         and this test will remain as acceptance test."""
         self._writeContentToFileWithName(TEST_INPUT,GOLD_SETTINGS['filesToLoadFrom'][0])
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('father')
-        self._assertActualEqualsExpected(actual,TEST_OUTPUT)          
+        self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1)'])          
         
     def __setupAndRunTaskManagerThenGetOutputAsText(self,roleOfMain):
         settings = Settings.setTo(GOLD_SETTINGS)

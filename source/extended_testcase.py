@@ -11,7 +11,7 @@ class ExtendedTestCase(unittest.TestCase):
         if type(actual) == str and type(expected) == str:
             print('Two strings agree up to:')
             for i in range(len(expected)):
-                if expected[i] != actual[i]: break
+                if i+1 == len(actual) or expected[i] != actual[i]: break
             for j in range(len(expected)):
                 if expected[len(expected)-j-1] != actual[len(actual)-j-1]: break
             print('\nactual:',ExtendedTestCase.__addStartAndEndIndicatorsAtPositions(actual,i,j))

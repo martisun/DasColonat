@@ -11,10 +11,20 @@ class SummaryWriter(object):
             setattr(self,nameOfAttribute,personReferences)
         
     def getSummary(self):
+        print('summaryWriter l.14: clean code.')
         sectionHeader                 = self.__compileSectionHeader()
-        childrenListingIntro          = self.__compileChildrenListingIntro()
-        childrenDescriptionsInListing = self.__compileChildrenDescriptionsInListing()
-        summary =  sectionHeader+childrenListingIntro+childrenDescriptionsInListing
+        if self.__getNameOfAttributeForRole('father') in self.__dict__:
+            mainDescription = self.__phraseWriter.mainDescription(self.__main,\
+                                                    self.__father,self.__mother)
+        else:
+            mainDescription           = ''
+        if self.__getNameOfAttributeForRole('children') in self.__dict__:
+            childrenListingIntro          = self.__compileChildrenListingIntro()
+            childrenDescriptionsInListing = self.__compileChildrenDescriptionsInListing()
+            childrenListing = childrenListingIntro+childrenDescriptionsInListing
+        else: 
+            childrenListing = '\n'
+        summary =  sectionHeader+mainDescription+childrenListing
         return self.__phraseWriter.replaceSpecialCharacters(summary)
     
     def __compileChildrenDescriptionsInListing(self):
