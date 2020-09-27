@@ -24,3 +24,6 @@ class PersonReference(object):
         if nameOfAttribute in self.__inputDict: 
             return self.__inputDict[nameOfAttribute]
         else: return ''
+        
+    def isMoreThanReference(self):
+        return 'year' in self.__inputDict

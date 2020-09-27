@@ -62,7 +62,17 @@ class whenUsingEnglishPhraseWriter(ExtendedTestCase):
         peopleData = {**FATHER_INPUT,'children':[childData]}
         self.summaryWriter.setPeopleTo(peopleData)
         actual = self.summaryWriter.getSummary()
-        self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTINGS['both churches'])    
+        self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTINGS['both churches']) 
+        
+    def test_whenParentsRecordedButNoLifeEvent(self):
+        """Tests whether the summary writer puts out a section for a child
+        with known parents but no other known life-events."""
+        peopleData = {'father':{'PID':'(Fr0)','foreNames':'Jois','lastName':'Sunder'},
+                      'mother':{'PID':'x1(Fr0)','foreNames':'Alheid'},
+                      'main':{'PID':'(Fr0.1)','foreNames':'Wolterus','lastName':'Sunder'}}
+        self.summaryWriter.setPeopleTo(peopleData)
+        actual = self.summaryWriter.getSummary()
+        self._assertActualEqualsExpected(actual,CHILD_LISTINGS['no life-events'])         
         
     def test_whenWritingSecondSection(self):
         """This test asserts that the second section can be written, sub tests will be split of
@@ -111,6 +121,10 @@ CHILD_LISTINGS = {
 \begin{itemize}
 \item[\emph{\rom{1}.}] Wolterus~(\textbf{?})~\pids{(Fr0.1)} was baptised on the 18\supscr{th} of December 1661 before the catholic church of the {\it St. Vitus} parish and the reformed church, both at Freren.
 \end{itemize}
+""",'no life-events':"""
+\section{\pidt{(Fr0.1)}-- Sunder, Wolterus --~?}\label{sec:(Fr0.1)}
+
+Wolterus \textbf{S}under\pids{(Fr0.1)} is a child of Jois \textbf{S}under\pids{(Fr0)} and Alheid\pids{x1(Fr0)}.
 """}
 
 OTHER_CHILD_LISTING = """

@@ -20,7 +20,7 @@ class RecordInterpreter(object):
     def __collectRolesForSummary(self):
         peopleData = {}
         for role in RecordInterpreter.__rolesForSummary:
-            peopleData[role] = self.__roleInterpreter.getRelativeRoleInRecord(role)
+            peopleData.update(self.__roleInterpreter.getRelativeRoleInRecord(role))
         return peopleData 
          
     def __interpretRoleSpecificImplicitData(self):

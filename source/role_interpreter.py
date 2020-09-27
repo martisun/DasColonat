@@ -1,6 +1,7 @@
 class RoleInterpreter(object):
-    __relativeRoleData = {'father':{'spouse':'mother','children':'child'},
-                          'mother':{'spouse':'father','children':'child'}}
+    __relativeRoleData = {'father':{'spouse':'mother','children':'infant'},
+                          'mother':{'spouse':'father','children':'infant'},
+                          'infant':{}}
     __uniqueRoles  = ['main','spouse']
     nonUniqueRole = 'children'
     __roleInterpreters = {}
@@ -24,10 +25,19 @@ class RoleInterpreter(object):
     
     def getRelativeRoleInRecord(self,name):
         relativeRole = self.__getRelativeRoleWithName(name)
-        if name in RoleInterpreter.__uniqueRoles: return self.__record[relativeRole]
-        else:                                     return [self.__record[relativeRole]]
-        
+        if self.__isRelativeRoleRecorded(relativeRole): 
+            recordOfRelativeRole = self.__record[relativeRole]
+            return self.__formatIntoListForNonUniqueRoles(name,recordOfRelativeRole)
+        else: return {}
+    
+    def __formatIntoListForNonUniqueRoles(self,name,recordOfRelativeRole):
+        if name in RoleInterpreter.__uniqueRoles: return {name:recordOfRelativeRole}
+        else:                                     return {name:[recordOfRelativeRole]}
+    
     def __getRelativeRoleWithName(self,name):
-        return self.__dict[name]
+        if name in self.__dict: return self.__dict[name]
+        
+    def __isRelativeRoleRecorded(self,relativeRole):
+        return relativeRole in self.__record
     
 RoleInterpreter.initialize()    

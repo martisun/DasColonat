@@ -49,7 +49,15 @@ class whenUsingFileParser(whenUsingMockFile):
         and this test will remain as acceptance test."""
         self._writeContentToFileWithName(TEST_INPUT,GOLD_SETTINGS['filesToLoadFrom'][0])
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('father')
-        self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1)'])          
+        self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1)']) 
+        
+    def test_whenWritingSecondSection(self):
+        """This test asserts that the third section can be written, sub tests will be split of
+        and this test will remain as acceptance test. This test will show that we can choose the
+        infant in a record as our person of focus."""
+        self._writeContentToFileWithName(MODIFIED_TEST_INPUT,GOLD_SETTINGS['filesToLoadFrom'][0])
+        actual = self.__setupAndRunTaskManagerThenGetOutputAsText('infant')
+        self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1.1)'])         
         
     def __setupAndRunTaskManagerThenGetOutputAsText(self,roleOfMain):
         settings = Settings.setTo(GOLD_SETTINGS)
@@ -66,20 +74,25 @@ class whenUsingFileParser(whenUsingMockFile):
 GOLD_SETTINGS = {'filesToLoadFrom':['baptism.csv'],\
                  'filesToSaveTo':'summary.tex'}    
     
-STR_HEADER = 'father;;;mother;;child;;;;;;\n'+\
+STR_HEADER = 'father;;;mother;;infant;;;;;;\n'+\
              'PID;foreNames;lastName;PID;foreNames;PID;'+\
              'foreNames;day;month;year;denom_0;nameOfParish' 
         
 STR_WOLTERUS  = '\n(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.1);Wolterus;18;12;1661;rc;St. Vitus' 
 STR_HERMANNUS = '\n(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.2);Hermännus;1;6;1666;rc;St. Vitus'       
         
-TEST_INPUT = 'father;;;mother;;;child;;;;;;;;\n'+\
+TEST_INPUT = 'father;;;mother;;;infant;;;;;;;;\n'+\
              'PID;foreNames;lastName;PID;foreNames;lastName;PID;'+\
              'foreNames;gender;day;month;year;denom_0;denom_1;nameOfParish'+\
              '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.1);Jan;m;13;12;1711;rc;ref;St. Vitus'+\
              '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.2);Maria Elisabet;f;8;7;1714;ref;;'+\
              '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.3);Berend;m;31;5;1717;ref;;'+\
-             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.4);Berend;m;12;2;1719;ref;;'      
+             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.4);Berend;m;12;2;1719;ref;;'
+                
+MODIFIED_TEST_INPUT = 'father;;;mother;;;infant;;;;;;;;\n'+\
+             'PID;foreNames;lastName;PID;foreNames;lastName;PID;'+\
+             'foreNames;gender;day;month;year;denom_0;denom_1;nameOfParish'+\
+             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.1);Jan;m;13;12;1711;rc;ref;St. Vitus'              
 
     
     

@@ -11,21 +11,19 @@ class SummaryWriter(object):
             setattr(self,nameOfAttribute,personReferences)
         
     def getSummary(self):
-        print('summaryWriter l.14: clean code.')
-        sectionHeader                 = self.__compileSectionHeader()
-        if self.__getNameOfAttributeForRole('father') in self.__dict__:
-            mainDescription = self.__phraseWriter.mainDescription(self.__main,\
-                                                    self.__father,self.__mother)
-        else:
-            mainDescription           = ''
+        sectionHeader     = self.__compileSectionHeader()
+        mainDescription   = self.__compileMainParagraph()
+        childrenListing  = self.__compileChildrenListing()         
+        summary =  sectionHeader+mainDescription+childrenListing
+        return self.__phraseWriter.replaceSpecialCharacters(summary)
+    
+    def __compileChildrenListing(self):
         if self.__getNameOfAttributeForRole('children') in self.__dict__:
             childrenListingIntro          = self.__compileChildrenListingIntro()
             childrenDescriptionsInListing = self.__compileChildrenDescriptionsInListing()
-            childrenListing = childrenListingIntro+childrenDescriptionsInListing
+            return childrenListingIntro+childrenDescriptionsInListing
         else: 
-            childrenListing = '\n'
-        summary =  sectionHeader+mainDescription+childrenListing
-        return self.__phraseWriter.replaceSpecialCharacters(summary)
+            return '\n'
     
     def __compileChildrenDescriptionsInListing(self):
         addChildListing   = self.__phraseWriter.childrenDescriptionsInListing(self.__children)
@@ -37,9 +35,26 @@ class SummaryWriter(object):
         else:
             return self.__phraseWriter.childrenListingIntroForParents(self.__main,self.__spouse)
     
+    def __compileMainParagraph(self):
+        father = self.__getRecordOf('father')
+        mother = self.__getRecordOf('mother')
+        if self.__main.isMoreThanReference() and (father and mother):
+            return self.__phraseWriter.mainDescription(self.__main,father,mother)
+        elif father and mother:
+            return self.__phraseWriter.parentReference(self.__main,father,mother)
+        else:
+            return ''
+                
+    
     def __compileSectionHeader(self):
         sectionHeader     = self.__phraseWriter.sectionHeader(self.__main)
         return '\n%s\n\n'%sectionHeader
+    
+    def __getRecordOf(self,recordRole):
+        attributeNameOfRecordRole = self.__getNameOfAttributeForRole(recordRole)
+        if attributeNameOfRecordRole in self.__dict__:
+            return getattr(self,attributeNameOfRecordRole)
+        else: return {}
     
     def __getNameOfAttributeForRole(self,role):
         className       = type(self).__name__

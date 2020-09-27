@@ -4,7 +4,11 @@ from source.summary_writer import SummaryWriter
 
 from source.mock_file import MockFolderAdapter
 
-SUMMARY_STRUCTURE ={'default':"""
+SUMMARY_STRUCTURE ={'only parents':"""
+{sectionHeader}
+
+{parentReference}
+""",'only children':"""
 {sectionHeader}
 
 {childListingIntro}
@@ -15,7 +19,7 @@ SUMMARY_STRUCTURE ={'default':"""
 {childrenListingIntro}
 {childrenDescriptionsInListing}
 """,
-   'no children':"""
+   'only life-event':"""
 {sectionHeader}
 
 {mainDescription}
@@ -37,6 +41,9 @@ class MockPhraseWriter(object):
     def mainDescription(self,main,father,mother):
         return """{mainDescription}"""
     
+    def parentReference(self,main,father,mother):
+        return """{parentReference}"""
+    
     def sectionHeader(self,main):
         return """{sectionHeader}"""
     
@@ -52,7 +59,16 @@ class whenWritingSummary(ExtendedTestCase):
         summaryWriter.setPeopleTo({'main':{},'spouse':{},'children':[{}]})
         summaryWriter.setPhraseWriterTo(MockPhraseWriter())
         actual = summaryWriter.getSummary()
-        self._assertActualEqualsExpected(actual,SUMMARY_STRUCTURE['default'])
+        self._assertActualEqualsExpected(actual,SUMMARY_STRUCTURE['only children'])
+        
+    def test_whetherHasParentReferenceIfRecorded(self):
+        """Tests whether the text written by the summary writer 
+        includes at least a parent reference if these are recorded."""
+        summaryWriter = SummaryWriter()
+        summaryWriter.setPeopleTo({'main':{},'father':{},'mother':{}})
+        summaryWriter.setPhraseWriterTo(MockPhraseWriter())
+        actual = summaryWriter.getSummary()
+        self._assertActualEqualsExpected(actual,SUMMARY_STRUCTURE['only parents'])        
         
     def test_whetherHasChildrenListingIfMultipleChildren(self):
         """Tests whether the text written by the summary writer 
@@ -69,9 +85,9 @@ class whenWritingSummary(ExtendedTestCase):
         includes a description of the main person, if there is 
         information about his or her life-events."""
         summaryWriter = SummaryWriter()
-        summaryWriter.setPeopleTo({'main':{},'father':{},'mother':{}})
+        summaryWriter.setPeopleTo({'main':{'year':0}})
         summaryWriter.setPhraseWriterTo(MockPhraseWriter())
         actual = summaryWriter.getSummary()
-        self._assertActualEqualsExpected(actual,SUMMARY_STRUCTURE['no children'])         
+        self._assertActualEqualsExpected(actual,SUMMARY_STRUCTURE['only life-event'])         
         
       

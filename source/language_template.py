@@ -76,7 +76,8 @@ class Sentences(object):
 class EnglishSentences(Sentences):    
     _sentences = {'baptismOnly':'$usedName was baptised $onTheDate$beforeChurches at $town.',
                   'childListingIntro':'$FromARelationshipOfCouple was brought forth:',
-                  'childrenListingIntro':'$FromARelationshipOfCouple were brought forth:'}
+                  'childrenListingIntro':'$FromARelationshipOfCouple were brought forth:',
+                  'MainNameWithParents':'$nameOfMain is a $child of $nameOfFather and $nameOfMother.'}
     _clauses   = {'MainNameWithParents':'$nameOfMain, $child of $nameOfFather and $nameOfMother,',
                   'FromARelationshipOfCouple':'From a relationship between $nameOfMainParent and $nameOfOtherParent',
                   'onTheDate':'on the $day_th of $month $year',
@@ -85,7 +86,7 @@ class EnglishSentences(Sentences):
                   'andChurchBoth':' and the $denom_1 church, both'}
     _months    = {2:'February',5:'May',6:'June',7:'July',12:'December'}
     _denoms    = {'rc':'catholic','ref':'reformed'}
-    _child     = {'m':'son'}
+    _child     = {'m':'son','':'child'}
     
     def _getOrdinalOf(self,value):
         if int(value)%10 == 1: ordinal = 'st'
@@ -95,7 +96,8 @@ class EnglishSentences(Sentences):
 class DutchSentences(Sentences):    
     _sentences = {'baptismOnly':'$usedName is gedoopt $onTheDate$beforeChurches te $town.',
                   'childListingIntro':'$FromARelationshipOfCouple is voortgebracht:',
-                  'childrenListingIntro':'$FromARelationshipOfCouple zijn voortgebracht:'}
+                  'childrenListingIntro':'$FromARelationshipOfCouple zijn voortgebracht:',
+                  'MainNameWithParents':'$nameOfMain is een $child van $nameOfFather en $nameOfMother.'}
     _clauses   = {'MainNameWithParents':'$nameOfMain, $child van $nameOfFather en $nameOfMother,',
                   'FromARelationshipOfCouple':'Uit een relatie tussen $nameOfMainParent en $nameOfOtherParent',
                   'onTheDate':'op de $day_th $month $year',
@@ -104,7 +106,7 @@ class DutchSentences(Sentences):
                   'andChurchBoth':' en de $denom_1 kerk, beide'}
     _months    = {2:'februari',5:'mei',6:'juni',7:'juli',12:'december'}
     _denoms    = {'rc':'katholieke','ref':'gereformeerde'}
-    _child     = {'m':'zoon'}
+    _child     = {'m':'zoon','':'kind'}
     
     def _getOrdinalOf(self,value):
         if int(value)%10 == 1: ordinal = 'ste'
@@ -114,7 +116,8 @@ class DutchSentences(Sentences):
 class GermanSentences(Sentences):   
     _sentences = {'baptismOnly':'$usedName ist $onTheDate getauft$beforeChurches zu $town.',
                   'childListingIntro':'$FromARelationshipOfCouple ist geboren worden:',
-                  'childrenListingIntro':'$FromARelationshipOfCouple sind geboren worden:'}
+                  'childrenListingIntro':'$FromARelationshipOfCouple sind geboren worden:',
+                  'MainNameWithParents':'$nameOfMain ist ein $child von $nameOfFather und $nameOfMother.'}
     _clauses   = {'MainNameWithParents':'$nameOfMain, $child von $nameOfFather und $nameOfMother,',
                   'FromARelationshipOfCouple':'From a relationship between $nameOfMainParent and $nameOfOtherParent',
                   'onTheDate':'am $day_th $month $year',
@@ -123,7 +126,7 @@ class GermanSentences(Sentences):
                   'andChurchBoth':' und der $denom_1 Kirche, beiden'}
     _months    = {2:'Februar',5:'Mai',6:'Juni',7:'Juli',12:'Dezember'}
     _denoms    = {'rc':'katholischen','ref':'reformierten'}
-    _child     = {'m':'Sohn'}    
+    _child     = {'m':'Sohn','':'Kind'}    
     
     def _getOrdinalOf(self,value):
         return str(value)+'.'
