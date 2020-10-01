@@ -1,4 +1,7 @@
 class LatexTemplater(object):
+    def evaluate(self,method,arguments):
+        return getattr(self,method)(*arguments)    
+    
     @staticmethod
     def bold(text):
         return '\textbf{%s}'%text

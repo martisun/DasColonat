@@ -20,7 +20,16 @@ class PersonReference(object):
     def __setFromDict(self,inputDict):
         self.__inputDict = inputDict
         
-    def get(self,nameOfAttribute):
+    def get(self,namesOfAttributes):
+        if isinstance(namesOfAttributes,list):
+            return self.__getMultipleAttributes(namesOfAttributes)
+        else:
+            return self.__getSingleAttribute(namesOfAttributes)
+    
+    def __getMultipleAttributes(self,namesOfAttributes):
+        return [self.__getSingleAttribute(nameOfAttribute) for nameOfAttribute in namesOfAttributes]
+        
+    def __getSingleAttribute(self,nameOfAttribute):    
         if nameOfAttribute in self.__inputDict: 
             return self.__inputDict[nameOfAttribute]
         else: return ''

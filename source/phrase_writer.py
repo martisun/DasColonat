@@ -1,5 +1,5 @@
 from source.latex_templater import LatexTemplater
-from source.language_template import SentenceSelector
+from source.sentence_templates import SentenceSelector
 
 class PhraseWriter(object):    
     @staticmethod
@@ -46,11 +46,6 @@ class PhraseWriter(object):
     
     def replaceSpecialCharacters(self,text):
         return self.__templater.replaceSpecialCharacters(text)
-    
-    def sectionHeader(self,person):
-        section = self.__compileSection(person)
-        label   = self.__compileLabel(person)
-        return section+label
 
     def __compileChildDescriptionInListingOf(self,child):  
         childName      = self.__compileFirstNameWithPIDAndGenderOf(child)
@@ -129,32 +124,5 @@ class PhraseWriter(object):
                      'nameOfOtherParent':nameOfOtherParent}
         self.__sentences.selectClauseWithTag('FromARelationshipOfCouple')
         return self.__sentences.fillOutBlanksWith(inputData)
-    
-    def __compileSection(self,person):
-        title = self.__compileTitle(person)
-        return self.__templater.section(title)
-    
-    def __compileTitle(self,person):
-        pidInTitle   = self.__compilePIDInTitle(person)
-        nameInTitle  = self.__compileNameInTitle(person) 
-        genderSymbol = self.__compileGenderSymbolInTitle(person)
-        return pidInTitle+nameInTitle+genderSymbol
 
-    def __compileGenderSymbolInTitle(self,person):
-        spaceInText  = self.__templater.space()
-        genderSymbol = person.get('gender')
-        return spaceInText+self.__templater.genderSymbol(genderSymbol)
-    
-    def __compileNameInTitle(self,person):
-        firstName = person.get('foreNames')
-        lastName  = person.get('lastName')
-        return self.__templater.nameInTitle(firstName,lastName)
-    
-    def __compilePIDInTitle(self,person):
-        pidOfMainParent = person.get('PID')
-        return self.__templater.titlePID(pidOfMainParent)
-    
-    def __compileLabel(self,person):
-        pidOfPerson = person.get('PID')
-        return self.__templater.label(pidOfPerson)
         

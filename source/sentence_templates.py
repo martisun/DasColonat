@@ -2,7 +2,7 @@ import re
 from string import Template
 
 from source.latex_templater import LatexTemplater
-        
+
 class SentenceSelector(object):
     @staticmethod
     def getSentencesInLanguage(languageTag):

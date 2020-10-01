@@ -1,17 +1,25 @@
 from source.person_reference import PersonReference
+from source.writer_templates import Writer,WriterTemplates
 
 class SummaryWriter(object):    
     def setPhraseWriterTo(self,phraseWriter):
         self.__phraseWriter = phraseWriter
         
-    def setPeopleTo(self,people):
+    def setPeopleTo(self,people):       
         for role in people:
             nameOfAttribute  = self.__getNameOfAttributeForRole(role)
             personReferences = PersonReference.makeFrom(people[role])
             setattr(self,nameOfAttribute,personReferences)
         
     def getSummary(self):
-        sectionHeader     = self.__compileSectionHeader()
+        templateText = WriterTemplates.get('summary')
+        subWriters   = Writer.parse(templateText)
+        for subWriter in subWriters:
+            blank  = subWriter.getBlank()
+            filler = subWriter.write({'main':self.__main}) 
+            templateText = templateText.replace(blank,filler)
+        
+        sectionHeader     = templateText
         mainDescription   = self.__compileMainParagraph()
         childrenListing  = self.__compileChildrenListing()         
         summary =  sectionHeader+mainDescription+childrenListing
@@ -44,11 +52,6 @@ class SummaryWriter(object):
             return self.__phraseWriter.parentReference(self.__main,father,mother)
         else:
             return ''
-                
-    
-    def __compileSectionHeader(self):
-        sectionHeader     = self.__phraseWriter.sectionHeader(self.__main)
-        return '\n%s\n\n'%sectionHeader
     
     def __getRecordOf(self,recordRole):
         attributeNameOfRecordRole = self.__getNameOfAttributeForRole(recordRole)
@@ -60,3 +63,6 @@ class SummaryWriter(object):
         className       = type(self).__name__
         nameOfAttribute = '_%s__%s'%(className,role)
         return nameOfAttribute
+
+
+    
