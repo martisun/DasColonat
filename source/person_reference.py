@@ -36,3 +36,7 @@ class PersonReference(object):
         
     def isMoreThanReference(self):
         return 'year' in self.__inputDict
+    
+    def isSuitableGivenTag(self,tag):
+        return (tag == '*' and self.isMoreThanReference()) or tag != '*'
+    

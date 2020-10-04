@@ -1,6 +1,11 @@
 class LatexTemplater(object):
+    __nonTrivialMethods = ['genderSymbol']
+    
     def evaluate(self,method,arguments):
-        return getattr(self,method)(*arguments)    
+        if not self.__areAllArgumentsTrivial(arguments)\
+        or method in self.__nonTrivialMethods: 
+            return getattr(self,method)(*arguments)    
+        else: return ''
     
     @staticmethod
     def bold(text):
@@ -68,3 +73,7 @@ class LatexTemplater(object):
     @staticmethod
     def __itemsWithPrefix(items):
         return ['\item[\emph{\rom{%d}.}] %s'%(i+1,item) for i,item in enumerate(items)]
+    
+    @staticmethod
+    def __areAllArgumentsTrivial(arguments):
+        return len(arguments) != 0 and all([argument=='' for argument in arguments])

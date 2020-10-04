@@ -78,8 +78,7 @@ class EnglishSentences(Sentences):
                   'childListingIntro':'$FromARelationshipOfCouple was brought forth:',
                   'childrenListingIntro':'$FromARelationshipOfCouple were brought forth:',
                   'MainNameWithParents':'$nameOfMain is a $child of $nameOfFather and $nameOfMother.'}
-    _clauses   = {'MainNameWithParents':'$nameOfMain, $child of $nameOfFather and $nameOfMother,',
-                  'FromARelationshipOfCouple':'From a relationship between $nameOfMainParent and $nameOfOtherParent',
+    _clauses   = {'FromARelationshipOfCouple':'From a relationship between $nameOfMainParent and $nameOfOtherParent',
                   'onTheDate':'on the $day_th of $month $year',
                   'ofTheNamedParish':' of the $nameOfParish_it parish',
                   'beforeTheChurches':' before the $denom_0 church$ofTheNamedParish$andChurchBoth',

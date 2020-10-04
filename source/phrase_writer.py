@@ -27,8 +27,7 @@ class PhraseWriter(object):
                                                                    'childrenListingIntro')
     
     def mainDescription(self,main,father,mother):
-        mainNameWithParents = self.__compileMainNameWithParentsClause(main,father,mother)
-        return self.__compileBaptismOnlyConcerning(mainNameWithParents,main)
+        return self.__compileBaptismOnlyConcerning('',main)
     
     def __fillOutRelationshipClauseIntoSentenceWithTag(self,relationshipClause,sentenceTag):
         inputData = {'FromARelationshipOfCouple':relationshipClause}
@@ -76,15 +75,6 @@ class PhraseWriter(object):
         genderSymbolInText     = self.__templater.genderSymbol(genderSymbol)
         boldGenderSymbolInText = self.__templater.bold(genderSymbolInText)
         return spaceInText+'(%s)'%boldGenderSymbolInText
-    
-    def __compileMainNameWithParentsClause(self,main,father,mother):
-        nameOfMain       = self.__compileNameWithPIDInTextOf(main)
-        nameOfFather     = self.__compileNameWithPIDInTextOf(father)
-        nameOfMother     = self.__compileNameWithPIDInTextOf(mother)
-        inputData = {'nameOfMain':nameOfMain,'child':main.get('gender'),
-                     'nameOfFather':nameOfFather,'nameOfMother':nameOfMother}
-        self.__sentences.selectClauseWithTag('MainNameWithParents')
-        return self.__sentences.fillOutBlanksWith(inputData) 
     
     def __compileNameWithPIDInTextOf(self,person):
         firstName = person.get('foreNames')
