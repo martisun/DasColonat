@@ -38,7 +38,7 @@ class PhraseWriter(object):
         nameOfMain       = self.__compileNameWithPIDInTextOf(main)
         nameOfFather     = self.__compileNameWithPIDInTextOf(father)
         nameOfMother     = self.__compileNameWithPIDInTextOf(mother)
-        inputData = {'nameOfMain':nameOfMain,'child':main.get('gender'),
+        inputData = {'child':main.get('gender'),
                      'nameOfFather':nameOfFather,'nameOfMother':nameOfMother}
         self.__sentences.selectSentenceWithTag('MainNameWithParents')
         return self.__sentences.fillOutBlanksWith(inputData) 

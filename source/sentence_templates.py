@@ -77,7 +77,7 @@ class EnglishSentences(Sentences):
     _sentences = {'baptismOnly':'$usedName was baptised $onTheDate$beforeChurches at $town.',
                   'childListingIntro':'$FromARelationshipOfCouple was brought forth:',
                   'childrenListingIntro':'$FromARelationshipOfCouple were brought forth:',
-                  'MainNameWithParents':'$nameOfMain is a $child of $nameOfFather and $nameOfMother.'}
+                  'MainNameWithParents':' of $nameOfFather and $nameOfMother.'}
     _clauses   = {'FromARelationshipOfCouple':'From a relationship between $nameOfMainParent and $nameOfOtherParent',
                   'onTheDate':'on the $day_th of $month $year',
                   'ofTheNamedParish':' of the $nameOfParish_it parish',

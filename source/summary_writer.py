@@ -1,9 +1,8 @@
 from source.person_reference import PersonReference
-from source.writer_templates import WriterParser
 
 class SummaryWriter(object):    
     def setPhraseWriterTo(self,phraseWriter):
-        self.__phraseWriter = phraseWriter
+        self.__phraseWriter = phraseWriter   
         
     def setPeopleTo(self,people):
         self.__people = {}
@@ -13,8 +12,8 @@ class SummaryWriter(object):
             setattr(self,nameOfAttribute,personReferences)
             if role != 'children': self.__people.update({role:personReferences})
         
-    def getSummary(self):
-        summaryWriter = WriterParser.parse('$summary(all)')[0]
+    def getSummary(self,writerMaker):
+        summaryWriter = writerMaker.parse('$summary(all)')[0]
         sectionHeader = summaryWriter.write(self.__people)
         mainDescription   = self.__compileMainParagraph()
         childrenListing  = self.__compileChildrenListing()         
