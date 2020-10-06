@@ -1,7 +1,7 @@
 import re
 
 from source.writers import AllWriter,TemplaterWriter
-from source.writer_templates import AllWriterTemplate,WriterTemplate
+from source.writer_templates import AllWriterTemplate,SelectorWriterTemplate,WriterTemplate
 from source.language_template import LanguageTemplateSelector
 from source.pattern_parsers import PatternParser,TemplaterPatternParser
 
@@ -35,6 +35,8 @@ class WriterMaker(object):
     def __initializeTemplateFromInput(templateDict,candidatePeople):
         if not 'required' in templateDict:
             templateCandidate = AllWriterTemplate()
+        elif not 'template' in templateDict:
+            templateCandidate = SelectorWriterTemplate()
         else:
             templateCandidate = WriterTemplate()
         templateCandidate.setupWith(templateDict,candidatePeople)

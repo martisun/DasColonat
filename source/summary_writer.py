@@ -1,3 +1,4 @@
+import re
 from source.person_reference import PersonReference
 
 class SummaryWriter(object):    
@@ -43,8 +44,6 @@ class SummaryWriter(object):
         mother = self.__getRecordOf('mother')
         if self.__main.isMoreThanReference() and (father and mother):
             return self.__phraseWriter.mainDescription(self.__main,father,mother)
-        elif father and mother:
-            return self.__phraseWriter.parentReference(self.__main,father,mother)
         else:
             return ''
     

@@ -12,11 +12,15 @@ class AllWriterTemplate(object):
     
     def setupWith(self,inputDict,people):
         self._selectedPeople = people
-        self._text = inputDict['template']  
+        self._setTemplateTextWith(inputDict)
                 
     def isComplete(self):
-        return True           
+        return True   
     
+    def _setTemplateTextWith(self,inputDict):   
+        if self.isComplete(): self._text = inputDict['template']
+        else:                 self._text = ''
+            
 class WriterTemplate(AllWriterTemplate):
     @staticmethod
     def extractRolesAndTagsFrom(roleSpecifications):
@@ -29,7 +33,7 @@ class WriterTemplate(AllWriterTemplate):
     def setupWith(self,inputDict,candidates):
         self._requiredPeople = self.extractRolesAndTagsFrom(inputDict['required']) 
         self.__selectPeopleFromCandidates(candidates)
-        self.__setTemplateTextWith(inputDict)    
+        self._setTemplateTextWith(inputDict)    
                 
     def isComplete(self):
         return (len(self._selectedPeople) == len(self._requiredPeople))            
@@ -41,13 +45,24 @@ class WriterTemplate(AllWriterTemplate):
             specificationsForCandidate = self._requiredPeople[count]
             self.__addPersonWithSpecificationsToSelection(candidate,specificationsForCandidate)
     
-    def __setTemplateTextWith(self,inputDict):   
-        if self.isComplete(): self._text = inputDict['template']
-        else:                 self._text = ''
-    
     def __addPersonWithSpecificationsToSelection(self,candidate,specificationsForCandidate):
         tagForCandidate  = specificationsForCandidate['tag']
         roleForCandidate = specificationsForCandidate['role']
         if candidate.isSuitableGivenTag(tagForCandidate):
             self._selectedPeople.update({roleForCandidate:candidate})
     
+class SelectorWriterTemplate(WriterTemplate):
+    def _setTemplateTextWith(self,inputDict):   
+        if self.isComplete():  
+            self._text = self.__getTextFromMapping(inputDict['key'],inputDict['map'])
+        else: self._text = ''
+            
+    def __getTextFromMapping(self,keyForMapping,mapping):
+        primaryRequiredPerson = self.__getPrimaryRequiredPerson()
+        keyValueForMapping = primaryRequiredPerson.get(keyForMapping)
+        return mapping[keyValueForMapping]
+        
+    def __getPrimaryRequiredPerson(self):
+        roleOfPrimaryRequiredPerson = self._requiredPeople[0]['role']
+        return self._selectedPeople[roleOfPrimaryRequiredPerson]
+        

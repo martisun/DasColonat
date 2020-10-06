@@ -55,8 +55,10 @@ class LatexTemplater(object):
         return '\section{%s}'%title
     
     @staticmethod
-    def space():
-        return '~'
+    def space(*arg):
+        if len(arg) == 0: return '~'
+        elif arg[0] == '': return ''
+        else:              return ' '
     
     @staticmethod
     def superScript(text):

@@ -34,15 +34,6 @@ class PhraseWriter(object):
         self.__sentences.selectSentenceWithTag(sentenceTag)
         return self.__sentences.fillOutBlanksWith(inputData)
     
-    def parentReference(self,main,father,mother):
-        nameOfMain       = self.__compileNameWithPIDInTextOf(main)
-        nameOfFather     = self.__compileNameWithPIDInTextOf(father)
-        nameOfMother     = self.__compileNameWithPIDInTextOf(mother)
-        inputData = {'child':main.get('gender'),
-                     'nameOfFather':nameOfFather,'nameOfMother':nameOfMother}
-        self.__sentences.selectSentenceWithTag('MainNameWithParents')
-        return self.__sentences.fillOutBlanksWith(inputData) 
-    
     def replaceSpecialCharacters(self,text):
         return self.__templater.replaceSpecialCharacters(text)
 
