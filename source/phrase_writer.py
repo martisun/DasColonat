@@ -12,6 +12,9 @@ class PhraseWriter(object):
         self.__sentences = sentences
         self.__templater = LatexTemplater()       
     
+    def setWriterMakerTo(self,writerMaker):
+        self.__writerMaker = writerMaker
+    
     def childrenDescriptionsInListing(self,children):
         childrenListing = [self.__compileChildDescriptionInListingOf(child) for child in children]
         return self.__templater.compileListingOf(childrenListing)
@@ -50,8 +53,8 @@ class PhraseWriter(object):
         return self.__sentences.fillOutBlanksWith(inputData)    
     
     def __compileDateOfEvent(self,person):
-        self.__sentences.selectClauseWithTag('onTheDate')
-        return self.__sentences.fillBlanksWith(person)
+        dateWriter = self.__writerMaker.parse('$onTheDate(main)')[0]
+        return dateWriter.write({'main':person})
     
     def __compileFirstNameWithPIDAndGenderOf(self,person):
         firstName   = person.get('foreNames')

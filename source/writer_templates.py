@@ -8,7 +8,7 @@ class AllWriterTemplate(object):
         return self._selectedPeople
     
     def replace(self,textToReplace,replacementText):
-        self._text = self._text.replace(textToReplace,replacementText)
+        self._text = self._text.replace(textToReplace,str(replacementText))
     
     def setupWith(self,inputDict,people):
         self._selectedPeople = people

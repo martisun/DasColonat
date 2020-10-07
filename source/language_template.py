@@ -32,6 +32,15 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
                       {'required':['main','father','mother'],
                        'template':"""$nameWithPIDInText(main) is a $child(main) of $nameWithPIDInText(father) and $nameWithPIDInText(mother)."""},
                       {'required':['main*'],'template':"""$nameWithPIDInText(main)"""}],
+     'onTheDate':[{'required':['main'],
+                   'template':"""on the $dayOrdinal(main) of $month(main) (+year)"""}],
+     'dayOrdinal':[{'required':['main'],'key':'day',
+                    'map':{1:'$dayst(main)',8:'$dayth(main)',12:'$dayth(main)',
+                           13:'$dayth(main)',18:'$dayth(main)',31:'$dayst(main)'}}],
+     'dayth':[{'required':['main'],'template':"""(+day)t.superScript(th)"""}],
+     'dayst':[{'required':['main'],'template':"""(+day)t.superScript(st)"""}],
+     'month':[{'required':['main'],'key':'month',
+               'map':{2:'February',5:'May',6:'June',7:'July',12:'December'}}],
      'child':[{'required':['main'],'key':'gender','map':{'m':'son','':'child'}}]}
 
 class DutchTemplateCollection(GeneralTemplateCollection):
@@ -42,6 +51,10 @@ class DutchTemplateCollection(GeneralTemplateCollection):
                        {'required':['main','father','mother'],
                        'template':"""$nameWithPIDInText(main) is een $child(main) van $nameWithPIDInText(father) en $nameWithPIDInText(mother)."""},
                        {'required':['main*'],'template':"""$nameWithPIDInText(main)"""}],
+     'onTheDate':[{'required':['main'],
+                   'template':"""op (+day) december (+year)"""}],
+     'month':[{'required':['main'],'key':'month',
+               'map':{2:'februari',5:'mei',6:'juni',7:'juli',12:'december'}}],
      'child':[{'required':['main'],'key':'gender','map':{'m':'zoon','':'kind'}}]}
 
 class GermanTemplateCollection(GeneralTemplateCollection):
@@ -52,4 +65,8 @@ class GermanTemplateCollection(GeneralTemplateCollection):
                       {'required':['main','father','mother'],
                        'template':"""$nameWithPIDInText(main) ist ein $child(main) von $nameWithPIDInText(father) und $nameWithPIDInText(mother)."""},
                       {'required':['main*'],'template':"""$nameWithPIDInText(main)"""}],
+     'onTheDate':[{'required':['main'],
+                   'template':"""am (+day). Dezember (+year)"""}],
+     'month':[{'required':['main'],'key':'month',
+               'map':{2:'Februar',5:'Mai',6:'Juni',7:'Juli',12:'Dezember'}}],
      'child':[{'required':['main'],'key':'gender','map':{'m':'Sohn','':'Kind'}}]}
