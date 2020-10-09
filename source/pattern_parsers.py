@@ -14,7 +14,7 @@ class TemplaterPatternParser(PatternParser):
     
     @staticmethod
     def extractFullSpecsFrom(templateText):
-        return re.findall('(t\.(\w+)\(([\+\w+\,]+)?\))',templateText)
+        return re.findall('(t\.(\w+)\(([\+\w+\,\s\.]+)?\))',templateText)
     
     @staticmethod
     def extractBlankedSpecsFrom(templateText):

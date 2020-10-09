@@ -1,7 +1,7 @@
 import re
 
 from source.writers import AllWriter,TemplaterWriter
-from source.writer_templates import AllWriterTemplate,SelectorWriterTemplate,WriterTemplate
+from source.writer_templates import AllWriterTemplate,KeyWriterTemplate,SelectorWriterTemplate,WriterTemplate
 from source.language_template import LanguageTemplateSelector
 from source.pattern_parsers import PatternParser,TemplaterPatternParser
 
@@ -18,7 +18,7 @@ class WriterMaker(object):
     def getTemplateWithNameAndInput(self,name,candidatePeople):
         templateGroup     = self.__templateCollection.getTemplateCollectionWithName(name)
         while len(templateGroup) > 0:
-            templateDict = templateGroup.pop(0)
+            templateDict = self.__templateCollection.initialize(templateGroup.pop(0))
             templateCandidate = self.__initializeTemplateFromInput(templateDict,candidatePeople)
             if templateCandidate.isComplete(): break
         return templateCandidate
@@ -36,7 +36,10 @@ class WriterMaker(object):
         if not 'required' in templateDict:
             templateCandidate = AllWriterTemplate()
         elif not 'template' in templateDict:
-            templateCandidate = SelectorWriterTemplate()
+            if not 'modifier' in templateDict:
+                templateCandidate = KeyWriterTemplate()
+            else:
+                templateCandidate = SelectorWriterTemplate()
         else:
             templateCandidate = WriterTemplate()
         templateCandidate.setupWith(templateDict,candidatePeople)

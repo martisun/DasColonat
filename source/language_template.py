@@ -17,11 +17,34 @@ $mainParagraph(main,father,mother)"""}],
                      'template':"""t.titlePID(+PID)t.nameInTitle(+foreNames,+lastName)"""+\
     """t.space()t.genderSymbol(+gender)"""}],
      'nameWithPIDInText':[{'required':['main'],'template':"""(+foreNames)t.space(+lastName)"""+\
-                           """t.firstLetterBold(+lastName)t.textPID(+PID)"""}]}
+                           """t.firstLetterBold(+lastName)t.textPID(+PID)"""}],
+     'firstNameWithPIDAndGenderInText':[{'required':['main'],'template':"""(+foreNames)"""+\
+                  """t.space()($boldGender(main))t.space()t.textPID(+PID)"""}],
+      'boldGender':[{'required':['main'],'template':"""t.bold($gender(main))"""}],
+      'gender':[{'required':['main'],'template':"""t.genderSymbol(+gender)"""}]}
+    @staticmethod
+    def ordinalSelector():
+        getLastDigit = lambda x: int(x)%10
+        selectFirst  = lambda x: min(2,getLastDigit(x))
+        return selectFirst
+    
+    @staticmethod
+    def primalListSelector():
+        primalListSelector = lambda x: x[0]
+        return primalListSelector
+    
+    def initialize(self,templateDict):
+        if 'modifier' in templateDict:
+            method = self.__getPrivateMethodNamed(templateDict['modifier'])
+            return {**templateDict,'modifier':method()}
+        else: return templateDict
     
     def getTemplateCollectionWithName(self,name):
         specifications = {**self._generalSpecifications,**self._languageSpecificSpecifications}
         return specifications[name].copy()
+    
+    def __getPrivateMethodNamed(self,nameOfMethod):
+        return getattr(self,nameOfMethod)
         
 
 class EnglishTemplateCollection(GeneralTemplateCollection):
@@ -34,14 +57,15 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
                       {'required':['main*'],'template':"""$nameWithPIDInText(main)"""}],
      'onTheDate':[{'required':['main'],
                    'template':"""on the $dayOrdinal(main) of $month(main) (+year)"""}],
-     'dayOrdinal':[{'required':['main'],'key':'day',
-                    'map':{1:'$dayst(main)',8:'$dayth(main)',12:'$dayth(main)',
-                           13:'$dayth(main)',18:'$dayth(main)',31:'$dayst(main)'}}],
+     'dayOrdinal':[{'required':['main'],'key':'day','modifier':'ordinalSelector',
+                    'map':{1:'$dayst(main)',2:'$dayth(main)'}}],
      'dayth':[{'required':['main'],'template':"""(+day)t.superScript(th)"""}],
      'dayst':[{'required':['main'],'template':"""(+day)t.superScript(st)"""}],
      'month':[{'required':['main'],'key':'month',
                'map':{2:'February',5:'May',6:'June',7:'July',12:'December'}}],
-     'child':[{'required':['main'],'key':'gender','map':{'m':'son','':'child'}}]}
+     'child':[{'required':['main'],'key':'gender','map':{'m':'son','':'child'}}],
+     'ofTheNamedParish':[{'required':['main'],'key':'denom','modifier':'primalListSelector',
+                          'map':{'rc':' of the t.italic(St. Vitus) parish','ref':''}}]}
 
 class DutchTemplateCollection(GeneralTemplateCollection):
     _languageSpecificSpecifications =\

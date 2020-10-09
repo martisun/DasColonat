@@ -50,19 +50,37 @@ class WriterTemplate(AllWriterTemplate):
         roleForCandidate = specificationsForCandidate['role']
         if candidate.isSuitableGivenTag(tagForCandidate):
             self._selectedPeople.update({roleForCandidate:candidate})
-    
-class SelectorWriterTemplate(WriterTemplate):
+
+class SelectingWriterTemplate(WriterTemplate):
     def _setTemplateTextWith(self,inputDict):   
-        if self.isComplete():  
-            self._text = self.__getTextFromMapping(inputDict['key'],inputDict['map'])
+        if self.isComplete(): 
+            parameters = self.__extractInputFrom(inputDict)
+            self._text = self._getTextFromMapping(*parameters)
         else: self._text = ''
-            
-    def __getTextFromMapping(self,keyForMapping,mapping):
-        primaryRequiredPerson = self.__getPrimaryRequiredPerson()
-        keyValueForMapping = primaryRequiredPerson.get(keyForMapping)
-        return mapping[keyValueForMapping]
-        
-    def __getPrimaryRequiredPerson(self):
+    
+    def _getPrimaryRequiredPerson(self):
         roleOfPrimaryRequiredPerson = self._requiredPeople[0]['role']
         return self._selectedPeople[roleOfPrimaryRequiredPerson]
+    
+    def _getKeyValueFromPrimaryRequiredPerson(self,keyForMapping):
+        primaryRequiredPerson = self._getPrimaryRequiredPerson()
+        return primaryRequiredPerson.get(keyForMapping)
+    
+    def __extractInputFrom(self,inputDict):
+        return (inputDict[elem] for elem in self._inputKeys)
+            
+class KeyWriterTemplate(SelectingWriterTemplate):
+    _inputKeys = ['key','map']
+    
+    def _getTextFromMapping(self,keyForMapping,mapping):
+        keyValueForMapping = self._getKeyValueFromPrimaryRequiredPerson(keyForMapping)
+        return mapping[keyValueForMapping]
+    
+class SelectorWriterTemplate(SelectingWriterTemplate): 
+    _inputKeys = ['key','map','modifier']
+    
+    def _getTextFromMapping(self,keyForMapping,mapping,selector):
+        keyValueForSelector = self._getKeyValueFromPrimaryRequiredPerson(keyForMapping)
+        keyValueForMapping = selector(keyValueForSelector) 
+        return mapping[keyValueForMapping]        
         

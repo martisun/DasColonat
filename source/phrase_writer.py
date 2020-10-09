@@ -57,35 +57,16 @@ class PhraseWriter(object):
         return dateWriter.write({'main':person})
     
     def __compileFirstNameWithPIDAndGenderOf(self,person):
-        firstName   = person.get('foreNames')
-        PIDinText   = self.__templater.textPID(person.get('PID'))
-        genderSymbolInText = self.__compileGenderSymbolInText(person)
-        spaceInText = self.__templater.space() 
-        return firstName+genderSymbolInText+spaceInText+PIDinText
-    
-    def __compileGenderSymbolInText(self,person):
-        spaceInText  = self.__templater.space() 
-        genderSymbol = person.get('gender')
-        genderSymbolInText     = self.__templater.genderSymbol(genderSymbol)
-        boldGenderSymbolInText = self.__templater.bold(genderSymbolInText)
-        return spaceInText+'(%s)'%boldGenderSymbolInText
+        nameWriter = self.__writerMaker.parse('$firstNameWithPIDAndGenderInText(main)')[0]
+        return nameWriter.write({'main':person})
     
     def __compileNameWithPIDInTextOf(self,person):
-        firstName = person.get('foreNames')
-        lastName  = self.__compileLastNameInTextOf(person) 
-        PIDinText = self.__templater.textPID(person.get('PID'))
-        return firstName+lastName+PIDinText
-    
-    def __compileLastNameInTextOf(self,person):
-        lastName = person.get('lastName')
-        if lastName != '': lastName = ' %s'%self.__templater.firstLetterBold(lastName)
-        return lastName 
+        nameWriter = self.__writerMaker.parse('$nameWithPIDInText(main)')[0]
+        return nameWriter.write({'main':person})
     
     def __compileParishName(self,child):
-        if child.get('denom')[0] == 'rc':
-            self.__sentences.selectClauseWithTag('ofTheNamedParish')
-            return self.__sentences.fillBlanksWith(child)
-        else: return ''
+        parishNameWriter = self.__writerMaker.parse('$ofTheNamedParish(main)')[0]
+        return parishNameWriter.write({'main':child})
     
     def __compilePlaceOfEvent(self,child):
         parishName = self.__compileParishName(child)
