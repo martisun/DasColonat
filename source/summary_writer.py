@@ -17,9 +17,8 @@ class SummaryWriter(object):
         summaryWriter = writerMaker.parse('$summary(all)')[0]
         sectionHeader = summaryWriter.write(self.__people)
         self.__phraseWriter.setWriterMakerTo(writerMaker)
-        mainDescription   = self.__compileMainParagraph()
         childrenListing  = self.__compileChildrenListing()         
-        summary =  sectionHeader+mainDescription+childrenListing
+        summary =  sectionHeader+childrenListing
         return self.__phraseWriter.replaceSpecialCharacters(summary)
     
     def __compileChildrenListing(self):
@@ -39,14 +38,6 @@ class SummaryWriter(object):
             return self.__phraseWriter.childListingIntroForParents(self.__main,self.__spouse)
         else:
             return self.__phraseWriter.childrenListingIntroForParents(self.__main,self.__spouse)
-    
-    def __compileMainParagraph(self):
-        father = self.__getRecordOf('father')
-        mother = self.__getRecordOf('mother')
-        if self.__main.isMoreThanReference() and (father and mother):
-            return self.__phraseWriter.mainDescription(self.__main,father,mother)
-        else:
-            return ''
     
     def __getRecordOf(self,recordRole):
         attributeNameOfRecordRole = self.__getNameOfAttributeForRole(recordRole)

@@ -74,14 +74,7 @@ class Sentences(object):
         return re.sub('\_\w+$', '', key)
     
 class EnglishSentences(Sentences):    
-    _sentences = {'baptismOnly':'$usedName was baptised $onTheDate$beforeChurches at $town.',
-                  'childListingIntro':'$FromARelationshipOfCouple was brought forth:',
-                  'childrenListingIntro':'$FromARelationshipOfCouple were brought forth:'}
-    _clauses   = {'FromARelationshipOfCouple':'From a relationship between $nameOfMainParent and $nameOfOtherParent',
-                  'ofTheNamedParish':' of the $nameOfParish_it parish',
-                  'beforeTheChurches':' before the $denom_0 church$ofTheNamedParish$andChurchBoth',
-                  'andChurchBoth':' and the $denom_1 church, both'}
-    _denoms    = {'rc':'catholic','ref':'reformed'}
+    pass
 
 class DutchSentences(Sentences):    
     _sentences = {'baptismOnly':'$usedName is gedoopt $onTheDate$beforeChurches te $town.',
