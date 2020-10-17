@@ -13,12 +13,12 @@ class AllWriter(object):
         
     def write(self,people):
         template = self.__maker.getTemplateWithNameAndInput(self.__name,people)
-        self._doReplacementsInTemplateTextWith(template)
-        return template.getText() 
+        self._doReplacementsInTemplateTextWith(template) 
+        return LatexTemplater.replaceSpecialCharacters(template.getText())
     
     def _writeIntoTemplateWith(self,superTemplate):
         blankReplacement  = self.write(superTemplate.getPeople()) 
-        superTemplate.replace(self._blank,blankReplacement)     
+        superTemplate.replace(self._blank,blankReplacement)
     
     def _doReplacementsInTemplateTextWith(self,template):
         self.__replaceSubWriterTemplates(template)
@@ -45,7 +45,7 @@ class SelectiveWriter(AllWriter):
         for inputRole in self.__inputRoles:
             if inputRole in people: peopleCandidates.append(people[inputRole])
             else:                   peopleCandidates
-        return peopleCandidates               
+        return peopleCandidates 
 
 class TemplaterWriter(SelectiveWriter):
     def __init__(self,*specification):
@@ -84,3 +84,27 @@ class TemplaterWriter(SelectiveWriter):
         for blank,method,arguments in specifications:
             blankReplacement = self.__determineTemplaterBlankReplacement(method,arguments, template.getPeople()) 
             template.replace(blank,blankReplacement)
+            
+class ListingWriter(object):    
+    def __init__(self):
+        self.__templater = LatexTemplater()       
+    
+    def setMakerTo(self,writerMaker):
+        self.__writerMaker = writerMaker
+    
+    def _writeIntoTemplateWith(self,superTemplate):
+        people = superTemplate.getPeople()
+        if 'children' in people:
+            blankReplacement  = self.childrenDescriptionsInListing(people['children'])
+            blankReplacement  = '\n%s'%blankReplacement 
+        else:
+            blankReplacement = ''
+        superTemplate.replace('$childrenListing(children)',blankReplacement)
+    
+    def childrenDescriptionsInListing(self,children):
+        childrenListing = [self.__compileChildDescriptionInListingOf(child) for child in children]
+        return self.__templater.compileListingOf(childrenListing)
+
+    def __compileChildDescriptionInListingOf(self,child):  
+        childDescriptionWriter = self.__writerMaker.parse('$childDescription(main)')[0]
+        return childDescriptionWriter.write({'main':child})              

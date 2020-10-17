@@ -6,16 +6,21 @@ class LanguageTemplateSelector(object):
                                'de':GermanTemplateCollection()}
         return templateCollections[languageTag]  
 
+#     'childrenListing':[{'required':['children^'],'template':"""t.compileListingOf("""+\
+#                      """$childDescription(children))"""}],    
+    
 class GeneralTemplateCollection(object):
     _generalSpecifications = {'summary':[{'template':"""
 $sectionHeader(main)
 
-$mainParagraph(main,father,mother)"""}],    
+$mainParagraph(main,father,mother)$childListingIntro(main,spouse,children)$childrenListing(children)
+"""}],    
     'sectionHeader':[{'required':['main'],
                       'template':"""t.section($sectionTitle(main))t.label(+PID)"""}],
     'sectionTitle':[{'required':['main'],
                      'template':"""t.titlePID(+PID)t.nameInTitle(+foreNames,+lastName)"""+\
-    """t.space()t.genderSymbol(+gender)"""}],
+    """t.space()t.genderSymbol(+gender)"""}],     
+     'childrenListing':[{'template':""" ... childrenListing ... """}],                              
      'childDescription':[{'required':['main'],'template':"""$firstNameWithPIDAndGender"""+\
                           """(main)$baptismOnly(main)"""}],
      'nameWithPIDInText':[{'required':['main'],'template':"""(+foreNames)t.space(+lastName)"""+\
@@ -31,12 +36,22 @@ $mainParagraph(main,father,mother)"""}],
         return selectFirst
     
     @staticmethod
+    def lengthOneOrMore():
+        oneOrMore = lambda x: min(len(x),2)
+        return oneOrMore
+    
+    @staticmethod
     def primalListSelector():
         return GeneralTemplateCollection.__listSelector(0)
     
     @staticmethod
     def secondaryListSelector():
         return GeneralTemplateCollection.__listSelector(1)
+    
+    @staticmethod
+    def toInt():
+        toInt = lambda x: int(x)
+        return toInt
     
     def initialize(self,templateDict):
         if 'modifier' in templateDict:
@@ -65,11 +80,11 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
                       {'required':['main','father','mother'],
                        'template':"""$nameWithPIDInText(main) is a $child(main) of $nameWithPIDInText(father) and $nameWithPIDInText(mother)."""},
                       {'required':['main*'],'template':"""$nameWithPIDInText(main)$baptismOnly(main)"""}],
+     'childListingIntro':[{'required':['father','mother','children'],'key':'children',
+                           'modifier':'lengthOneOrMore',
+               'map':{1:"""$FromARelationshipOfCouple(father,mother) was brought forth:""",
+                      2:"""$FromARelationshipOfCouple(father,mother) were brought forth:"""}}],
      'FromARelationshipOfCouple':[{'required':['father','mother'],'template':"""From a relationship between $nameWithPIDInText(father) and $nameWithPIDInText(mother)"""}],
-     'childListingIntro':[{'required':['father','mother'],
-               'template':"""$FromARelationshipOfCouple(father,mother) was brought forth:"""}],
-     'childrenListingIntro':[{'required':['father','mother'],
-               'template':"""$FromARelationshipOfCouple(father,mother) were brought forth:"""}],
      'baptismOnly':[{'required':['main'],'template':""" was baptised $onTheDate(main)"""+\
                      """$beforeTheChurches(main) at $town(main)."""}],
      'onTheDate':[{'required':['main'],
@@ -78,7 +93,7 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
                     'map':{1:'$dayst(main)',2:'$dayth(main)'}}],
      'dayth':[{'required':['main'],'template':"""(+day)t.superScript(th)"""}],
      'dayst':[{'required':['main'],'template':"""(+day)t.superScript(st)"""}],
-     'month':[{'required':['main'],'key':'month',
+     'month':[{'required':['main'],'key':'month','modifier':'toInt',
                'map':{2:'February',5:'May',6:'June',7:'July',12:'December'}}],
      'child':[{'required':['main'],'key':'gender','map':{'m':'son','':'child'}}],
      'town':[{'template':"""Freren"""}],

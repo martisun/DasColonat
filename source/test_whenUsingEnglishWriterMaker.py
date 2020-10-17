@@ -1,30 +1,27 @@
 from source.extended_testcase import ExtendedTestCase
 
-from source.summary_writer import SummaryWriter
-from source.phrase_writer import PhraseWriter
+from source.writer_adapter import WriterAdapter
 from source.writer_maker import WriterMaker
 
-class whenUsingEnglishPhraseWriter(ExtendedTestCase):
+class whenUsingEnglishWriterMaker(ExtendedTestCase):
     def setUp(self):
-        self.summaryWriter = SummaryWriter()
-        self.phraseWriter = PhraseWriter.inLanguage('en')
-        self.writerMaker  = WriterMaker.inLanguage('en')
-        self.summaryWriter.setPhraseWriterTo(self.phraseWriter)
+        self.summaryWriter = WriterAdapter.forTemplatePattern('$summary(all)')
+        writerMaker  = WriterMaker.inLanguage('en')
+        self.summaryWriter.setMakerTo(writerMaker)
+        
     
     def test_whenWritingSectionForFather(self):
         """Tests whether the summary writer puts out a correct section
         centred around the father of a baptism entry given the expected
         output of the file parser."""
-        self.summaryWriter.setPeopleTo(FATHER_INPUT)
-        actual = self.summaryWriter.getSummary(self.writerMaker)
+        actual = self.summaryWriter.write(FATHER_INPUT)
         self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTINGS['default'])
         
     def test_whenWritingSectionForMother(self):
         """Tests whether the summary writer puts out a correct section
         centred around the mother of a baptism entry given the expected
         output of the file parser."""
-        self.summaryWriter.setPeopleTo(MOTHER_INPUT)
-        actual = self.summaryWriter.getSummary(self.writerMaker)
+        actual = self.summaryWriter.write(MOTHER_INPUT)
         self._assertActualEqualsExpected(actual,MOTHER_OUTPUT+CHILD_LISTINGS['default'])
         
     def test_whenWritingSectionForFatherForOtherChild(self):
@@ -32,8 +29,7 @@ class whenUsingEnglishPhraseWriter(ExtendedTestCase):
         centred around the father of a baptism entry given a different 
         child."""
         peopleData = {**FATHER_INPUT,'children':[HERMAN_INPUT]}
-        self.summaryWriter.setPeopleTo(peopleData)
-        actual = self.summaryWriter.getSummary(self.writerMaker)
+        actual = self.summaryWriter.write(peopleData)
         self._assertActualEqualsExpected(actual,FATHER_OUTPUT+OTHER_CHILD_LISTING)
         
     def test_whenWritingSectionForFatherOfBothChildren(self):
@@ -43,8 +39,7 @@ class whenUsingEnglishPhraseWriter(ExtendedTestCase):
         peopleData = {'main':{'PID':'(Fr0)','foreNames':'Jois','lastName':'Sunder','gender':'m'},
                       'spouse':{'PID':'x1(Fr0)','foreNames':'Alheid'},
                       'children':[WOLTER_INPUT,HERMAN_INPUT]}
-        self.summaryWriter.setPeopleTo(peopleData)
-        actual = self.summaryWriter.getSummary(self.writerMaker)
+        actual = self.summaryWriter.write(peopleData)
         self._assertActualEqualsExpected(actual,COMBINED_CHILDREN_LISTING)
         
     def test_whenBaptismSourceHasDifferentChurchDenomination(self):
@@ -52,8 +47,7 @@ class whenUsingEnglishPhraseWriter(ExtendedTestCase):
         a child baptism record for other than just the catholic denomination."""
         childData  = {**WOLTER_INPUT,'denom':['ref']}
         peopleData = {**FATHER_INPUT,'children':[childData]}
-        self.summaryWriter.setPeopleTo(peopleData)
-        actual = self.summaryWriter.getSummary(self.writerMaker)
+        actual = self.summaryWriter.write(peopleData)
         self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTINGS['reformed church'])
 
     def test_whenBaptismSourceHasMultipleChurchDenomination(self):
@@ -62,8 +56,7 @@ class whenUsingEnglishPhraseWriter(ExtendedTestCase):
         befor both the catholic and the reformed faith."""
         childData  = {**WOLTER_INPUT,'denom':['rc','ref']}
         peopleData = {**FATHER_INPUT,'children':[childData]}
-        self.summaryWriter.setPeopleTo(peopleData)
-        actual = self.summaryWriter.getSummary(self.writerMaker)
+        actual = self.summaryWriter.write(peopleData)
         self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTINGS['both churches']) 
         
     def test_whenParentsRecordedButNoLifeEvent(self):
@@ -72,22 +65,19 @@ class whenUsingEnglishPhraseWriter(ExtendedTestCase):
         peopleData = {'father':{'PID':'(Fr0)','foreNames':'Jois','lastName':'Sunder'},
                       'mother':{'PID':'x1(Fr0)','foreNames':'Alheid'},
                       'main':{'PID':'(Fr0.1)','foreNames':'Wolterus','lastName':'Sunder'}}
-        self.summaryWriter.setPeopleTo(peopleData)
-        actual = self.summaryWriter.getSummary(self.writerMaker)
+        actual = self.summaryWriter.write(peopleData)
         self._assertActualEqualsExpected(actual,CHILD_LISTINGS['no life-events'])         
         
     def test_whenWritingSecondSection(self):
         """This test asserts that the second section can be written, sub tests will be split of
         and this test will remain as acceptance test."""
-        self.summaryWriter.setPeopleTo(TEST_INPUT['(Fr1)'])
-        actual = self.summaryWriter.getSummary(self.writerMaker)
+        actual = self.summaryWriter.write(TEST_INPUT['(Fr1)'])
         self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1)'])  
         
     def test_whenWritingThirdSection(self):
         """This test asserts that the third section can be written, sub tests will be split of
         and this test will remain as acceptance test."""
-        self.summaryWriter.setPeopleTo(TEST_INPUT['(Fr1.1)'])
-        actual = self.summaryWriter.getSummary(self.writerMaker)
+        actual = self.summaryWriter.write(TEST_INPUT['(Fr1.1)'])
         self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1.1)'])          
 
 WOLTER_INPUT = {'PID':'(Fr0.1)','foreNames':'Wolterus','day':18,'month':12,'year':1661, 'nameOfParish':'St. Vitus','denom':['rc']}

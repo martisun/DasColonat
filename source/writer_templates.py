@@ -38,9 +38,9 @@ class WriterTemplate(AllWriterTemplate):
     def isComplete(self):
         return (len(self._selectedPeople) == len(self._requiredPeople))            
             
-    def __selectPeopleFromCandidates(self,candidates):
+    def __selectPeopleFromCandidates(self,candidateCollection):
         self._selectedPeople = {}
-        for count,candidate in enumerate(candidates):
+        for count,candidate in enumerate(candidateCollection):
             if count == len(self._requiredPeople): break
             specificationsForCandidate = self._requiredPeople[count]
             self.__addPersonWithSpecificationsToSelection(candidate,specificationsForCandidate)
@@ -48,7 +48,7 @@ class WriterTemplate(AllWriterTemplate):
     def __addPersonWithSpecificationsToSelection(self,candidate,specificationsForCandidate):
         tagForCandidate  = specificationsForCandidate['tag']
         roleForCandidate = specificationsForCandidate['role']
-        if candidate.isSuitableGivenTag(tagForCandidate):
+        if isinstance(candidate,list) or candidate.isSuitableGivenTag(tagForCandidate):
             self._selectedPeople.update({roleForCandidate:candidate})
 
 class SelectingWriterTemplate(WriterTemplate):
@@ -80,7 +80,11 @@ class SelectorWriterTemplate(SelectingWriterTemplate):
     _inputKeys = ['key','map','modifier']
     
     def _getTextFromMapping(self,keyForMapping,mapping,selector):
-        keyValueForSelector = self._getKeyValueFromPrimaryRequiredPerson(keyForMapping)
+        roleKeys = [requiredPerson['role'] for requiredPerson in self._requiredPeople]
+        if not keyForMapping in roleKeys:
+            keyValueForSelector = self._getKeyValueFromPrimaryRequiredPerson(keyForMapping)
+        else:
+            keyValueForSelector = self._selectedPeople[keyForMapping]
         keyValueForMapping = selector(keyValueForSelector) 
         return mapping[keyValueForMapping]        
         

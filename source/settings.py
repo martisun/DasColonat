@@ -1,6 +1,9 @@
-from source.phrase_writer import PhraseWriter
+from source.writer_maker import WriterMaker
+from source.writer_adapter import WriterAdapter
 
 class Settings(object):
+    __summaryWriterTemplatePattern = '$summary(all)'
+    
     @staticmethod
     def setTo(inputDict):
         theSettings = Settings()
@@ -12,8 +15,14 @@ class Settings(object):
                            'roleOfMain':''}
         self.updateWith(defaultSettings)
     
-    def getPhraseWriter(self):
-        return PhraseWriter.inLanguage(self.language)
+    def getSummaryWriter(self):
+        writerMaker = self.getWriterMaker()
+        summaryWriter = WriterAdapter.forTemplatePattern(self.__summaryWriterTemplatePattern)
+        summaryWriter.setMakerTo(writerMaker)
+        return summaryWriter
+    
+    def getWriterMaker(self):
+        return WriterMaker.inLanguage(self.language)
     
     def setGUITo(self,theGUI):
         self.__GUI = theGUI 

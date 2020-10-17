@@ -1,6 +1,6 @@
 import re
 
-from source.writers import AllWriter,TemplaterWriter
+from source.writers import AllWriter,TemplaterWriter,ListingWriter
 from source.writer_templates import AllWriterTemplate,KeyWriterTemplate,SelectorWriterTemplate,WriterTemplate
 from source.language_template import LanguageTemplateSelector
 from source.pattern_parsers import PatternParser,TemplaterPatternParser
@@ -51,6 +51,8 @@ class WriterMaker(object):
         if len(arguments) == 1 and 'all' in arguments:
             templaterWriter = AllWriter(blank,name)
             templaterWriter.setPatternParserTo(PatternParser())
+        elif name == 'childrenListing':
+            templaterWriter = ListingWriter()
         else:
             templaterWriter = TemplaterWriter(blank,name,arguments)
             templaterWriter.setPatternParserTo(TemplaterPatternParser())

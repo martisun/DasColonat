@@ -3,7 +3,6 @@ from source.file_loader import FileLoader
 from source.file_parser import FileParser
 from source.file_writer import FileWriter
 from source.record_reader import RecordReader
-from source.summary_writer import SummaryWriter
 
 class TaskManager(FileHandler):
     def run(self):
@@ -19,8 +18,7 @@ class TaskManager(FileHandler):
         filesToLoad    = self.__fileLoader.getFileToLoadFrom()
         parsedRecords  = self.__parseFile(filesToLoad[0])        
         allPeopleData  = self.__readPeopleFromRecords(parsedRecords)
-        self.__summaryWriter.setPeopleTo(allPeopleData)
-        textToSave = self.__summaryWriter.getSummary()
+        textToSave = self.__summaryWriter.write(allPeopleData)
         self.__fileWriter.writeTextToFileToSaveTo(textToSave)
     
     def __initializeFileLoader(self):
@@ -30,9 +28,7 @@ class TaskManager(FileHandler):
         self.__fileWriter = self.__getInitializedFileHandler(FileWriter())
     
     def __initializeSummaryWriter(self):
-        self.__summaryWriter = SummaryWriter()
-        self.__phraseWriter = self._settings.getPhraseWriter()
-        self.__summaryWriter.setPhraseWriterTo(self.__phraseWriter)
+        self.__summaryWriter = self._settings.getSummaryWriter()
         
     def __getInitializedFileHandler(self,fileHandler):
         fileHandler.setGUITo(self._GUI)

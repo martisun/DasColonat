@@ -1,5 +1,5 @@
 from source.test_whenUsingMockFile import whenUsingMockFile
-from source.test_whenUsingEnglishPhraseWriter import FATHER_OUTPUT,MOTHER_OUTPUT,CHILD_LISTINGS,OTHER_CHILD_LISTING,COMBINED_CHILDREN_LISTING,TEST_OUTPUT
+from source.test_whenUsingEnglishWriterMaker import FATHER_OUTPUT,MOTHER_OUTPUT,CHILD_LISTINGS,OTHER_CHILD_LISTING,COMBINED_CHILDREN_LISTING,TEST_OUTPUT
 
 from source.task_manager import TaskManager
 from source.settings import Settings
