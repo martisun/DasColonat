@@ -1,36 +1,55 @@
+import re
+
 from source.latex_templater import LatexTemplater
 
-class AllWriter(object):
+class Writer(object):
     def __init__(self,blank,name):
         self._blank         = blank
+        self._replacers     = []
         self.__name         = name
+    
+    def parseTemplate(self,template):
+        return self.__maker.parse(template.getText())
     
     def setMakerTo(self,maker):
         self.__maker = maker
-    
-    def setPatternParserTo(self,parser):
-        self._patternParser = parser
         
     def write(self,people):
         template = self.__maker.getTemplateWithNameAndInput(self.__name,people)
-        self._doReplacementsInTemplateTextWith(template) 
-        return LatexTemplater.replaceSpecialCharacters(template.getText())
+        for replacer in self._replacers:
+            replacer.doReplacementsTo(template)
+        return LatexTemplater.replaceSpecialCharacters(template.getText())   
     
-    def _writeIntoTemplateWith(self,superTemplate):
+    def writeIntoTemplateWith(self,superTemplate):
         blankReplacement  = self.write(superTemplate.getPeople()) 
-        superTemplate.replace(self._blank,blankReplacement)
+        superTemplate.replace(self._blank,blankReplacement)     
+        
+class SubWriterReplacer(object):  
+    def __init__(self,parentWriter):
+        self.__parent = parentWriter    
     
-    def _doReplacementsInTemplateTextWith(self,template):
-        self.__replaceSubWriterTemplates(template)
-        specifications = self._patternParser.extractParametersFromArguments(template.getText())
+    def doReplacementsTo(self,template):
+        for subWriter in self.__parent.parseTemplate(template):
+            subWriter.writeIntoTemplateWith(template)             
+
+class ParameterReplacer(object):
+    def doReplacementsTo(self,template):
+        specifications = self.__extractSpecificationsFromTemplate(template)
         for blank,parameter in specifications:
             people = template.getPeople()
-            template.replace(blank,people['main'].get(parameter))
-        
-    def __replaceSubWriterTemplates(self,template):
-        for subWriter in self.__maker.parse(template.getText()):
-            subWriter._writeIntoTemplateWith(template)    
-    
+            value  = people['main'].get(parameter) 
+            template.replace(blank,value)   
+            
+    @staticmethod
+    def __extractSpecificationsFromTemplate(template):
+        arguments = template.getText()
+        return re.findall('(\(\+(\w+)\))',arguments)
+            
+class AllWriter(Writer):
+    def __init__(self,blank,name):
+        super().__init__(blank,name)
+        self._replacers = [SubWriterReplacer(self),ParameterReplacer()]
+            
 class SelectiveWriter(AllWriter):      
     def __init__(self,blank,name,arguments):
         super().__init__(blank,name)
@@ -51,10 +70,13 @@ class TemplaterWriter(SelectiveWriter):
     def __init__(self,*specification):
         super().__init__(*specification)
         self.__templater     = LatexTemplater()
-        
+    
+    def setPatternParserTo(self,patternParser):
+        self._patternParser = patternParser
+    
     def _doReplacementsInTemplateTextWith(self,template):
         self.__replaceTemplaterCalls(template) 
-        super()._doReplacementsInTemplateTextWith(template)
+        super().doReplacementsTo(template)
         
     def _writeIntoTemplateWith(self,superTemplate):
         blankedArgument   = self._patternParser.blankedArgument
@@ -92,7 +114,7 @@ class ListingWriter(object):
     def setMakerTo(self,writerMaker):
         self.__writerMaker = writerMaker
     
-    def _writeIntoTemplateWith(self,superTemplate):
+    def writeIntoTemplateWith(self,superTemplate):
         people = superTemplate.getPeople()
         if 'children' in people:
             blankReplacement  = self.childrenDescriptionsInListing(people['children'])

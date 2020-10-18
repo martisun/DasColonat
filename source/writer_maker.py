@@ -50,7 +50,6 @@ class WriterMaker(object):
         arguments = arguments.split(',')
         if len(arguments) == 1 and 'all' in arguments:
             templaterWriter = AllWriter(blank,name)
-            templaterWriter.setPatternParserTo(PatternParser())
         elif name == 'childrenListing':
             templaterWriter = ListingWriter()
         else:
