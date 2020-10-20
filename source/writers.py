@@ -69,16 +69,13 @@ class SelectiveWriter(AllWriter):
 class TemplaterWriter(SelectiveWriter):
     def __init__(self,*specification):
         super().__init__(*specification)
+        self._replacers.insert(0,TemplaterCallReplacer()) 
         self.__templater     = LatexTemplater()
     
     def setPatternParserTo(self,patternParser):
         self._patternParser = patternParser
-    
-    def _doReplacementsInTemplateTextWith(self,template):
-        self.__replaceTemplaterCalls(template) 
-        super().doReplacementsTo(template)
         
-    def _writeIntoTemplateWith(self,superTemplate):
+    def writeIntoTemplateWith(self,superTemplate):
         blankedArgument   = self._patternParser.blankedArgument
         blankReplacement  = self.write(superTemplate.getPeople()) 
         superTemplate.replace(self._blank,blankedArgument)
@@ -92,20 +89,33 @@ class TemplaterWriter(SelectiveWriter):
             superTemplate.replace(blank,blankReplacement)  
         else:  
             superTemplate.replace(self._patternParser.blankedArgument,argument)  
+
+class TemplaterCallReplacer(object):
+    def __init__(self):
+        self.__templater     = LatexTemplater()
+    
+    def doReplacementsTo(self,template):
+        specifications = self.__extractSpecificationsFromTemplate(template)
+        for blank,method,arguments in specifications:
+            blankReplacement = self.__determineTemplaterBlankReplacement(method,arguments, template.getPeople()) 
+            template.replace(blank,blankReplacement)  
     
     def __determineTemplaterBlankReplacement(self,method,arguments,people):
-        parameters = self._patternParser.extractParameterNamesFromArguments(arguments)
+        parameters = self.extractParameterNamesFromArguments(arguments)
         if not (len(arguments) > 0 and len(parameters) == 0):
             values = people['main'].get(parameters)    
             return self.__templater.evaluate(method,values)
         else:
             return self.__templater.evaluate(method,[arguments])
     
-    def __replaceTemplaterCalls(self,template):
-        specifications = self._patternParser.extractFullSpecsFrom(template.getText())
-        for blank,method,arguments in specifications:
-            blankReplacement = self.__determineTemplaterBlankReplacement(method,arguments, template.getPeople()) 
-            template.replace(blank,blankReplacement)
+    @staticmethod
+    def __extractSpecificationsFromTemplate(template):
+        arguments = template.getText()
+        return re.findall('(t\.(\w+)\(([\+\w+\,\s\.]+)?\))',arguments)    
+    
+    @staticmethod
+    def extractParameterNamesFromArguments(arguments):
+        return re.findall('\+(\w+)',arguments)      
             
 class ListingWriter(object):    
     def __init__(self):
