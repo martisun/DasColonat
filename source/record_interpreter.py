@@ -1,7 +1,7 @@
 from source.role_interpreter import RoleInterpreter
 
 class RecordInterpreter(object):
-    __rolesForSummary          = ['main','spouse','children'] 
+    __rolesForSummary          = ['main','spouse','children','father','mother'] 
     __roleSpecificImplicitData = {'father':{'gender':'m'},
                                   'mother':{'gender':'f'}}
     
@@ -19,7 +19,7 @@ class RecordInterpreter(object):
         
     def __collectRolesForSummary(self):
         peopleData = {}
-        for role in RecordInterpreter.__rolesForSummary:
+        for role in self.__rolesForSummary:
             peopleData.update(self.__roleInterpreter.getRelativeRoleInRecord(role))
         return peopleData 
          

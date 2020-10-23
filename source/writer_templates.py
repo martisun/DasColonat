@@ -1,11 +1,19 @@
 import re 
 
-class AllWriterTemplate(object):    
+class AllWriterTemplate(object): 
+    blankArgument = '+blank'
+    
     def getText(self):
         return self._text
     
     def getPeople(self):
         return self._selectedPeople
+    
+    def replaceBlankBy(self,replacementText):
+        self.replace(self.blankArgument,replacementText)
+    
+    def replaceByBlank(self,textToReplace):
+        self.replace(textToReplace,self.blankArgument)
     
     def replace(self,textToReplace,replacementText):
         self._text = self._text.replace(textToReplace,str(replacementText))

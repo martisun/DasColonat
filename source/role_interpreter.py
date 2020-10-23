@@ -1,8 +1,8 @@
 class RoleInterpreter(object):
     __relativeRoleData = {'father':{'spouse':'mother','children':'infant'},
                           'mother':{'spouse':'father','children':'infant'},
-                          'infant':{}}
-    __uniqueRoles  = ['main','spouse']
+                          'infant':{'father':'father','mother':'mother'}}
+    __uniqueRoles  = ['main','spouse','father','mother']
     nonUniqueRole = 'children'
     __roleInterpreters = {}
     

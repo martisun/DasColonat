@@ -23,100 +23,31 @@ class Writer(object):
     def writeIntoTemplateWith(self,superTemplate):
         blankReplacement  = self.write(superTemplate.getPeople()) 
         superTemplate.replace(self._blank,blankReplacement)     
-        
-class SubWriterReplacer(object):  
-    def __init__(self,parentWriter):
-        self.__parent = parentWriter    
-    
-    def doReplacementsTo(self,template):
-        for subWriter in self.__parent.parseTemplate(template):
-            subWriter.writeIntoTemplateWith(template)             
-
-class ParameterReplacer(object):
-    def doReplacementsTo(self,template):
-        specifications = self.__extractSpecificationsFromTemplate(template)
-        for blank,parameter in specifications:
-            people = template.getPeople()
-            value  = people['main'].get(parameter) 
-            template.replace(blank,value)   
-            
-    @staticmethod
-    def __extractSpecificationsFromTemplate(template):
-        arguments = template.getText()
-        return re.findall('(\(\+(\w+)\))',arguments)
             
 class AllWriter(Writer):
     def __init__(self,blank,name):
         super().__init__(blank,name)
-        self._replacers = [SubWriterReplacer(self),ParameterReplacer()]
-            
+        self._replacers = [SubWriterReplacer(self),ParameterReplacer()]        
+        
 class SelectiveWriter(AllWriter):      
     def __init__(self,blank,name,arguments):
         super().__init__(blank,name)
-        self.__inputRoles   = arguments
+        self.__selector   = RoleSelector(arguments)
     
     def write(self,people):
-        peopleCandidates = self.__getPeopleCandidatesFromInputRoles(people)
-        return super().write(peopleCandidates)
+        peopleCandidates = self.__selector.selectPeopleFrom(people)
+        return super().write(peopleCandidates) 
     
-    def __getPeopleCandidatesFromInputRoles(self,people):
-        peopleCandidates = []        
-        for inputRole in self.__inputRoles:
-            if inputRole in people: peopleCandidates.append(people[inputRole])
-            else:                   peopleCandidates
-        return peopleCandidates 
-
-class TemplaterWriter(SelectiveWriter):
+class TemplaterWriter(SelectiveWriter):    
     def __init__(self,*specification):
         super().__init__(*specification)
-        self._replacers.insert(0,TemplaterCallReplacer()) 
-        self.__templater     = LatexTemplater()
-    
-    def setPatternParserTo(self,patternParser):
-        self._patternParser = patternParser
+        self._replacers.insert(0,SimpleTemplaterCallReplacer())
+        self.__blankReplacer = BlankTemplaterCallReplacer(self)
         
     def writeIntoTemplateWith(self,superTemplate):
-        blankedArgument   = self._patternParser.blankedArgument
-        blankReplacement  = self.write(superTemplate.getPeople()) 
-        superTemplate.replace(self._blank,blankedArgument)
-        self.__applyTemplaterWithValueToBlankIn(blankReplacement,superTemplate)
-    
-    def __applyTemplaterWithValueToBlankIn(self,argument,superTemplate):
-        specifications  = self._patternParser.extractBlankedSpecsFrom(superTemplate.getText())
-        if specifications: 
-            blank,method     = specifications.pop()
-            blankReplacement = self.__templater.evaluate(method,[argument])
-            superTemplate.replace(blank,blankReplacement)  
-        else:  
-            superTemplate.replace(self._patternParser.blankedArgument,argument)  
+        superTemplate.replaceByBlank(self._blank)
+        self.__blankReplacer.doReplacementsTo(superTemplate)     
 
-class TemplaterCallReplacer(object):
-    def __init__(self):
-        self.__templater     = LatexTemplater()
-    
-    def doReplacementsTo(self,template):
-        specifications = self.__extractSpecificationsFromTemplate(template)
-        for blank,method,arguments in specifications:
-            blankReplacement = self.__determineTemplaterBlankReplacement(method,arguments, template.getPeople()) 
-            template.replace(blank,blankReplacement)  
-    
-    def __determineTemplaterBlankReplacement(self,method,arguments,people):
-        parameters = self.extractParameterNamesFromArguments(arguments)
-        if not (len(arguments) > 0 and len(parameters) == 0):
-            values = people['main'].get(parameters)    
-            return self.__templater.evaluate(method,values)
-        else:
-            return self.__templater.evaluate(method,[arguments])
-    
-    @staticmethod
-    def __extractSpecificationsFromTemplate(template):
-        arguments = template.getText()
-        return re.findall('(t\.(\w+)\(([\+\w+\,\s\.]+)?\))',arguments)    
-    
-    @staticmethod
-    def extractParameterNamesFromArguments(arguments):
-        return re.findall('\+(\w+)',arguments)      
-            
 class ListingWriter(object):    
     def __init__(self):
         self.__templater = LatexTemplater()       
@@ -139,4 +70,88 @@ class ListingWriter(object):
 
     def __compileChildDescriptionInListingOf(self,child):  
         childDescriptionWriter = self.__writerMaker.parse('$childDescription(main)')[0]
-        return childDescriptionWriter.write({'main':child})              
+        return childDescriptionWriter.write({'main':child})        
+        
+class SubWriterReplacer(object):  
+    def __init__(self,parentWriter):
+        self.__parent = parentWriter    
+    
+    def doReplacementsTo(self,template):
+        for subWriter in self.__parent.parseTemplate(template):
+            subWriter.writeIntoTemplateWith(template)             
+
+class ParameterReplacer(object):
+    def doReplacementsTo(self,template):
+        specifications = self.__extractSpecificationsFromTemplate(template)
+        for blank,parameter in specifications:
+            people = template.getPeople()
+            value  = people['main'].get(parameter) 
+            template.replace(blank,value)   
+            
+    @staticmethod
+    def __extractSpecificationsFromTemplate(template):
+        arguments = template.getText()
+        return re.findall('(\(\+(\w+)\))',arguments)    
+
+class TemplaterCallReplacer(object):
+    def __init__(self):
+        self._templater = LatexTemplater()
+        
+    def _extractSpecificationsFromTemplate(self,template,argumentPattern):
+        arguments = template.getText()
+        return re.findall('(t\.(\w+)\(%s\))'%argumentPattern,arguments)          
+    
+class SimpleTemplaterCallReplacer(TemplaterCallReplacer):    
+    def doReplacementsTo(self,template):
+        specifications = self._extractSpecificationsFromTemplate(template)
+        for blank,method,arguments in specifications:
+            blankReplacement = self.__determineBlankReplacement(method,arguments,template) 
+            template.replace(blank,blankReplacement)  
+    
+    def __determineBlankReplacement(self,method,arguments,template):
+        people      = template.getPeople()
+        inputValues = self.__determineTemplaterMethod(arguments,people)
+        return self._templater.evaluate(method,inputValues)
+    
+    def __determineTemplaterMethod(self,arguments,people):
+        parameters = self.extractParameterNamesFromArguments(arguments)
+        if not (len(arguments) > 0 and len(parameters) == 0):
+            return people['main'].get(parameters)    
+        else: return [arguments]
+    
+    def _extractSpecificationsFromTemplate(self,template):
+        return super()._extractSpecificationsFromTemplate(template,'([\+\w+\,\s\.]+)?')   
+    
+    @staticmethod
+    def extractParameterNamesFromArguments(arguments):
+        return re.findall('\+(\w+)',arguments)      
+
+class BlankTemplaterCallReplacer(TemplaterCallReplacer):    
+    def __init__(self,parentWriter):
+        super().__init__()
+        self.__parentWriter = parentWriter
+    
+    def doReplacementsTo(self,template):
+        specifications   = self._extractSpecificationsFromTemplate(template)
+        argument = self.__parentWriter.write(template.getPeople())
+        if specifications: 
+            blank,method = specifications.pop()
+            argument     = self._templater.evaluate(method,[argument])
+            template.replace(blank,argument) 
+        else: 
+            template.replaceBlankBy(argument)       
+    
+    def _extractSpecificationsFromTemplate(self,template):
+        blankArgument = re.escape(template.blankArgument)
+        return super()._extractSpecificationsFromTemplate(template,blankArgument)
+    
+class RoleSelector(object):
+    def __init__(self,roles):
+        self.__inputRoles = roles
+        
+    def selectPeopleFrom(self,people):
+        peopleCandidates = []        
+        for inputRole in self.__inputRoles:
+            if inputRole in people: peopleCandidates.append(people[inputRole])
+            else:                   peopleCandidates
+        return peopleCandidates                         

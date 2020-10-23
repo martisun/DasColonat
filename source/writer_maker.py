@@ -54,6 +54,5 @@ class WriterMaker(object):
             templaterWriter = ListingWriter()
         else:
             templaterWriter = TemplaterWriter(blank,name,arguments)
-            templaterWriter.setPatternParserTo(TemplaterPatternParser())
         templaterWriter.setMakerTo(self)
         return templaterWriter 

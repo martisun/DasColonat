@@ -16,7 +16,7 @@ class TaskManager(FileHandler):
     
     def __go(self):
         filesToLoad    = self.__fileLoader.getFileToLoadFrom()
-        parsedRecords  = self.__parseFile(filesToLoad[0])        
+        parsedRecords  = self.__parseFile(filesToLoad[0]) 
         allPeopleData  = self.__readPeopleFromRecords(parsedRecords)
         textToSave = self.__summaryWriter.write(allPeopleData)
         self.__fileWriter.writeTextToFileToSaveTo(textToSave)

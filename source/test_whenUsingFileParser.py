@@ -51,7 +51,7 @@ class whenUsingFileParser(whenUsingMockFile):
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('father')
         self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1)']) 
         
-    def test_whenWritingSecondSection(self):
+    def test_whenWritingThirdSection(self):
         """This test asserts that the third section can be written, sub tests will be split of
         and this test will remain as acceptance test. This test will show that we can choose the
         infant in a record as our person of focus."""
@@ -89,10 +89,10 @@ TEST_INPUT = 'father;;;mother;;;infant;;;;;;;;\n'+\
              '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.3);Berend;m;31;5;1717;ref;;'+\
              '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.4);Berend;m;12;2;1719;ref;;'
                 
-MODIFIED_TEST_INPUT = 'father;;;mother;;;infant;;;;;;;;\n'+\
+MODIFIED_TEST_INPUT = 'father;;;mother;;;infant;;;;;;;;;\n'+\
              'PID;foreNames;lastName;PID;foreNames;lastName;PID;'+\
-             'foreNames;gender;day;month;year;denom_0;denom_1;nameOfParish'+\
-             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.1);Jan;m;13;12;1711;rc;ref;St. Vitus'              
+             'foreNames;lastName;gender;day;month;year;denom_0;denom_1;nameOfParish'+\
+             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.1);Jan;Sunder;m;13;12;1711;rc;ref;St. Vitus'              
 
     
     
