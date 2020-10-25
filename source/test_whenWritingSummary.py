@@ -1,8 +1,9 @@
 from source.extended_testcase import ExtendedTestCase
 
-from source.summary_writer import SummaryWriter
-
 from source.mock_file import MockFolderAdapter
+
+from source.writer_maker import WriterMaker
+from source.writer_adapter import WriterAdapter
 
 SUMMARY_STRUCTURE ={'only parents':"""
 {sectionHeader}
@@ -55,10 +56,12 @@ class whenWritingSummary(ExtendedTestCase):
         """Tests whether the text written by the summary writer 
         includes consecutively the inputfile content and a child 
         listing."""
-        summaryWriter = SummaryWriter()
-        summaryWriter.setPeopleTo({'main':{},'spouse':{},'children':[{}]})
-        summaryWriter.setPhraseWriterTo(MockPhraseWriter())
-        actual = summaryWriter.getSummary()
+        writerMaker   = WriterMaker.inLanguage('en')
+        summaryWriter = WriterAdapter.forTemplatePattern('$summary(all)')
+        summaryWriter.setMakerTo(writerMaker)
+        actual = summaryWriter.write({'main':{},'spouse':{},'children':[{}]})
+        #summaryWriter.setPhraseWriterTo(MockPhraseWriter())
+        #actual = summaryWriter.getSummary()
         self._assertActualEqualsExpected(actual,SUMMARY_STRUCTURE['only children'])
         
     def test_whetherHasParentReferenceIfRecorded(self):

@@ -18,6 +18,7 @@ class TaskManager(FileHandler):
         filesToLoad    = self.__fileLoader.getFileToLoadFrom()
         parsedRecords  = self.__parseFile(filesToLoad[0]) 
         allPeopleData  = self.__readPeopleFromRecords(parsedRecords)
+        self.__deriveAdditionalInformationFrom(allPeopleData)
         textToSave = self.__summaryWriter.write(allPeopleData)
         self.__fileWriter.writeTextToFileToSaveTo(textToSave)
     
@@ -42,13 +43,27 @@ class TaskManager(FileHandler):
      
     def __readPeopleFromRecords(self,parsedRecords):
         recordReader = RecordReader(self._settings.roleOfMain)
-        return recordReader.readPeopleFrom(parsedRecords)
-        
-        
+        return recordReader.readPeopleFrom(parsedRecords) 
     
+    def __deriveAdditionalInformationFrom(self,peopleData):
+        people = PeopleDataDeriver(peopleData)
+        people.deriveAdditionalInformation()
     
+class PeopleDataDeriver(object):
+    def __init__(self,rawInputDict):
+        self.__data = rawInputDict
+        
+    def data(self):
+        return self.__data
     
+    def deriveAdditionalInformation(self):
+        if self.__isLastNameOfMainDerivable(): 
+            self.__updateLastNameOfMainWithLastNameOfFather()
+    
+    def __isLastNameOfMainDerivable(self):
+        return (not 'lastName' in self.__data['main'] and 'father' in self.__data)
         
-        
+    def __updateLastNameOfMainWithLastNameOfFather(self):
+        self.__data['main']['lastName'] = self.__data['father']['lastName']   
         
     

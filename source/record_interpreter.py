@@ -24,7 +24,8 @@ class RecordInterpreter(object):
         return peopleData 
          
     def __interpretRoleSpecificImplicitData(self):
-        for role in self.__record: self.__updateRecordForRole(role)
+        for role in self.__record: 
+            self.__updateRecordForRole(role)
     
     def __updateRecordForRole(self,role):
         if role in self.__roleSpecificImplicitData:

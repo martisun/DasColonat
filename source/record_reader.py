@@ -9,7 +9,7 @@ class RecordReader(object):
     def readPeopleFrom(self,parsedRecords):     
         for record in parsedRecords:
             peopleData = self.__collectPeopleDataFrom(record)
-            self.__addPeople(peopleData)
+            self.__addPeople(peopleData)   
         return self.__peopleCollected
     
     def __addPeople(self,peopleData):

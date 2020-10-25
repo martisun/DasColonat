@@ -6,48 +6,44 @@ from source.settings import Settings
 from source.mock_gui import MockGUI
 from source.mock_file import MockFolderAdapter
 
+from source.default_settings import getDefaultTestSettings
+
 class whenUsingFileParser(whenUsingMockFile):
     def setUp(self):
         self.folderAdapter = MockFolderAdapter()
+        defaultTestSettings = getDefaultTestSettings()
+        self.defaultTestFileToLoadFrom = defaultTestSettings['filesToLoadFrom'][0]
     
     def test_whenWritingSectionForFatherGivenAll(self):
         """Tests whether given the minimal input for both father and mother
         of the baptism record in a string representation of the summary writer 
         input to a Mockfile the expected output is returned."""
-        self._writeContentToFileWithName(STR_HEADER+STR_WOLTERUS,
-                                         GOLD_SETTINGS['filesToLoadFrom'][0])
-        actual = self.__setupAndRunTaskManagerThenGetOutputAsText('father')
-        self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTINGS['default'])  
+        self.__test_whenWritingSectionForParentGivenAll('father',FATHER_OUTPUT)
         
     def test_whenWritingSectionForMotherGivenAll(self):
         """Tests whether given the minimal input for both father and mother
         of the baptism record in a string representation of the summary writer 
         input to a Mockfile the expected output is returned."""
-        self._writeContentToFileWithName(STR_HEADER+STR_WOLTERUS,
-                                         GOLD_SETTINGS['filesToLoadFrom'][0])
-        actual = self.__setupAndRunTaskManagerThenGetOutputAsText('mother')
-        self._assertActualEqualsExpected(actual,MOTHER_OUTPUT+CHILD_LISTINGS['default'])
+        self.__test_whenWritingSectionForParentGivenAll('mother',MOTHER_OUTPUT)
         
     def test_whenWritingSectionForFatherGivenOtherChild(self):
         """Tests the same as `test_whenWritingSectionForFatherGivenAll` for a
         different baptism record of the same couple."""
-        self._writeContentToFileWithName(STR_HEADER+STR_HERMANNUS,
-                                         GOLD_SETTINGS['filesToLoadFrom'][0])
+        self.__writeContentToDefaultFile(STR_HEADER+STR_HERMANNUS)
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('father')
         self._assertActualEqualsExpected(actual,FATHER_OUTPUT+OTHER_CHILD_LISTING) 
         
     def test_whenWritingSectionForFatherOfBothChildren(self):
         """Tests whether given baptism input for two children, we can write a 
         single summary section that includes them both."""
-        self._writeContentToFileWithName(STR_HEADER+STR_WOLTERUS+STR_HERMANNUS,
-                                         GOLD_SETTINGS['filesToLoadFrom'][0])
+        self.__writeContentToDefaultFile(STR_HEADER+STR_WOLTERUS+STR_HERMANNUS)
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('father')
         self._assertActualEqualsExpected(actual,COMBINED_CHILDREN_LISTING) 
         
     def test_whenWritingSecondSection(self):
         """This test asserts that the second section can be written, sub tests will be split of
         and this test will remain as acceptance test."""
-        self._writeContentToFileWithName(TEST_INPUT,GOLD_SETTINGS['filesToLoadFrom'][0])
+        self.__writeContentToDefaultFile(TEST_INPUT)
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('father')
         self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1)']) 
         
@@ -55,24 +51,51 @@ class whenUsingFileParser(whenUsingMockFile):
         """This test asserts that the third section can be written, sub tests will be split of
         and this test will remain as acceptance test. This test will show that we can choose the
         infant in a record as our person of focus."""
-        self._writeContentToFileWithName(MODIFIED_TEST_INPUT,GOLD_SETTINGS['filesToLoadFrom'][0])
+        self.__writeContentToDefaultFile(TEST_INPUT)
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('infant')
         self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1.1)'])         
-        
+    
+    def __test_whenWritingSectionForParentGivenAll(self,parent,parentOutput):
+        self.__writeDefaultContentToDefaultFile() 
+        self.__assertActualOutputForParentWithParentOutputEqualsDesiredOutput(parent,parentOutput)
+    
+    def __writeDefaultContentToDefaultFile(self):
+        desiredFileContent = STR_HEADER+STR_WOLTERUS
+        self.__writeContentToDefaultFile(desiredFileContent)
+    
+    def __writeContentToDefaultFile(self,desiredFileContent):
+        desiredFileName    = self.defaultTestFileToLoadFrom
+        self._writeContentToFileWithName(desiredFileContent,desiredFileName)
+    
+    def __assertActualOutputForParentWithParentOutputEqualsDesiredOutput(self,parent,parentOutput):
+        actualOutput  = self.__setupAndRunTaskManagerThenGetOutputAsText(parent)
+        desiredOutput = parentOutput+CHILD_LISTINGS['default']
+        self._assertActualEqualsExpected(actualOutput,desiredOutput) 
+    
     def __setupAndRunTaskManagerThenGetOutputAsText(self,roleOfMain):
-        settings = Settings.setTo(GOLD_SETTINGS)
+        settings    = self.__setupGoldSettingsWithRoleOfMain(roleOfMain)
+        taskManager = self.__setupTaskManagerWithSettings(settings) 
+        taskManager.run()
+        return self.__readContentFromDefaultFile()
+    
+    def __setupGoldSettingsWithRoleOfMain(self,roleOfMain):
+        defaultTestSettings = getDefaultTestSettings()
+        settings = Settings.setTo(defaultTestSettings)
         settings.updateWith({'roleOfMain':roleOfMain})
-        theGUI   = MockGUI()
+        return settings
+    
+    def __setupTaskManagerWithSettings(self,settings):
         taskManager = TaskManager()
-        taskManager.setGUITo(theGUI)
+        taskManager.setGUITo(MockGUI())
         taskManager.setFolderAdapterTo(self.folderAdapter)
         taskManager.setSettingsTo(settings)
-        taskManager.run()
-        actual = self._readContentFromFileWithName(GOLD_SETTINGS['filesToSaveTo'])
-        return actual
+        return taskManager
+    
+    def __readContentFromDefaultFile(self):
+        defaultTestSettings = getDefaultTestSettings()
+        fileNameWithSavedData = defaultTestSettings['filesToSaveTo']
+        return self._readContentFromFileWithName(fileNameWithSavedData)
 
-GOLD_SETTINGS = {'filesToLoadFrom':['baptism.csv'],\
-                 'filesToSaveTo':'summary.tex'}    
     
 STR_HEADER = 'father;;;mother;;infant;;;;;;\n'+\
              'PID;foreNames;lastName;PID;foreNames;PID;'+\
@@ -88,11 +111,6 @@ TEST_INPUT = 'father;;;mother;;;infant;;;;;;;;\n'+\
              '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.2);Maria Elisabet;f;8;7;1714;ref;;'+\
              '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.3);Berend;m;31;5;1717;ref;;'+\
              '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.4);Berend;m;12;2;1719;ref;;'
-                
-MODIFIED_TEST_INPUT = 'father;;;mother;;;infant;;;;;;;;;\n'+\
-             'PID;foreNames;lastName;PID;foreNames;lastName;PID;'+\
-             'foreNames;lastName;gender;day;month;year;denom_0;denom_1;nameOfParish'+\
-             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.1);Jan;Sunder;m;13;12;1711;rc;ref;St. Vitus'              
 
     
     

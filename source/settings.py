@@ -11,9 +11,9 @@ class Settings(object):
         return theSettings
     
     def __init__(self):
-        defaultSettings = {'filesToLoadFrom':[],'filesToSaveTo':None,'language':'en',
+        emptySettings = {'filesToLoadFrom':[],'filesToSaveTo':None,'language':'en',
                            'roleOfMain':''}
-        self.updateWith(defaultSettings)
+        self.updateWith(emptySettings)
     
     def getSummaryWriter(self):
         writerMaker = self.getWriterMaker()
