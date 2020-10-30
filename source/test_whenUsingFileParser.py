@@ -6,7 +6,7 @@ from source.settings import Settings
 from source.mock_gui import MockGUI
 from source.mock_file import MockFolderAdapter
 
-from source.default_settings import getDefaultTestSettings
+from source.default_settings import getDefaultTestSettings,getPrimalTestHeader
 
 class whenUsingFileParser(whenUsingMockFile):
     def setUp(self):
@@ -29,14 +29,16 @@ class whenUsingFileParser(whenUsingMockFile):
     def test_whenWritingSectionForFatherGivenOtherChild(self):
         """Tests the same as `test_whenWritingSectionForFatherGivenAll` for a
         different baptism record of the same couple."""
-        self.__writeContentToDefaultFile(STR_HEADER+STR_HERMANNUS)
+        desiredFileContent = getPrimalTestHeader()+STR_HERMANNUS
+        self.__writeContentToDefaultFile(desiredFileContent)
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('father')
         self._assertActualEqualsExpected(actual,FATHER_OUTPUT+OTHER_CHILD_LISTING) 
         
     def test_whenWritingSectionForFatherOfBothChildren(self):
         """Tests whether given baptism input for two children, we can write a 
         single summary section that includes them both."""
-        self.__writeContentToDefaultFile(STR_HEADER+STR_WOLTERUS+STR_HERMANNUS)
+        desiredFileContent = getPrimalTestHeader()+STR_WOLTERUS+STR_HERMANNUS
+        self.__writeContentToDefaultFile(desiredFileContent)
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('father')
         self._assertActualEqualsExpected(actual,COMBINED_CHILDREN_LISTING) 
         
@@ -50,7 +52,9 @@ class whenUsingFileParser(whenUsingMockFile):
     def test_whenWritingThirdSection(self):
         """This test asserts that the third section can be written, sub tests will be split of
         and this test will remain as acceptance test. This test will show that we can choose the
-        infant in a record as our person of focus."""
+        infant in a record as our person of focus.
+         * the test-input includes records of spanning multiple generations, ensure that the
+           children listing does not include possible grandchildren."""
         self.__writeContentToDefaultFile(TEST_INPUT)
         actual = self.__setupAndRunTaskManagerThenGetOutputAsText('infant')
         self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1.1)'])         
@@ -60,7 +64,7 @@ class whenUsingFileParser(whenUsingMockFile):
         self.__assertActualOutputForParentWithParentOutputEqualsDesiredOutput(parent,parentOutput)
     
     def __writeDefaultContentToDefaultFile(self):
-        desiredFileContent = STR_HEADER+STR_WOLTERUS
+        desiredFileContent = getPrimalTestHeader()+STR_WOLTERUS
         self.__writeContentToDefaultFile(desiredFileContent)
     
     def __writeContentToDefaultFile(self,desiredFileContent):
@@ -96,10 +100,6 @@ class whenUsingFileParser(whenUsingMockFile):
         fileNameWithSavedData = defaultTestSettings['filesToSaveTo']
         return self._readContentFromFileWithName(fileNameWithSavedData)
 
-    
-STR_HEADER = 'father;;;mother;;infant;;;;;;\n'+\
-             'PID;foreNames;lastName;PID;foreNames;PID;'+\
-             'foreNames;day;month;year;denom_0;nameOfParish' 
         
 STR_WOLTERUS  = '\n(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.1);Wolterus;18;12;1661;rc;St. Vitus' 
 STR_HERMANNUS = '\n(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.2);Hermännus;1;6;1666;rc;St. Vitus'       
@@ -110,7 +110,9 @@ TEST_INPUT = 'father;;;mother;;;infant;;;;;;;;\n'+\
              '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.1);Jan;m;13;12;1711;rc;ref;St. Vitus'+\
              '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.2);Maria Elisabet;f;8;7;1714;ref;;'+\
              '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.3);Berend;m;31;5;1717;ref;;'+\
-             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.4);Berend;m;12;2;1719;ref;;'
+             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.4);Berend;m;12;2;1719;ref;;'+\
+             '\n(Fr1.1);Jan;Sunder;x1(Fr1.1);Enne;Tijs;(Fr1.1.1);Thele Marie;f;18;9;1734;ref;;'  
+                
 
     
     

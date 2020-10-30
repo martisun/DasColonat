@@ -4,17 +4,15 @@ class LanguageTemplateSelector(object):
         templateCollections = {'en':EnglishTemplateCollection(),
                                'nl':DutchTemplateCollection(),
                                'de':GermanTemplateCollection()}
-        return templateCollections[languageTag]  
-
-#     'childrenListing':[{'required':['children^'],'template':"""t.compileListingOf("""+\
-#                      """$childDescription(children))"""}],    
+        return templateCollections[languageTag]      
     
 class GeneralTemplateCollection(object):
     _generalSpecifications = {'summary':[{'template':"""
 $sectionHeader(main)
 
-$mainParagraph(main,father,mother)$childListingIntro(main,spouse,children)$childrenListing(children)
-"""}],    
+$mainParagraph(main,father,mother)$lineBreak(main)$childListingIntro(main,spouse,children)$childrenListing(children)
+"""}],
+    'lineBreak':[{'required':['main*'],'template':"""\n\n"""}],
     'sectionHeader':[{'required':['main'],
                       'template':"""t.section($sectionTitle(main))t.label(+PID)"""}],
     'sectionTitle':[{'required':['main'],
@@ -94,7 +92,7 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
      'dayth':[{'required':['main'],'template':"""(+day)t.superScript(th)"""}],
      'dayst':[{'required':['main'],'template':"""(+day)t.superScript(st)"""}],
      'month':[{'required':['main'],'key':'month','modifier':'toInt',
-               'map':{2:'February',5:'May',6:'June',7:'July',12:'December'}}],
+               'map':{2:'February',5:'May',6:'June',7:'July',9:'September',12:'December'}}],
      'child':[{'required':['main'],'key':'gender','map':{'m':'son','':'child'}}],
      'town':[{'template':"""Freren"""}],
      'beforeTheChurches':[{'required':['main'],'key':'denom','modifier':'primalListSelector',

@@ -1,4 +1,5 @@
 class RoleInterpreter(object):
+    __mainRole         = 'main'
     __relativeRoleData = {'father':{'spouse':'mother','children':'infant'},
                           'mother':{'spouse':'father','children':'infant'},
                           'infant':{'father':'father','mother':'mother'}}
@@ -23,12 +24,21 @@ class RoleInterpreter(object):
     def setRecordTo(self,record):
         self.__record = record
     
+    def getRelativeRolesInRecord(self,roles):
+        peopleData = {}
+        for role in roles:
+            peopleData.update(self.getRelativeRoleInRecord(role))
+        return peopleData 
+    
     def getRelativeRoleInRecord(self,name):
         relativeRole = self.__getRelativeRoleWithName(name)
         if self.__isRelativeRoleRecorded(relativeRole): 
             recordOfRelativeRole = self.__record[relativeRole]
             return self.__formatIntoListForNonUniqueRoles(name,recordOfRelativeRole)
         else: return {}
+    
+    def getPIDOfMainRoleInRecord(self):
+        return self.getRelativeRoleInRecord(self.__mainRole)[self.__mainRole]['PID']
     
     def __formatIntoListForNonUniqueRoles(self,name,recordOfRelativeRole):
         if name in RoleInterpreter.__uniqueRoles: return {name:recordOfRelativeRole}

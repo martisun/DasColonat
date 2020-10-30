@@ -3,6 +3,8 @@ from source.extended_testcase import ExtendedTestCase
 from source.writer_adapter import WriterAdapter
 from source.writer_maker import WriterMaker
 
+from source.default_settings import getPrimalTestIntermediateInputForFather, getPrimalTestOutputForFather
+
 class whenUsingEnglishWriterMaker(ExtendedTestCase):
     def setUp(self):
         self.summaryWriter = WriterAdapter.forTemplatePattern('$summary(all)')
@@ -14,8 +16,10 @@ class whenUsingEnglishWriterMaker(ExtendedTestCase):
         """Tests whether the summary writer puts out a correct section
         centred around the father of a baptism entry given the expected
         output of the file parser."""
-        actual = self.summaryWriter.write(FATHER_INPUT)
-        self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTINGS['default'])
+        peopleDataDict = getPrimalTestIntermediateInputForFather()
+        expectedOutput = getPrimalTestOutputForFather() 
+        actualOutput = self.summaryWriter.write(peopleDataDict)
+        self._assertActualEqualsExpected(actualOutput,expectedOutput)
         
     def test_whenWritingSectionForMother(self):
         """Tests whether the summary writer puts out a correct section
@@ -28,7 +32,8 @@ class whenUsingEnglishWriterMaker(ExtendedTestCase):
         """Tests whether the summary writer can also put out a section
         centred around the father of a baptism entry given a different 
         child."""
-        peopleData = {**FATHER_INPUT,'children':[HERMAN_INPUT]}
+        peopleDataDict = getPrimalTestIntermediateInputForFather()
+        peopleData = {**peopleDataDict,'children':[HERMAN_INPUT]}
         actual = self.summaryWriter.write(peopleData)
         self._assertActualEqualsExpected(actual,FATHER_OUTPUT+OTHER_CHILD_LISTING)
         
@@ -46,7 +51,8 @@ class whenUsingEnglishWriterMaker(ExtendedTestCase):
         """Tests whether the summary writer puts out a section based on 
         a child baptism record for other than just the catholic denomination."""
         childData  = {**WOLTER_INPUT,'denom':['ref']}
-        peopleData = {**FATHER_INPUT,'children':[childData]}
+        peopleDataDict = getPrimalTestIntermediateInputForFather()
+        peopleData = {**peopleDataDict,'children':[childData]}
         actual = self.summaryWriter.write(peopleData)
         self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTINGS['reformed church'])
 
@@ -55,7 +61,8 @@ class whenUsingEnglishWriterMaker(ExtendedTestCase):
         a child baptism record in case a child was baptised (on the same date)
         befor both the catholic and the reformed faith."""
         childData  = {**WOLTER_INPUT,'denom':['rc','ref']}
-        peopleData = {**FATHER_INPUT,'children':[childData]}
+        peopleDataDict = getPrimalTestIntermediateInputForFather()
+        peopleData = {**peopleDataDict,'children':[childData]}
         actual = self.summaryWriter.write(peopleData)
         self._assertActualEqualsExpected(actual,FATHER_OUTPUT+CHILD_LISTINGS['both churches']) 
         
@@ -86,9 +93,6 @@ HERMAN_INPUT = {'PID':'(Fr0.2)','foreNames':'Hermännus','day':1,'month':6,'year
 MOTHER_INPUT = {'main':{'PID':'x1(Fr0)','foreNames':'Alheid','gender':'f'},
                 'spouse':{'PID':'(Fr0)','foreNames':'Jois','lastName':'Sunder'},
                 'children':[WOLTER_INPUT]}  
-
-FATHER_INPUT = {'main':{'PID':'(Fr0)','foreNames':'Jois','lastName':'Sunder','gender':'m'},
-                'spouse':{'PID':'x1(Fr0)','foreNames':'Alheid'},'children':[WOLTER_INPUT]} 
         
 FATHER_OUTPUT="""
 \section{\pidt{(Fr0)}-- Sunder, Jois --~\Mars}\label{sec:(Fr0)}
@@ -148,8 +152,11 @@ TEST_INPUT = {'(Fr1)':{'main':{'PID':'(Fr1)','foreNames':'Jan','lastName':'Sunde
              '(Fr1.1)':{'main':{'PID':'(Fr1.1)','foreNames':'Jan','lastName':'Sunder',
                                 'day':13,'month':12,'year':1711,'nameOfParish':'St. Vitus',
                                 'gender':'m','denom':['rc','ref']},
+                        'spouse':{'PID':'x1(Fr1.1)','foreNames':'Enne','lastName':'Tijs'},
                         'father':{'PID':'(Fr1)','foreNames':'Jan','lastName':'Sunder'},
-                        'mother':{'PID':'x1(Fr1)','foreNames':'Tela','lastName':'Mouwe'}}} 
+                        'mother':{'PID':'x1(Fr1)','foreNames':'Tela','lastName':'Mouwe'},
+                        'children':[{'PID':'(Fr1.1.1)','foreNames':'Thele Marie','day':18,
+                                     'month':9,'year':1734,'gender':'f','denom':['ref']}]}} 
 
 TEST_OUTPUT = {'(Fr1)':"""
 \section{\pidt{(Fr1)}-- Sunder, Jan --~\Mars}\label{sec:(Fr1)}
@@ -166,4 +173,9 @@ From a relationship between Jan \textbf{S}under\pids{(Fr1)} and Tela \textbf{M}o
 \section{\pidt{(Fr1.1)}-- Sunder, Jan --~\Mars}\label{sec:(Fr1.1)}
 
 Jan \textbf{S}under\pids{(Fr1.1)}, son of Jan \textbf{S}under\pids{(Fr1)} and Tela \textbf{M}ouwe\pids{x1(Fr1)}, was baptised on the 13\supscr{th} of December 1711 before the catholic church of the {\it St. Vitus} parish and the reformed church, both at Freren.
+
+From a relationship between Jan \textbf{S}under\pids{(Fr1.1)} and Enne \textbf{T}ijs\pids{x1(Fr1.1)} was brought forth:
+\begin{itemize}
+\item[\emph{\rom{1}.}] Thele Marie~(\textbf{\Venus})~\pids{(Fr1.1.1)} was baptised on the 18\supscr{th} of September 1734 before the reformed church at Freren.
+\end{itemize}
 """}

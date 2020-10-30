@@ -3,14 +3,18 @@ from source.role_interpreter import RoleInterpreter
 
 class RecordReader(object):    
     def __init__(self,roleOfMain):
-        self.__roleOfMain = roleOfMain
+        self.__interpreter = RecordInterpreter.forRoleOfMain(roleOfMain)
         self.__peopleCollected = {}
         
-    def readPeopleFrom(self,parsedRecords):     
+    def readPeopleFrom(self,parsedRecords):
         for record in parsedRecords:
             peopleData = self.__collectPeopleDataFrom(record)
             self.__addPeople(peopleData)   
         return self.__peopleCollected
+    
+    def __collectPeopleDataFrom(self,parsedRecord):
+        self.__interpreter.setParsedRecordTo(parsedRecord)
+        return self.__interpreter.interpret()    
     
     def __addPeople(self,peopleData):
         for role in peopleData: self.__addRoleWithData(role,peopleData[role])
@@ -26,12 +30,6 @@ class RecordReader(object):
         
     def __addNonUniqueRoleWithData(self,role,inputData):
         self.__peopleCollected[role] += inputData
-    
-    def __collectPeopleDataFrom(self,parsedRecord):
-        recordInterpreter = RecordInterpreter()
-        recordInterpreter.setParsedRecordTo(parsedRecord)
-        recordInterpreter.setRoleOfMainTo(self.__roleOfMain)
-        return recordInterpreter.interpret()
     
     def __isRoleRecorded(self,role):
         return (role in self.__peopleCollected)
