@@ -1,9 +1,9 @@
-from source.record_interpreter import RecordInterpreter
+from source.record_interpreter import RecordInterpreterMaker
 from source.role_interpreter import RoleInterpreter
 
 class RecordReader(object):    
     def __init__(self,roleOfMain):
-        self.__interpreter = RecordInterpreter.forRoleOfMain(roleOfMain)
+        self.__interpreter = RecordInterpreterMaker.forRoleOfMain(roleOfMain)
         self.__peopleCollected = {}
         
     def readPeopleFrom(self,parsedRecords):

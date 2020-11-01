@@ -1,57 +1,74 @@
 from source.role_interpreter import RoleInterpreter
 
-class RecordInterpreter(object):
-    __rolesForSummary          = ['main','spouse','children','father','mother'] 
+class RecordInterpreterMaker(object):    
+    @staticmethod
+    def forRoleOfMain(roleOfMain):
+        return RecordInterpreterMaker(roleOfMain)
+    
+    def __init__(self,roleOfMain):
+        self.__recordInterpreter = ''
+        self.__roleOfMain        = roleOfMain
+        
+    def interpret(self):
+        return self.__recordInterpreter.interpret(self.__record)
+        
+    def setParsedRecordTo(self,parsedRecord):
+        self.__record = self.__interpretRoleSpecificallyTheRecord(parsedRecord)
+        self.__setPIDofMainIfUnset()        
+    
+    def __getPIDOfRoleOfMain(self,record):
+        return self.__record[self.__roleOfMain]['PID']
+    
+    def __interpretRoleSpecificallyTheRecord(self,record):
+        interpreter = RoleSpecificImplicitInterpreter()
+        return interpreter.interpret(record)
+    
+    def __setPIDofMainIfUnset(self):
+        pidOfMainInRecord = self.__getPIDOfRoleOfMain()
+        if not self.__recordInterpreter: 
+            self.__recordInterpreter = RecordInterpreter(pidOfMainInRecord)           
+
+            
+class RoleSpecificImplicitInterpreter(object):
     __roleSpecificImplicitData = {'father':{'gender':'m'},
                                   'mother':{'gender':'f'}}
     
-    @staticmethod
-    def forRoleOfMain(roleOfMain):
-        mainRoleInterpreter = RoleInterpreter.forRole(roleOfMain)
-        return RecordInterpreter(mainRoleInterpreter)
-    
-    def __init__(self,roleInterpreter):
-        self.__pidOfMain       = ''
-        self.__roleInterpreter = roleInterpreter
+    def interpret(self,record):
+        for role in record:
+            self.__updateRecordForRole(record,role)
+        return record
         
-    def interpret(self):        
-        self.__interpretRoleSpecificImplicitData()
-        pidOfMainInRecord = self.__roleInterpreter.getPIDOfMainRoleInRecord()
-        self.__setPIDofMainIfUnset(pidOfMainInRecord)
-        return self.__collectRolesForSummary(pidOfMainInRecord)
+    def __updateRecordForRole(self,record,role):
+        if role in self.__roleSpecificImplicitData:
+            record[role].update(self.__roleSpecificImplicitData[role])  
+            
+
+class RecordInterpreter(object):
+    __rolesForSummary          = ['main','spouse','children','father','mother'] 
     
-    def setParsedRecordTo(self,parsedRecord):
-        self.__record = parsedRecord
-        self.__roleInterpreter.setRecordTo(self.__record)
-    
-    def __setPIDofMainIfUnset(self,pidOfMainInRecord):
-        if not self.__pidOfMain: self.__pidOfMain = pidOfMainInRecord        
-    
-    def __collectRolesForSummary(self,pid):
-        if self.__pidOfPersonMatchesPIDofMainRole(pid):
-            return self.__collectRolesFromMatchingRecordForSummary() 
-        elif self.__pidOfPersonMatchesPIDofAnyRole():
-            roleOfMain = [role for role in self.__record\
-                          if self.__record[role]['PID']==self.__pidOfMain][0]
-            self.__roleInterpreter = RoleInterpreter.forRole(roleOfMain)
-            self.__roleInterpreter.setRecordTo(self.__record)
-            print('l.38 awful (working) mess!!! record_interpreter')
+    def __init__(self,pidOfMain):
+        self.__pidOfMain = pidOfMain
+        
+    def interpret(self,record):
+        self.__record = record 
+        if self.__pidOfPersonMatchesPIDofAnyRole():
+            self.__setupRoleInterpreterForMainPID()
             return self.__collectRolesFromMatchingRecordForSummary()   
-        else: return {}    
+        else: return {} 
+    
+    def __setupRoleInterpreterForMainPID(self):
+        roleOfMain = self.__getRoleOfMainPID()
+        self.__setupRoleInterpreterForRole(roleOfMain)                 
+    
+    def __getRoleOfMainPID(self):
+        return [role for role in self.__record if self.__record[role]['PID']==self.__pidOfMain][0]
+    
+    def __setupRoleInterpreterForRole(self,role):
+        self.__roleInterpreter = RoleInterpreter.forRole(role)
+        self.__roleInterpreter.setRecordTo(self.__record)
     
     def __pidOfPersonMatchesPIDofAnyRole(self):
         return any([self.__record[role]['PID']==self.__pidOfMain for role in self.__record])
-        
-    def __pidOfPersonMatchesPIDofMainRole(self,pid):    
-        return self.__pidOfMain == pid
     
     def __collectRolesFromMatchingRecordForSummary(self):
-        return self.__roleInterpreter.getRelativeRolesInRecord(self.__rolesForSummary)     
-        
-    def __interpretRoleSpecificImplicitData(self):
-        for role in self.__record: 
-            self.__updateRecordForRole(role)
-    
-    def __updateRecordForRole(self,role):
-        if role in self.__roleSpecificImplicitData:
-            self.__record[role].update(self.__roleSpecificImplicitData[role])      
+        return self.__roleInterpreter.getRelativeRolesInRecord(self.__rolesForSummary)          
