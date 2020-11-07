@@ -1,11 +1,92 @@
-class LanguageTemplateSelector(object):
+from source.writer_templates import AllWriterTemplate,KeyWriterTemplate,SelectorWriterTemplate,WriterTemplate,ModifiedMapTemplate
+
+class LanguageTemplateCollections(object):
     @staticmethod
-    def getTemplateCollectionInLanguage(languageTag):
+    def getWithLanguageTag(languageTag):
         templateCollections = {'en':EnglishTemplateCollection(),
                                'nl':DutchTemplateCollection(),
                                'de':GermanTemplateCollection()}
         return templateCollections[languageTag]      
+
+class TemplateMaker(object):
+    @staticmethod
+    def makeFromDict(templateDict):
+        if not 'required' in templateDict:
+            if not 'map' in templateDict:
+                return AllWriterTemplate(templateDict)
+            else:
+                method = KeyModifiers.getWithName(templateDict['modifier'])
+                templateDict = {**templateDict,'modifier':method()}
+                return ModifiedMapTemplate(templateDict)
+        elif not 'template' in templateDict:
+            if not 'modifier' in templateDict:
+                return KeyWriterTemplate(templateDict)
+            else:
+                method = KeyModifiers.getWithName(templateDict['modifier'])
+                templateDict = {**templateDict,'modifier':method()}
+                return SelectorWriterTemplate(templateDict)
+        else:
+            return WriterTemplate(templateDict)        
+
+class KeyModifiers(object):
+    @staticmethod
+    def getWithName(modifierName):
+        return getattr(KeyModifiers(),modifierName)
+        
+    @staticmethod
+    def ordinalSelector():
+        def getLastDigit(x):
+            if x == '': return 0
+            else:       return int(x)%10
+        selectFirst  = lambda x: min(2,getLastDigit(x))
+        return selectFirst
     
+    @staticmethod
+    def toInt():
+        def toInt(x):
+            if x == '': return 0
+            else:       return int(x)
+        return toInt  
+    
+    @staticmethod
+    def primalListSelector():
+        return KeyModifiers.__listSelector(0)  
+    
+    @staticmethod
+    def secondaryListSelector():
+        return KeyModifiers.__listSelector(1)  
+    
+    @staticmethod
+    def __listSelector(index):
+        def listSelector(x):
+            if index < len(x): return x[index]
+            else:              return ''
+        return listSelector  
+    
+    @staticmethod
+    def lengthOneOrMore():
+        oneOrMore = lambda x: min(len(x),2)
+        return oneOrMore           
+        
+class TemplateQueue(object):
+    def __init__(self,templateQueueData):
+        self.__data = templateQueueData.copy()
+    
+    def setupTemplateCandidateFor(self,candidatePeople):
+        templateCandidate = self.__setupNextTemplateCandidateWith(candidatePeople)
+        if templateCandidate.isComplete() or self.__isEmpty(): 
+            return templateCandidate
+        else: 
+            return self.setupTemplateCandidateFor(candidatePeople)
+    
+    def __setupNextTemplateCandidateWith(self,candidatePeople):
+        templateCandidate = TemplateMaker.makeFromDict(self.__data.pop(0))    
+        templateCandidate.setPeopleTo(candidatePeople)
+        return templateCandidate         
+    
+    def __isEmpty(self):
+        return not bool(self.__data)   
+
 class GeneralTemplateCollection(object):
     _generalSpecifications = {'summary':[{'template':"""
 $sectionHeader(main)
@@ -27,48 +108,11 @@ $mainParagraph(main,father,mother)$lineBreak(main)$childListingIntro(main,spouse
                   """t.space()($boldGender(main))t.space()t.textPID(+PID)"""}],
       'boldGender':[{'required':['main'],'template':"""t.bold($gender(main))"""}],
       'gender':[{'required':['main'],'template':"""t.genderSymbol(+gender)"""}]}
-    @staticmethod
-    def ordinalSelector():
-        getLastDigit = lambda x: int(x)%10
-        selectFirst  = lambda x: min(2,getLastDigit(x))
-        return selectFirst
+    def __init__(self):
+        self.__dataDict = {**self._generalSpecifications,**self._languageSpecificSpecifications}
     
-    @staticmethod
-    def lengthOneOrMore():
-        oneOrMore = lambda x: min(len(x),2)
-        return oneOrMore
-    
-    @staticmethod
-    def primalListSelector():
-        return GeneralTemplateCollection.__listSelector(0)
-    
-    @staticmethod
-    def secondaryListSelector():
-        return GeneralTemplateCollection.__listSelector(1)
-    
-    @staticmethod
-    def toInt():
-        toInt = lambda x: int(x)
-        return toInt
-    
-    def initialize(self,templateDict):
-        if 'modifier' in templateDict:
-            method = self.__getPrivateMethodNamed(templateDict['modifier'])
-            return {**templateDict,'modifier':method()}
-        else: return templateDict
-    
-    def getTemplateCollectionWithName(self,name):
-        specifications = {**self._generalSpecifications,**self._languageSpecificSpecifications}
-        return specifications[name].copy()
-    
-    def __getPrivateMethodNamed(self,nameOfMethod):
-        return getattr(self,nameOfMethod)
-    
-    def __listSelector(index):
-        def listSelector(x):
-            if index < len(x): return x[index]
-            else:              return ''
-        return listSelector        
+    def setupTemplateQueueWithName(self,name):
+        return TemplateQueue(self.__dataDict[name])  
 
 class EnglishTemplateCollection(GeneralTemplateCollection):
     _languageSpecificSpecifications =\
@@ -86,13 +130,14 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
      'baptismOnly':[{'required':['main'],'template':""" was baptised $onTheDate(main)"""+\
                      """$beforeTheChurches(main) at $town(main)."""}],
      'onTheDate':[{'required':['main'],
-                   'template':"""on the $dayOrdinal(main) of $month(main) (+year)"""}],
+                   'template':"""on the $dayOrdinal(main) $tmp(main)"""}],
+     'tmp':[{'required':['main'],'template':"""of $month(+month) (+year)"""}],
      'dayOrdinal':[{'required':['main'],'key':'day','modifier':'ordinalSelector',
-                    'map':{1:'$dayst(main)',2:'$dayth(main)'}}],
+                    'map':{0:'$dayth(main)',1:'$dayst(main)',2:'$dayth(main)'}}],
      'dayth':[{'required':['main'],'template':"""(+day)t.superScript(th)"""}],
      'dayst':[{'required':['main'],'template':"""(+day)t.superScript(st)"""}],
-     'month':[{'required':['main'],'key':'month','modifier':'toInt',
-               'map':{2:'February',5:'May',6:'June',7:'July',9:'September',12:'December'}}],
+     'month':[{'modifier':'toInt','map':{0:'',2:'February',5:'May',6:'June',7:'July',
+                                         8:'August',9:'September',12:'December'}}],
      'child':[{'required':['main'],'key':'gender','map':{'m':'son','':'child'}}],
      'town':[{'template':"""Freren"""}],
      'beforeTheChurches':[{'required':['main'],'key':'denom','modifier':'primalListSelector',

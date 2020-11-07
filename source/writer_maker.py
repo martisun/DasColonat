@@ -1,58 +1,48 @@
 import re
 
 from source.writers import AllWriter,TemplaterWriter,ListingWriter
-from source.writer_templates import AllWriterTemplate,KeyWriterTemplate,SelectorWriterTemplate,WriterTemplate
-from source.language_template import LanguageTemplateSelector
+from source.language_template import LanguageTemplateCollections
 from source.pattern_parsers import PatternParser,TemplaterPatternParser
 
 class WriterMaker(object):
     @staticmethod
     def inLanguage(languageTag):
-        templateCollection = LanguageTemplateSelector.getTemplateCollectionInLanguage(languageTag)  
+        templateCollection = LanguageTemplateCollections.getWithLanguageTag(languageTag)  
         writerMaker = WriterMaker(templateCollection)
         return writerMaker
     
     def __init__(self,templateCollection):
         self.__templateCollection = templateCollection
     
-    def getTemplateWithNameAndInput(self,name,candidatePeople):
-        templateGroup     = self.__templateCollection.getTemplateCollectionWithName(name)
-        while len(templateGroup) > 0:
-            templateDict = self.__templateCollection.initialize(templateGroup.pop(0))
-            templateCandidate = self.__initializeTemplateFromInput(templateDict,candidatePeople)
-            if templateCandidate.isComplete(): break
-        return templateCandidate
-    
     def setTemplateCollectionTo(self,templateCollection):
         self.__templateCollection = templateCollection
     
-    def parse(self,templateText):
+    def getTemplateQueueWithName(self,name):
+        return self.__templateCollection.setupTemplateQueueWithName(name)
+    
+    def parse(self,templateText,tmp):
+        print('l.30 templateText:',templateText)
         specifications = re.findall('(\$(\w+)\(([\,\w]+)\))',templateText)
-        return [self.__initTemplaterWriterFrom(specification)\
-                for specification in specifications]  
-    
-    @staticmethod
-    def __initializeTemplateFromInput(templateDict,candidatePeople):
-        if not 'required' in templateDict:
-            templateCandidate = AllWriterTemplate()
-        elif not 'template' in templateDict:
-            if not 'modifier' in templateDict:
-                templateCandidate = KeyWriterTemplate()
-            else:
-                templateCandidate = SelectorWriterTemplate()
+        print('l.32 specifications:',specifications)
+        if len(specifications) > 0:
+            return [self.__initTemplaterWriterFrom(specification,tmp)\
+                    for specification in specifications]  
         else:
-            templateCandidate = WriterTemplate()
-        templateCandidate.setupWith(templateDict,candidatePeople)
-        return templateCandidate
+            specifications = re.findall('(\$(\w+)\(\+([\,\w]+)\))',templateText)
+            print('l.38 specifications:',specifications)
+            if len(specifications) > 0:
+                return [self.__initTemplaterWriterFrom(specifications[0],tmp)]
+            else: return []
     
-    def __initTemplaterWriterFrom(self,specification):
+    def __initTemplaterWriterFrom(self,specification,tmp):
         blank,name,arguments = specification
         arguments = arguments.split(',')
+        queue     = self.getTemplateQueueWithName(name)
         if len(arguments) == 1 and 'all' in arguments:
-            templaterWriter = AllWriter(blank,name)
+            templaterWriter = AllWriter(blank,queue)
         elif name == 'childrenListing':
             templaterWriter = ListingWriter()
         else:
-            templaterWriter = TemplaterWriter(blank,name,arguments)
+            templaterWriter = TemplaterWriter(blank,queue,arguments)
         templaterWriter.setMakerTo(self)
         return templaterWriter 

@@ -13,7 +13,7 @@ class WriterAdapter(object):
         
     def write(self,people):
         processedPeople = self.__makePersonReferencesOf(people)
-        summaryWriter = self.__writerMaker.parse(self.__templatePattern)[0]
+        summaryWriter = self.__writerMaker.parse(self.__templatePattern,'')[0]
         return summaryWriter.write(processedPeople)
     
     def __makePersonReferencesOf(self,people):

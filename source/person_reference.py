@@ -19,6 +19,7 @@ class PersonReference(object):
     
     def __setFromDict(self,inputDict):
         self.__inputDict = inputDict
+        self.data = inputDict
         
     def get(self,namesOfAttributes):
         if isinstance(namesOfAttributes,list):

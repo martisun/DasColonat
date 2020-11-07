@@ -16,7 +16,7 @@ class RecordInterpreterMaker(object):
         self.__record = self.__interpretRoleSpecificallyTheRecord(parsedRecord)
         self.__setPIDofMainIfUnset()        
     
-    def __getPIDOfRoleOfMain(self,record):
+    def __getPIDOfRoleOfMain(self):
         return self.__record[self.__roleOfMain]['PID']
     
     def __interpretRoleSpecificallyTheRecord(self,record):
