@@ -59,7 +59,7 @@ class ListingWriter(object):
         self.__writerMaker = writerMaker
     
     def writeIntoTemplateWith(self,superTemplate):
-        people = superTemplate.getPeople()
+        people = superTemplate.getData()
         if 'children' in people:
             blankReplacement  = self.childrenDescriptionsInListing(people['children'])
             blankReplacement  = '\n%s'%blankReplacement 
@@ -88,7 +88,7 @@ class ParameterReplacer(object):
     def doReplacementsTo(self,template,tmp):
         specifications = self.__extractSpecificationsFromTemplate(template)
         for blank,parameter in specifications:
-            people = template.getPeople()
+            people = template.getData()
             value  = people['main'].get(parameter) 
             template.replace(blank,value)   
             
@@ -113,7 +113,7 @@ class SimpleTemplaterCallReplacer(TemplaterCallReplacer):
             template.replace(blank,blankReplacement)  
     
     def __determineBlankReplacement(self,method,arguments,template):
-        people      = template.getPeople()
+        people      = template.getData()
         inputValues = self.__determineTemplaterMethod(arguments,people)
         return self._templater.evaluate(method,inputValues)
     
@@ -137,7 +137,7 @@ class BlankTemplaterCallReplacer(TemplaterCallReplacer):
     
     def doReplacementsTo(self,template,tmp):
         specifications   = self._extractSpecificationsFromTemplate(template)
-        argument = self.__parentWriter.write(template.getPeople())
+        argument = self.__parentWriter.write(template.getData())
         if specifications: 
             blank,method = specifications.pop()
             argument     = self._templater.evaluate(method,[argument])

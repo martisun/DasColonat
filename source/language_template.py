@@ -1,4 +1,5 @@
-from source.writer_templates import AllWriterTemplate,KeyWriterTemplate,SelectorWriterTemplate,WriterTemplate,ModifiedMapTemplate
+from source.writer_templates import WriterTemplate
+from source.data_selector import DataSelector
 
 class LanguageTemplateCollections(object):
     @staticmethod
@@ -9,24 +10,55 @@ class LanguageTemplateCollections(object):
         return templateCollections[languageTag]      
 
 class TemplateMaker(object):
-    @staticmethod
-    def makeFromDict(templateDict):
-        if not 'required' in templateDict:
-            if not 'map' in templateDict:
-                return AllWriterTemplate(templateDict)
-            else:
-                method = KeyModifiers.getWithName(templateDict['modifier'])
-                templateDict = {**templateDict,'modifier':method()}
-                return ModifiedMapTemplate(templateDict)
-        elif not 'template' in templateDict:
-            if not 'modifier' in templateDict:
-                return KeyWriterTemplate(templateDict)
-            else:
-                method = KeyModifiers.getWithName(templateDict['modifier'])
-                templateDict = {**templateDict,'modifier':method()}
-                return SelectorWriterTemplate(templateDict)
-        else:
-            return WriterTemplate(templateDict)        
+    def setupWith(self,templateDict,candidateData):
+        self.__dict = templateDict.copy()
+        self.__data = candidateData
+        self.__isComplete = True
+        self.__processInput()
+    
+    def isComplete(self):
+        return self.__isComplete                
+        
+    def getTemplate(self):
+        template = WriterTemplate(self.__dict['template'])
+        template.setDataTo(self.__data)
+        return template
+    
+    def __processInput(self):
+        self.__setModifierInDict()
+        self.__setTemplateInDict()
+        
+    def __setModifierInDict(self):
+        if self.__aModifierNeedsToBeSet(): self.__doSetModifier()
+    
+    def __aModifierNeedsToBeSet(self):
+        return 'modifier' in self.__dict    
+    
+    def __doSetModifier(self):
+        method = KeyModifiers.getWithName(self.__dict['modifier'])
+        self.__dict = {**self.__dict,'modifier':method()}
+    
+    def __setTemplateInDict(self):
+        if self.__dataNeedsToBeSelected(): self.__doDataSelection()
+        elif self.__aMappingIsNeeded():    self.__doMappingOfDataToTemplate()
+    
+    def __doDataSelection(self):
+        dataSelector = DataSelector(self.__dict)
+        dataSelector.select(self.__data)
+        self.__dict['template'] = dataSelector.getText()
+        self.__data = dataSelector.getSelected()
+        self.__isComplete = dataSelector.isComplete()        
+    
+    def __doMappingOfDataToTemplate(self):
+        key = self.__dict['modifier'](self.__data)
+        self.__dict['template'] = self.__dict['map'][key]
+    
+    def __dataNeedsToBeSelected(self):
+        return 'required' in self.__dict
+    
+    def __aMappingIsNeeded(self):
+        return 'map' in self.__dict
+    
 
 class KeyModifiers(object):
     @staticmethod
@@ -70,19 +102,15 @@ class KeyModifiers(object):
         
 class TemplateQueue(object):
     def __init__(self,templateQueueData):
-        self.__data = templateQueueData.copy()
+        self.__data  = templateQueueData.copy()
+        self.__maker = TemplateMaker() 
     
     def setupTemplateCandidateFor(self,candidatePeople):
-        templateCandidate = self.__setupNextTemplateCandidateWith(candidatePeople)
-        if templateCandidate.isComplete() or self.__isEmpty(): 
-            return templateCandidate
+        self.__maker.setupWith(self.__data.pop(0),candidatePeople)
+        if self.__maker.isComplete() or self.__isEmpty(): 
+            return self.__maker.getTemplate()
         else: 
-            return self.setupTemplateCandidateFor(candidatePeople)
-    
-    def __setupNextTemplateCandidateWith(self,candidatePeople):
-        templateCandidate = TemplateMaker.makeFromDict(self.__data.pop(0))    
-        templateCandidate.setPeopleTo(candidatePeople)
-        return templateCandidate         
+            return self.setupTemplateCandidateFor(candidatePeople)       
     
     def __isEmpty(self):
         return not bool(self.__data)   
