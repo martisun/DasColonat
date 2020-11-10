@@ -21,15 +21,12 @@ class WriterMaker(object):
         return self.__templateCollection.setupTemplateQueueWithName(name)
     
     def parse(self,templateText,tmp):
-        print('l.30 templateText:',templateText)
         specifications = re.findall('(\$(\w+)\(([\,\w]+)\))',templateText)
-        print('l.32 specifications:',specifications)
         if len(specifications) > 0:
             return [self.__initTemplaterWriterFrom(specification,tmp)\
                     for specification in specifications]  
         else:
             specifications = re.findall('(\$(\w+)\(\+([\,\w]+)\))',templateText)
-            print('l.38 specifications:',specifications)
             if len(specifications) > 0:
                 return [self.__initTemplaterWriterFrom(specifications[0],tmp)]
             else: return []

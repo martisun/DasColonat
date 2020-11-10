@@ -15,7 +15,6 @@ class Writer(object):
         self.__maker = maker
         
     def write(self,people):
-        print('l.18 writers: people:',people)
         template = self.__queue.setupTemplateCandidateFor(people)
         for replacer in self._replacers:
             replacer.doReplacementsTo(template,people)
@@ -36,9 +35,7 @@ class SelectiveWriter(AllWriter):
         self.__selector   = RoleSelector(arguments)
     
     def write(self,people):
-        print('l.38 people:',people)
         peopleCandidates = self.__selector.selectPeopleFrom(people)
-        print('l.40 people:',peopleCandidates)
         return super().write(peopleCandidates) 
     
 class TemplaterWriter(SelectiveWriter):    
@@ -80,7 +77,6 @@ class SubWriterReplacer(object):
         self.__parent = parentWriter    
     
     def doReplacementsTo(self,template,people):
-        print('l. 83 parent:',type(self.__parent),' ',people)
         for subWriter in self.__parent.parseTemplate(template,people):
             subWriter.writeIntoTemplateWith(template)           
 
@@ -155,8 +151,6 @@ class RoleSelector(object):
         
     def selectPeopleFrom(self,people):
         peopleCandidates = []
-        print('l.157 inputRoles:',self.__inputRoles)
-        print('l.159 people:',people)
         for inputRole in self.__inputRoles:
             if inputRole in people: peopleCandidates.append(people[inputRole])
             else:                   peopleCandidates

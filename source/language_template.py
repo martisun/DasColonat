@@ -1,6 +1,124 @@
-from source.writer_templates import WriterTemplate
-from source.data_selector import DataSelector
+import re
 
+from source.writer_templates import WriterTemplate
+from source.data_selector import DataSelector    
+
+class TemplateMaker(object):
+    def setupWith(self,templateSpecification,candidateData):
+        self.__spec = templateSpecification
+        self.__data = candidateData
+        self.__isComplete = True
+    
+    def isComplete(self):
+        return self.__isComplete                
+        
+    def getTemplate(self): 
+        template = WriterTemplate(self.__getTemplateText())
+        template.setDataTo(self.__data)
+        return template
+    
+    def __getTemplateText(self):
+        if self.__spec.hasDataSelection(): return self.__doDataSelection()
+        elif self.__spec.hasMappingDefined(): return self.__spec.mapData(self.__data)
+        else: return self.__spec.getTemplate()
+    
+    def __doDataSelection(self):
+        dataSelector = DataSelector(self.__spec)
+        self.__data  = dataSelector.select(self.__data)
+        self.__isComplete = dataSelector.isComplete() 
+        return dataSelector.getText()
+        
+class TemplateSpec(object):
+    def __init__(self,templateDict):
+        self.__dict = templateDict.copy()
+        self.__setModifierInDict()
+        
+    def getDict(self):
+        return self.__dict
+    
+    def setTemplateTo(self,value):
+        self.__dict['template'] = value
+    
+    def mapData(self,data):
+        key = self.__dict['modifier'](data)
+        return self.doMap(key)
+    
+    def doMap(self,key):
+        return self.__dict['map'][key]
+    
+    def getKeyForMapping(self):
+        return self.__dict['key']
+    
+    def getModifier(self):
+        return self.__dict['modifier']
+    
+    def getRequiredKeys(self):
+        return self.__dict['required']
+    
+    def getRequiredKeySpecifications(self):
+        return KeySpecification.parseList(self.__dict['required'])
+    
+    def getTemplate(self):
+        return self.__dict['template']
+    
+    def __setModifierInDict(self):
+        if self.aModifierNeedsToBeSet(): self.__doSetModifier()
+    
+    def __doSetModifier(self):
+        method = KeyModifiers.getWithName(self.__dict['modifier'])
+        self.__dict = {**self.__dict,'modifier':method()}
+    
+    def isKeyForMappingRequired(self):
+        return self.getKeyForMapping() in self.getRequiredKeys()
+    
+    def isTemplateDefined(self):
+        return 'template' in self.__dict
+    
+    def aModifierNeedsToBeSet(self):
+        return 'modifier' in self.__dict 
+    
+    def hasDataSelection(self):
+        return 'required' in self.__dict
+    
+    def hasMappingDefined(self):
+        return 'map' in self.__dict 
+        
+class TemplateQueue(object):
+    def __init__(self,templateQueueData):
+        self.__data  = templateQueueData.copy()
+        self.__maker = TemplateMaker() 
+    
+    def setupTemplateCandidateFor(self,candidateData):
+        self.__maker.setupWith(self.__getNext(),candidateData)
+        if self.__maker.isComplete() or self.__isEmpty(): 
+            return self.__maker.getTemplate()
+        else: 
+            return self.setupTemplateCandidateFor(candidateData)       
+    
+    def __getNext(self):
+        templateSpecificationData = self.__data.pop(0)
+        return TemplateSpec(templateSpecificationData)
+    
+    def __isEmpty(self):
+        return not bool(self.__data)   
+
+class KeySpecification(object):
+    __pattern = '(\w+)(.?)'
+    
+    @staticmethod
+    def parseList(parsableTextList):
+        return [KeySpecification.parse(parsableText) 
+                for parsableText in parsableTextList]
+    
+    @staticmethod
+    def parse(parsableText):
+        key,tag = re.findall(KeySpecification.__pattern,parsableText)[0]
+        return KeySpecification(key,tag)
+    
+    def __init__(self,key,tag):
+        self.key = key
+        self.tag = tag    
+    
 class LanguageTemplateCollections(object):
     @staticmethod
     def getWithLanguageTag(languageTag):
@@ -9,111 +127,6 @@ class LanguageTemplateCollections(object):
                                'de':GermanTemplateCollection()}
         return templateCollections[languageTag]      
 
-class TemplateMaker(object):
-    def setupWith(self,templateDict,candidateData):
-        self.__dict = templateDict.copy()
-        self.__data = candidateData
-        self.__isComplete = True
-        self.__processInput()
-    
-    def isComplete(self):
-        return self.__isComplete                
-        
-    def getTemplate(self):
-        template = WriterTemplate(self.__dict['template'])
-        template.setDataTo(self.__data)
-        return template
-    
-    def __processInput(self):
-        self.__setModifierInDict()
-        self.__setTemplateInDict()
-        
-    def __setModifierInDict(self):
-        if self.__aModifierNeedsToBeSet(): self.__doSetModifier()
-    
-    def __aModifierNeedsToBeSet(self):
-        return 'modifier' in self.__dict    
-    
-    def __doSetModifier(self):
-        method = KeyModifiers.getWithName(self.__dict['modifier'])
-        self.__dict = {**self.__dict,'modifier':method()}
-    
-    def __setTemplateInDict(self):
-        if self.__dataNeedsToBeSelected(): self.__doDataSelection()
-        elif self.__aMappingIsNeeded():    self.__doMappingOfDataToTemplate()
-    
-    def __doDataSelection(self):
-        dataSelector = DataSelector(self.__dict)
-        dataSelector.select(self.__data)
-        self.__dict['template'] = dataSelector.getText()
-        self.__data = dataSelector.getSelected()
-        self.__isComplete = dataSelector.isComplete()        
-    
-    def __doMappingOfDataToTemplate(self):
-        key = self.__dict['modifier'](self.__data)
-        self.__dict['template'] = self.__dict['map'][key]
-    
-    def __dataNeedsToBeSelected(self):
-        return 'required' in self.__dict
-    
-    def __aMappingIsNeeded(self):
-        return 'map' in self.__dict
-    
-
-class KeyModifiers(object):
-    @staticmethod
-    def getWithName(modifierName):
-        return getattr(KeyModifiers(),modifierName)
-        
-    @staticmethod
-    def ordinalSelector():
-        def getLastDigit(x):
-            if x == '': return 0
-            else:       return int(x)%10
-        selectFirst  = lambda x: min(2,getLastDigit(x))
-        return selectFirst
-    
-    @staticmethod
-    def toInt():
-        def toInt(x):
-            if x == '': return 0
-            else:       return int(x)
-        return toInt  
-    
-    @staticmethod
-    def primalListSelector():
-        return KeyModifiers.__listSelector(0)  
-    
-    @staticmethod
-    def secondaryListSelector():
-        return KeyModifiers.__listSelector(1)  
-    
-    @staticmethod
-    def __listSelector(index):
-        def listSelector(x):
-            if index < len(x): return x[index]
-            else:              return ''
-        return listSelector  
-    
-    @staticmethod
-    def lengthOneOrMore():
-        oneOrMore = lambda x: min(len(x),2)
-        return oneOrMore           
-        
-class TemplateQueue(object):
-    def __init__(self,templateQueueData):
-        self.__data  = templateQueueData.copy()
-        self.__maker = TemplateMaker() 
-    
-    def setupTemplateCandidateFor(self,candidatePeople):
-        self.__maker.setupWith(self.__data.pop(0),candidatePeople)
-        if self.__maker.isComplete() or self.__isEmpty(): 
-            return self.__maker.getTemplate()
-        else: 
-            return self.setupTemplateCandidateFor(candidatePeople)       
-    
-    def __isEmpty(self):
-        return not bool(self.__data)   
 
 class GeneralTemplateCollection(object):
     _generalSpecifications = {'summary':[{'template':"""
@@ -144,11 +157,11 @@ $mainParagraph(main,father,mother)$lineBreak(main)$childListingIntro(main,spouse
 
 class EnglishTemplateCollection(GeneralTemplateCollection):
     _languageSpecificSpecifications =\
-    {'mainParagraph':[{'required':['main*','father','mother'],
+    {'mainParagraph':[{'required':['main','father','mother'],
+                       'template':"""$nameWithPIDInText(main) is a $child(main) of $nameWithPIDInText(father) and $nameWithPIDInText(mother)."""},
+                      {'required':['main*','father','mother'],
                        'template':"""$nameWithPIDInText(main)"""+\
     """, son of $nameWithPIDInText(father) and $nameWithPIDInText(mother),$baptismOnly(main)"""},
-                      {'required':['main','father','mother'],
-                       'template':"""$nameWithPIDInText(main) is a $child(main) of $nameWithPIDInText(father) and $nameWithPIDInText(mother)."""},
                       {'required':['main*'],'template':"""$nameWithPIDInText(main)$baptismOnly(main)"""}],
      'childListingIntro':[{'required':['father','mother','children'],'key':'children',
                            'modifier':'lengthOneOrMore',
@@ -202,3 +215,44 @@ class GermanTemplateCollection(GeneralTemplateCollection):
      'month':[{'required':['main'],'key':'month',
                'map':{2:'Februar',5:'Mai',6:'Juni',7:'Juli',12:'Dezember'}}],
      'child':[{'required':['main'],'key':'gender','map':{'m':'Sohn','':'Kind'}}]}
+    
+
+class KeyModifiers(object):
+    @staticmethod
+    def getWithName(modifierName):
+        return getattr(KeyModifiers(),modifierName)
+        
+    @staticmethod
+    def ordinalSelector():
+        def getLastDigit(x):
+            if x == '': return 0
+            else:       return int(x)%10
+        selectFirst  = lambda x: min(2,getLastDigit(x))
+        return selectFirst
+    
+    @staticmethod
+    def toInt():
+        def toInt(x):
+            if x == '': return 0
+            else:       return int(x)
+        return toInt  
+    
+    @staticmethod
+    def primalListSelector():
+        return KeyModifiers.__listSelector(0)  
+    
+    @staticmethod
+    def secondaryListSelector():
+        return KeyModifiers.__listSelector(1)  
+    
+    @staticmethod
+    def __listSelector(index):
+        def listSelector(x):
+            if index < len(x): return x[index]
+            else:              return ''
+        return listSelector  
+    
+    @staticmethod
+    def lengthOneOrMore():
+        oneOrMore = lambda x: min(len(x),2)
+        return oneOrMore        
