@@ -23,7 +23,7 @@ class TemplateMaker(object):
         else: return self.__spec.getTemplate()
     
     def __doDataSelection(self):
-        dataSelector = DataSelector(self.__spec)
+        dataSelector = DataSelector.createFor(self.__spec)
         self.__data  = dataSelector.select(self.__data)
         self.__isComplete = dataSelector.isComplete() 
         return dataSelector.getText()

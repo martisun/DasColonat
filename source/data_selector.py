@@ -1,62 +1,84 @@
-# add children from if-statements
-
-
 class DataSelector(object):    
+    @staticmethod
+    def createFor(requiredKeySpecifications):
+        if requiredKeySpecifications.isTemplateDefined():
+            return DataSelector(requiredKeySpecifications)
+        else:
+            return DataSelectorForMapping.createFor(requiredKeySpecifications)
+    
     def __init__(self,requiredKeySpecifications):
-        self.__spec = requiredKeySpecifications
-        self.__required = self.__spec.getRequiredKeySpecifications()
-        self.__selected = {}
+        self._spec = requiredKeySpecifications
+        self._required = self._spec.getRequiredKeySpecifications()
+        self._selected = {}
     
     def isComplete(self):
-        return len(self.__required) == len(self.__selected) 
+        return len(self._required) == len(self._selected) 
     
     def select(self,candidateData):
         candidateData = candidateData.copy()
-        for keySpecification in self.__required:
+        for keySpecification in self._required:
             if not candidateData: break
             self.__selectElementForSpecification(candidateData.pop(0),keySpecification) 
-        return self.__selected
+        return self._selected
     
     def __selectElementForSpecification(self,dataElement,keySpecification):
         if isinstance(dataElement,list) or dataElement.isSuitableGivenTag(keySpecification.tag):
-            self.__selected.update({keySpecification.key:dataElement})     
+            self._selected.update({keySpecification.key:dataElement})     
     
     def getText(self):
-        if self.isComplete(): return self.__determineTemplate()            
+        if self.isComplete(): return self._determineTemplate()       
         else:                 return ''
-    
-    def __determineTemplate(self):
-        if self.__spec.isTemplateDefined():
-            return self.__spec.getTemplate()
+        
+    def _determineTemplate(self):
+        return self._spec.getTemplate()        
+
+class DataSelectorForMapping(DataSelector):
+    @staticmethod
+    def createFor(requiredKeySpecifications):
+        if requiredKeySpecifications.aModifierNeedsToBeSet():
+            return DataSelectorForModifiedMapping.createFor(requiredKeySpecifications)
         else:
-            return self.__determineTemplateGivenMapping()
+            return DataSelectorForMapping(requiredKeySpecifications)
     
-    def __determineTemplateGivenMapping(self):
-        if self.__spec.aModifierNeedsToBeSet():
-            return self.__determineTemplateGivenSelector()
-        else:
-            return self.__determineTemplateFromPrimaryDataKey()
-    
-    def __determineTemplateGivenSelector(self):
-        keyValueForSelector = self.__determineKeyValueForSelector()
-        return self.__spec.mapData(keyValueForSelector)
-    
-    def __determineTemplateFromPrimaryDataKey(self):
+    def _determineTemplate(self):
         keyValueForMapping = self.__getValueFromPrimaryDataKey()
-        return self.__spec.doMap(keyValueForMapping)
-    
-    def __determineKeyValueForSelector(self):
-        if self.__spec.isKeyForMappingRequired(): 
-            keyForMapping = self.__spec.getKeyForMapping()
-            return self.__selected[keyForMapping]
-        else:
-            return self.__getValueFromPrimaryDataKey()
+        return self._spec.doMap(keyValueForMapping)
     
     def __getValueFromPrimaryDataKey(self):
         primaryRequiredData = self.__getPrimaryData()
-        keyForMapping = self.__spec.getKeyForMapping()
+        keyForMapping = self._spec.getKeyForMapping()
         return primaryRequiredData.get(keyForMapping)
     
     def __getPrimaryData(self):
-        primaryRequiredKey = self.__required[0].key
-        return self.__selected[primaryRequiredKey]
+        primaryRequiredKey = self._required[0].key
+        return self._selected[primaryRequiredKey]
+    
+class DataSelectorForModifiedMapping(DataSelectorForMapping):
+    @staticmethod
+    def createFor(requiredKeySpecifications):
+        if requiredKeySpecifications.isKeyForMappingRequired():
+            return DataSelectorForModifiedMapping(requiredKeySpecifications)
+        else:
+            return DataSelectorForModifiedMappingOfPrimary(requiredKeySpecifications)
+    
+    def _determineTemplate(self):
+        keyValueForSelector = self.__determineKeyValueForSelector()
+        return self._spec.mapData(keyValueForSelector)
+    
+    def __determineKeyValueForSelector(self):
+        keyForMapping = self._spec.getKeyForMapping()
+        return self._selected[keyForMapping]
+    
+class DataSelectorForModifiedMappingOfPrimary(DataSelectorForModifiedMapping):
+    def _determineTemplate(self):
+        keyValueForSelector = self.__determineKeyValueForSelector()
+        return self._spec.mapData(keyValueForSelector)
+    
+    def __determineKeyValueForSelector(self):
+        primaryRequiredData = self.__getPrimaryData()
+        keyForMapping = self._spec.getKeyForMapping()
+        return primaryRequiredData.get(keyForMapping)
+    
+    def __getPrimaryData(self):
+        primaryRequiredKey = self._required[0].key
+        return self._selected[primaryRequiredKey]
