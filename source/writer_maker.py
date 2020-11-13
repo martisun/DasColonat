@@ -38,7 +38,7 @@ class WriterMaker(object):
         if len(arguments) == 1 and 'all' in arguments:
             templaterWriter = AllWriter(blank,queue)
         elif name == 'childrenListing':
-            templaterWriter = ListingWriter()
+            templaterWriter = ListingWriter(blank,queue,arguments)
         else:
             templaterWriter = TemplaterWriter(blank,queue,arguments)
         templaterWriter.setMakerTo(self)

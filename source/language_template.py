@@ -89,18 +89,21 @@ class TemplateQueue(object):
         self.__maker = TemplateMaker() 
     
     def setupTemplateCandidateFor(self,candidateData):
-        self.__maker.setupWith(self.__getNext(),candidateData)
-        if self.__maker.isComplete() or self.__isEmpty(): 
+        return self.__setupTemplateCandidateRecursively(self.__data.copy(),candidateData)
+        
+    def __setupTemplateCandidateRecursively(self,queueData,candidateData):    
+        self.__maker.setupWith(self.__getNext(queueData),candidateData)
+        if self.__maker.isComplete() or self.__isQueueEmpty(queueData): 
             return self.__maker.getTemplate()
         else: 
-            return self.setupTemplateCandidateFor(candidateData)       
+            return self.__setupTemplateCandidateRecursively(queueData,candidateData)       
     
-    def __getNext(self):
-        templateSpecificationData = self.__data.pop(0)
+    def __getNext(self,data):
+        templateSpecificationData = data.pop(0)
         return TemplateSpec(templateSpecificationData)
     
-    def __isEmpty(self):
-        return not bool(self.__data)   
+    def __isQueueEmpty(self,queueData):
+        return not bool(queueData)
 
 class KeySpecification(object):
     __pattern = '(\w+)(.?)'
@@ -140,7 +143,7 @@ $mainParagraph(main,father,mother)$lineBreak(main)$childListingIntro(main,spouse
     'sectionTitle':[{'required':['main'],
                      'template':"""t.titlePID(+PID)t.nameInTitle(+foreNames,+lastName)"""+\
     """t.space()t.genderSymbol(+gender)"""}],     
-     'childrenListing':[{'template':""" ... childrenListing ... """}],                              
+     'childrenListing':[{'template':"""$childDescription(main)"""}],                              
      'childDescription':[{'required':['main'],'template':"""$firstNameWithPIDAndGender"""+\
                           """(main)$baptismOnly(main)"""}],
      'nameWithPIDInText':[{'required':['main'],'template':"""(+foreNames)t.space(+lastName)"""+\
@@ -157,11 +160,10 @@ $mainParagraph(main,father,mother)$lineBreak(main)$childListingIntro(main,spouse
 
 class EnglishTemplateCollection(GeneralTemplateCollection):
     _languageSpecificSpecifications =\
-    {'mainParagraph':[{'required':['main','father','mother'],
-                       'template':"""$nameWithPIDInText(main) is a $child(main) of $nameWithPIDInText(father) and $nameWithPIDInText(mother)."""},
-                      {'required':['main*','father','mother'],
+    {'mainParagraph':[{'required':['main*','father','mother'],
                        'template':"""$nameWithPIDInText(main)"""+\
-    """, son of $nameWithPIDInText(father) and $nameWithPIDInText(mother),$baptismOnly(main)"""},
+    """, son of $nameWithPIDInText(father) and $nameWithPIDInText(mother),$baptismOnly(main)"""},{'required':['main','father','mother'],
+                       'template':"""$nameWithPIDInText(main) is a $child(main) of $nameWithPIDInText(father) and $nameWithPIDInText(mother)."""},
                       {'required':['main*'],'template':"""$nameWithPIDInText(main)$baptismOnly(main)"""}],
      'childListingIntro':[{'required':['father','mother','children'],'key':'children',
                            'modifier':'lengthOneOrMore',

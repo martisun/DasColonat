@@ -25,13 +25,13 @@ class Writer(object):
         superTemplate.replace(self._blank,blankReplacement)     
             
 class AllWriter(Writer):
-    def __init__(self,blank,name):
-        super().__init__(blank,name)
+    def __init__(self,blank,queue):
+        super().__init__(blank,queue)
         self._replacers = [SubWriterReplacer(self),ParameterReplacer()]        
         
 class SelectiveWriter(AllWriter):      
-    def __init__(self,blank,name,arguments):
-        super().__init__(blank,name)
+    def __init__(self,blank,queue,arguments):
+        super().__init__(blank,queue)
         self.__selector   = RoleSelector(arguments)
     
     def write(self,people):
@@ -49,28 +49,32 @@ class TemplaterWriter(SelectiveWriter):
         self.__blankReplacer.doReplacementsTo(superTemplate,{})     
 
 class ListingWriter(object):    
-    def __init__(self):
-        self.__templater = LatexTemplater()       
+    def __init__(self,blank,queue,arguments):
+        self.__templater = LatexTemplater()
+        self.__blank     = blank
+        self.__queue     = queue
+        self.__argument = arguments[0]
     
     def setMakerTo(self,writerMaker):
         self.__writerMaker = writerMaker
     
     def writeIntoTemplateWith(self,superTemplate):
         people = superTemplate.getData()
-        if 'children' in people:
-            blankReplacement  = self.childrenDescriptionsInListing(people['children'])
+        if self.__argument in people:
+            blankReplacement  = self.subWriterInListing(people[self.__argument])
             blankReplacement  = '\n%s'%blankReplacement 
         else:
             blankReplacement = ''
-        superTemplate.replace('$childrenListing(children)',blankReplacement)
+        superTemplate.replace(self.__blank,blankReplacement)
     
-    def childrenDescriptionsInListing(self,children):
-        childrenListing = [self.__compileChildDescriptionInListingOf(child) for child in children]
-        return self.__templater.compileListingOf(childrenListing)
+    def subWriterInListing(self,people):
+        listingTexts = [self.__compileListingElementOf(person) for person in people]
+        return self.__templater.compileListingOf(listingTexts)
 
-    def __compileChildDescriptionInListingOf(self,child):  
-        childDescriptionWriter = self.__writerMaker.parse('$childDescription(main)','')[0]
-        return childDescriptionWriter.write({'main':child})        
+    def __compileListingElementOf(self,person):
+        template = self.__queue.setupTemplateCandidateFor(person)
+        subWriter = self.__writerMaker.parse(template.getText(),'')[0]
+        return subWriter.write({'main':person})        
         
 class SubWriterReplacer(object):  
     def __init__(self,parentWriter):
@@ -135,11 +139,14 @@ class BlankTemplaterCallReplacer(TemplaterCallReplacer):
         specifications   = self._extractSpecificationsFromTemplate(template)
         argument = self.__parentWriter.write(template.getData())
         if specifications: 
-            blank,method = specifications.pop()
-            argument     = self._templater.evaluate(method,[argument])
-            template.replace(blank,argument) 
+            self.__replaceSpecificationsInTemplate(template,specifications,argument)
         else: 
             template.replaceBlankBy(argument)       
+    
+    def __replaceSpecificationsInTemplate(self,template,specifications,argument):
+        blank,method = specifications.pop()
+        argument     = self._templater.evaluate(method,[argument])
+        template.replace(blank,argument)
     
     def _extractSpecificationsFromTemplate(self,template):
         blankArgument = re.escape(template.blankArgument)
@@ -150,10 +157,18 @@ class RoleSelector(object):
         self.__inputRoles = roles
         
     def selectPeopleFrom(self,people):
-        peopleCandidates = []
-        for inputRole in self.__inputRoles:
-            if inputRole in people: peopleCandidates.append(people[inputRole])
-            else:                   peopleCandidates
-        if len(peopleCandidates) == 0 and len(self.__inputRoles) == 1:
-            if self.__inputRoles[0] in people['main'].data: return people['main'].data[self.__inputRoles[0]]
-        return peopleCandidates                         
+        peopleCandidates = self.__selectPeopleAtSameLevel(people)
+        if not peopleCandidates and self.__inputRoles:
+            return self.__selectDataAtSubLevel(people)
+        return peopleCandidates
+    
+    def __selectPeopleAtSameLevel(self,people):
+        return [people[inputRole] for inputRole in self.__inputRoles if inputRole in people]
+    
+    def __selectDataAtSubLevel(self,people):
+        return people['main'].data[self.__inputRoles[0]]
+        
+    
+    
+    
+        
