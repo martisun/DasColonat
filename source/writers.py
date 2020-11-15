@@ -89,6 +89,7 @@ class ParameterReplacer(object):
         specifications = self.__extractSpecificationsFromTemplate(template)
         for blank,parameter in specifications:
             people = template.getData()
+            print('writers.py l.92 parameter:',parameter)
             value  = people['main'].get(parameter) 
             template.replace(blank,value)   
             

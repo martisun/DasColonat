@@ -1,32 +1,6 @@
 import re
 
-from source.writer_templates import WriterTemplate
-from source.data_selector import DataSelector    
-
-class TemplateMaker(object):
-    def setupWith(self,templateSpecification,candidateData):
-        self.__spec = templateSpecification
-        self.__data = candidateData
-        self.__isComplete = True
-    
-    def isComplete(self):
-        return self.__isComplete                
-        
-    def getTemplate(self): 
-        template = WriterTemplate(self.__getTemplateText())
-        template.setDataTo(self.__data)
-        return template
-    
-    def __getTemplateText(self):
-        if self.__spec.hasDataSelection(): return self.__doDataSelection()
-        elif self.__spec.hasMappingDefined(): return self.__spec.mapData(self.__data)
-        else: return self.__spec.getTemplate()
-    
-    def __doDataSelection(self):
-        dataSelector = DataSelector.createFor(self.__spec)
-        self.__data  = dataSelector.select(self.__data)
-        self.__isComplete = dataSelector.isComplete() 
-        return dataSelector.getText()
+from source.template_maker import TemplateMaker
         
 class TemplateSpec(object):
     def __init__(self,templateDict):
@@ -82,19 +56,23 @@ class TemplateSpec(object):
     
     def hasMappingDefined(self):
         return 'map' in self.__dict 
+    
+    def __repr__(self):
+        return 'TemplateSpec[%s]'%(str(self.__dict))
         
 class TemplateQueue(object):
     def __init__(self,templateQueueData):
-        self.__data  = templateQueueData.copy()
-        self.__maker = TemplateMaker() 
+        self.__queueData  = templateQueueData.copy()
+        self.__maker      = TemplateMaker()
     
     def setupTemplateCandidateFor(self,candidateData):
-        return self.__setupTemplateCandidateRecursively(self.__data.copy(),candidateData)
+        return self.__setupTemplateCandidateRecursively(self.__queueData.copy(),candidateData)
         
-    def __setupTemplateCandidateRecursively(self,queueData,candidateData):    
-        self.__maker.setupWith(self.__getNext(queueData),candidateData)
-        if self.__maker.isComplete() or self.__isQueueEmpty(queueData): 
-            return self.__maker.getTemplate()
+    def __setupTemplateCandidateRecursively(self,queueData,candidateData): 
+        writerTemplateMaker = self.__maker.getWriterTemplateMakerFor(self.__getNext(queueData))
+        writerTemplateMaker.select(candidateData)
+        if writerTemplateMaker.isComplete() or self.__isQueueEmpty(queueData): 
+            return writerTemplateMaker.getWriterTemplate()
         else: 
             return self.__setupTemplateCandidateRecursively(queueData,candidateData)       
     
@@ -120,7 +98,12 @@ class KeySpecification(object):
     
     def __init__(self,key,tag):
         self.key = key
-        self.tag = tag    
+        self.tag = tag
+        
+    def __repr__(self):
+        if self.tag == '': tagRepr = 'EMPTY'
+        else:              tagRepr = self.tag
+        return 'KeySpecification[key=%s,tag=%s]'%(self.key,tagRepr)
     
 class LanguageTemplateCollections(object):
     @staticmethod
@@ -179,6 +162,8 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
                     'map':{0:'$dayth(main)',1:'$dayst(main)',2:'$dayth(main)'}}],
      'dayth':[{'required':['main'],'template':"""(+day)t.superScript(th)"""}],
      'dayst':[{'required':['main'],'template':"""(+day)t.superScript(st)"""}],
+     'dayOrdinalTEST':[{'required':['main'],'template':"""(+day)$daystTEST(+day)"""}],
+     'daystTEST':[{'template':"""t.superScript(st)"""}],
      'month':[{'modifier':'toInt','map':{0:'',2:'February',5:'May',6:'June',7:'July',
                                          8:'August',9:'September',12:'December'}}],
      'child':[{'required':['main'],'key':'gender','map':{'m':'son','':'child'}}],
