@@ -41,3 +41,6 @@ class PersonReference(object):
     def isSuitableGivenTag(self,tag):
         return (tag == '*' and self.isMoreThanReference()) or tag != '*'
     
+    def __repr__(self):
+        return 'PersonReference[%s]'%(str(self.__inputDict))
+    

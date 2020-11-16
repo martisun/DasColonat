@@ -162,7 +162,7 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
                     'map':{0:'$dayth(main)',1:'$dayst(main)',2:'$dayth(main)'}}],
      'dayth':[{'required':['main'],'template':"""(+day)t.superScript(th)"""}],
      'dayst':[{'required':['main'],'template':"""(+day)t.superScript(st)"""}],
-     'dayOrdinalTEST':[{'required':['main'],'template':"""(+day)$daystTEST(+day)"""}],
+     'dayOrdinalTEST':[{'required':['+day'],'template':"""(+day)$daystTEST(+day)"""}],
      'daystTEST':[{'template':"""t.superScript(st)"""}],
      'month':[{'modifier':'toInt','map':{0:'',2:'February',5:'May',6:'June',7:'July',
                                          8:'August',9:'September',12:'December'}}],

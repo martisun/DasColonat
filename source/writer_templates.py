@@ -23,3 +23,6 @@ class WriterTemplate(object):
     
     def setDataTo(self,data):
         self._selected = data
+        
+    def __repr__(self):
+        return 'WriterTemplate[text=%s,data=%s]'%(self.__text,self._selected.keys())

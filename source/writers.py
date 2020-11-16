@@ -17,7 +17,7 @@ class Writer(object):
     def write(self,people):
         template = self.__queue.setupTemplateCandidateFor(people)
         for replacer in self._replacers:
-            replacer.doReplacementsTo(template,people)
+            replacer.doReplacementsTo(template)
         return LatexTemplater.replaceSpecialCharacters(template.getText())   
     
     def writeIntoTemplateWith(self,superTemplate):
@@ -46,7 +46,7 @@ class TemplaterWriter(SelectiveWriter):
         
     def writeIntoTemplateWith(self,superTemplate):
         superTemplate.replaceByBlank(self._blank)
-        self.__blankReplacer.doReplacementsTo(superTemplate,{})     
+        self.__blankReplacer.doReplacementsTo(superTemplate)     
 
 class ListingWriter(object):    
     def __init__(self,blank,queue,arguments):
@@ -80,17 +80,23 @@ class SubWriterReplacer(object):
     def __init__(self,parentWriter):
         self.__parent = parentWriter    
     
-    def doReplacementsTo(self,template,people):
+    def doReplacementsTo(self,template):
+        people = template.getData()
         for subWriter in self.__parent.parseTemplate(template,people):
             subWriter.writeIntoTemplateWith(template)           
 
 class ParameterReplacer(object):
-    def doReplacementsTo(self,template,tmp):
+    def doReplacementsTo(self,template):
         specifications = self.__extractSpecificationsFromTemplate(template)
         for blank,parameter in specifications:
             people = template.getData()
             print('writers.py l.92 parameter:',parameter)
-            value  = people['main'].get(parameter) 
+            print('.. template:',template)
+            print('.. people.get(day):',people)
+            if 'main' in people:
+                value = people['main'].get(parameter)
+            else:
+                value = people['day'].get('day')
             template.replace(blank,value)   
             
     @staticmethod
@@ -107,7 +113,7 @@ class TemplaterCallReplacer(object):
         return re.findall('(t\.(\w+)\(%s\))'%argumentPattern,arguments)          
     
 class SimpleTemplaterCallReplacer(TemplaterCallReplacer):    
-    def doReplacementsTo(self,template,tmp):
+    def doReplacementsTo(self,template):
         specifications = self._extractSpecificationsFromTemplate(template)
         for blank,method,arguments in specifications:
             blankReplacement = self.__determineBlankReplacement(method,arguments,template) 
@@ -136,7 +142,7 @@ class BlankTemplaterCallReplacer(TemplaterCallReplacer):
         super().__init__()
         self.__parentWriter = parentWriter
     
-    def doReplacementsTo(self,template,tmp):
+    def doReplacementsTo(self,template):
         specifications   = self._extractSpecificationsFromTemplate(template)
         argument = self.__parentWriter.write(template.getData())
         if specifications: 
