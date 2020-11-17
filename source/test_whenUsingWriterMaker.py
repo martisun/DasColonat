@@ -18,10 +18,24 @@ class whenUsingWriterMaker(ExtendedTestCase):
     def test_whenWritingDayWithOnlyDayAsAttribute(self):
         """Tests whether a template is accessible with a person
         attribute."""
-        peopleDataDict = {'main':{'day':'1'}}
-        expectedOutput = '1\supscr{st}'
-        summaryWriter = WriterAdapter.forTemplatePattern('$dayOrdinalTEST(main)')
+        self.__doTestWhenWritingDayWithOnlyDayAsAttribute(1,'st') 
+        
+    def test_whenWritingDayWithOnlyDayZeroAsAttribute(self):
+        """Tests whether a template is accessible with a person
+        attribute."""
+        self.__doTestWhenWritingDayWithOnlyDayAsAttribute(0,'th') 
+        
+    def test_whenWritingDayWithOnlyDayFourAsAttribute(self):
+        """Tests whether a template is accessible with a person
+        attribute."""
+        self.__doTestWhenWritingDayWithOnlyDayAsAttribute(4,'th')
+        
+    def __doTestWhenWritingDayWithOnlyDayAsAttribute(self,day,ordinal):
+        peopleDataDict = {'main':{'day':day}}
+        expectedOutput = '%d\supscr{%s}'%(day,ordinal)
+        summaryWriter = WriterAdapter.forTemplatePattern('$dayOrdinal(+day)')
         writerMaker  = WriterMaker.inLanguage('en')
         summaryWriter.setMakerTo(writerMaker)
         actualOutput = summaryWriter.write(peopleDataDict)
         self._assertActualEqualsExpected(actualOutput,expectedOutput)
+        

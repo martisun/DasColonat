@@ -16,9 +16,15 @@ class Writer(object):
         
     def write(self,people):
         template = self.__queue.setupTemplateCandidateFor(people)
+        print('l.19 people:',people)
+        print('.. template.getText():',template.getText())
         for replacer in self._replacers:
             replacer.doReplacementsTo(template)
-        return LatexTemplater.replaceSpecialCharacters(template.getText())   
+            print('l.21 use ',type(replacer))
+            print('.. template.getText():',template.getText())
+        tmp = template.getText()
+        tmp = tmp.replace('(day)',str(people))
+        return LatexTemplater.replaceSpecialCharacters(tmp)   
     
     def writeIntoTemplateWith(self,superTemplate):
         blankReplacement  = self.write(superTemplate.getPeople()) 
@@ -90,13 +96,7 @@ class ParameterReplacer(object):
         specifications = self.__extractSpecificationsFromTemplate(template)
         for blank,parameter in specifications:
             people = template.getData()
-            print('writers.py l.92 parameter:',parameter)
-            print('.. template:',template)
-            print('.. people.get(day):',people)
-            if 'main' in people:
-                value = people['main'].get(parameter)
-            else:
-                value = people['day'].get('day')
+            value = people['main'].get(parameter)
             template.replace(blank,value)   
             
     @staticmethod
@@ -173,6 +173,8 @@ class RoleSelector(object):
         return [people[inputRole] for inputRole in self.__inputRoles if inputRole in people]
     
     def __selectDataAtSubLevel(self,people):
+        print('l.170 people:',people)
+        print('... self.__inputRoles:',self.__inputRoles)
         return people['main'].data[self.__inputRoles[0]]
         
     

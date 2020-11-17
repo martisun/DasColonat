@@ -52,7 +52,11 @@ class TrivialWriterTemplateMaker(object):
         
 class MappingWriterTemplateMaker(TrivialWriterTemplateMaker):
     def select(self,candidateData):
-        self.__text = self._spec.mapData(candidateData)
+        print('l.55 candidateData:',candidateData)
+        print('.. spec:',self._spec)
+        if isinstance(candidateData,list): 
+            self.__text = self._spec.mapData(candidateData[0])
+        else: self.__text = self._spec.mapData(candidateData)
         self._selected = candidateData
     
     def _getTemplateText(self):
@@ -72,10 +76,13 @@ class SelectiveWriterTemplateMaker(object):
         print('... self._spec:',self._spec)
         print('... self._required:',self._required)
         if not isinstance(candidateData,int) and not isinstance(candidateData,str):
-            candidateData = candidateData.copy()    
+            candidateData = candidateData.copy() 
         for keySpecification in self._required:
-            if not candidateData: break
-            self.__selectElementForSpecification(candidateData.pop(0),keySpecification) 
+            if isinstance(candidateData,list) and not candidateData: break
+            if not isinstance(candidateData,int) and not isinstance(candidateData,str):
+                self.__selectElementForSpecification(candidateData.pop(0),keySpecification) 
+            else:
+                self._selected.update({keySpecification.key:candidateData})
     
     def __selectElementForSpecification(self,dataElement,keySpecification):
         if isinstance(dataElement,list) or dataElement.isSuitableGivenTag(keySpecification.tag):
