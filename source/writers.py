@@ -1,5 +1,6 @@
 import re
 
+from source.writer_templates import WriterTemplate
 from source.latex_templater import LatexTemplater
 
 class Writer(object):
@@ -8,41 +9,36 @@ class Writer(object):
         self._replacers     = []
         self.__queue        = queue
     
-    def parseTemplate(self,template,people):
-        return self.__maker.parse(template.getText(),people)
+    def parseTemplate(self,template):
+        return self.__maker.parse(template)
     
     def setMakerTo(self,maker):
         self.__maker = maker
         
-    def write(self,people):
+    def writeTo(self,people):
         template = self.__queue.setupTemplateCandidateFor(people)
-        print('l.19 people:',people)
-        print('.. template.getText():',template.getText())
         for replacer in self._replacers:
             replacer.doReplacementsTo(template)
-            print('l.21 use ',type(replacer))
-            print('.. template.getText():',template.getText())
-        tmp = template.getText()
-        tmp = tmp.replace('(day)',str(people))
-        return LatexTemplater.replaceSpecialCharacters(tmp)   
-    
-    def writeIntoTemplateWith(self,superTemplate):
-        blankReplacement  = self.write(superTemplate.getPeople()) 
-        superTemplate.replace(self._blank,blankReplacement)     
+        return template    
             
 class AllWriter(Writer):
     def __init__(self,blank,queue):
         super().__init__(blank,queue)
-        self._replacers = [SubWriterReplacer(self),ParameterReplacer()]        
+        self._replacers = [SubWriterReplacer(self),DataReplacer(),SubDataReplacer()]        
         
 class SelectiveWriter(AllWriter):      
     def __init__(self,blank,queue,arguments):
         super().__init__(blank,queue)
-        self.__selector   = RoleSelector(arguments)
+        self.__inputRoles = arguments
     
-    def write(self,people):
-        peopleCandidates = self.__selector.selectPeopleFrom(people)
-        return super().write(peopleCandidates) 
+    def writeTo(self,people):
+        peopleCandidates = self.selectPeopleFrom(people)
+        if not peopleCandidates and self.__inputRoles:
+            peopleCandidates = people['main'].data[self.__inputRoles[0]] 
+        return super().writeTo(peopleCandidates)    
+    
+    def selectPeopleFrom(self,people):
+        return [people[inputRole] for inputRole in self.__inputRoles if inputRole in people]
     
 class TemplaterWriter(SelectiveWriter):    
     def __init__(self,*specification):
@@ -56,7 +52,6 @@ class TemplaterWriter(SelectiveWriter):
 
 class ListingWriter(object):    
     def __init__(self,blank,queue,arguments):
-        self.__templater = LatexTemplater()
         self.__blank     = blank
         self.__queue     = queue
         self.__argument = arguments[0]
@@ -71,16 +66,17 @@ class ListingWriter(object):
             blankReplacement  = '\n%s'%blankReplacement 
         else:
             blankReplacement = ''
-        superTemplate.replace(self.__blank,blankReplacement)
+        superTemplate.replaceText(self.__blank,blankReplacement)
     
     def subWriterInListing(self,people):
-        listingTexts = [self.__compileListingElementOf(person) for person in people]
-        return self.__templater.compileListingOf(listingTexts)
+        listingTemplates = [self.__compileListingElementOf(person) for person in people]
+        return WriterTemplate.makeListingOf(listingTemplates)
 
     def __compileListingElementOf(self,person):
         template = self.__queue.setupTemplateCandidateFor(person)
-        subWriter = self.__writerMaker.parse(template.getText(),'')[0]
-        return subWriter.write({'main':person})        
+        subWriter = self.__writerMaker.parse(template)[0]
+        subWriterTemplate = subWriter.writeTo({'main':person})        
+        return subWriterTemplate
         
 class SubWriterReplacer(object):  
     def __init__(self,parentWriter):
@@ -88,16 +84,33 @@ class SubWriterReplacer(object):
     
     def doReplacementsTo(self,template):
         people = template.getData()
-        for subWriter in self.__parent.parseTemplate(template,people):
+        for subWriter in self.__parent.parseTemplate(template):
             subWriter.writeIntoTemplateWith(template)           
 
-class ParameterReplacer(object):
+class DataReplacer(object):
     def doReplacementsTo(self,template):
         specifications = self.__extractSpecificationsFromTemplate(template)
         for blank,parameter in specifications:
             people = template.getData()
-            value = people['main'].get(parameter)
-            template.replace(blank,value)   
+            mainTags = template.getMainDataTags()
+            if mainTags and parameter == mainTags[0]:
+                value = people[mainTags[0]]
+                print('l.96 writers.py refactoring')
+                template.replaceText(blank,value)   
+            
+    @staticmethod
+    def __extractSpecificationsFromTemplate(template):
+        arguments = template.getText()
+        return re.findall('(\((\w+)\))',arguments)       
+            
+class SubDataReplacer(object):
+    def doReplacementsTo(self,template):
+        specifications = self.__extractSpecificationsFromTemplate(template)
+        for blank,parameter in specifications:
+            people = template.getData()
+            mainTags = template.getMainDataTags()
+            value = people[mainTags[0]].get(parameter)
+            template.replaceText(blank,value)   
             
     @staticmethod
     def __extractSpecificationsFromTemplate(template):
@@ -117,7 +130,7 @@ class SimpleTemplaterCallReplacer(TemplaterCallReplacer):
         specifications = self._extractSpecificationsFromTemplate(template)
         for blank,method,arguments in specifications:
             blankReplacement = self.__determineBlankReplacement(method,arguments,template) 
-            template.replace(blank,blankReplacement)  
+            template.replaceText(blank,blankReplacement)  
     
     def __determineBlankReplacement(self,method,arguments,template):
         people      = template.getData()
@@ -144,7 +157,8 @@ class BlankTemplaterCallReplacer(TemplaterCallReplacer):
     
     def doReplacementsTo(self,template):
         specifications   = self._extractSpecificationsFromTemplate(template)
-        argument = self.__parentWriter.write(template.getData())
+        argumentTemplate = self.__parentWriter.writeTo(template.getData())
+        argument = argumentTemplate.getText()
         if specifications: 
             self.__replaceSpecificationsInTemplate(template,specifications,argument)
         else: 
@@ -153,31 +167,10 @@ class BlankTemplaterCallReplacer(TemplaterCallReplacer):
     def __replaceSpecificationsInTemplate(self,template,specifications,argument):
         blank,method = specifications.pop()
         argument     = self._templater.evaluate(method,[argument])
-        template.replace(blank,argument)
+        template.replaceText(blank,argument)
     
     def _extractSpecificationsFromTemplate(self,template):
         blankArgument = re.escape(template.blankArgument)
-        return super()._extractSpecificationsFromTemplate(template,blankArgument)
-    
-class RoleSelector(object):
-    def __init__(self,roles):
-        self.__inputRoles = roles
-        
-    def selectPeopleFrom(self,people):
-        peopleCandidates = self.__selectPeopleAtSameLevel(people)
-        if not peopleCandidates and self.__inputRoles:
-            return self.__selectDataAtSubLevel(people)
-        return peopleCandidates
-    
-    def __selectPeopleAtSameLevel(self,people):
-        return [people[inputRole] for inputRole in self.__inputRoles if inputRole in people]
-    
-    def __selectDataAtSubLevel(self,people):
-        print('l.170 people:',people)
-        print('... self.__inputRoles:',self.__inputRoles)
-        return people['main'].data[self.__inputRoles[0]]
-        
-    
-    
+        return super()._extractSpecificationsFromTemplate(template,blankArgument)  
     
         

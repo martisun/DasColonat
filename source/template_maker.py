@@ -95,6 +95,9 @@ class SelectiveWriterTemplateMaker(object):
     def getWriterTemplate(self):
         writerTemplate = WriterTemplate(self.getText())
         writerTemplate.setDataTo(self._selected)
+        print('template_maker.py l.98 refactoring')
+        mainDataTags = [elem.key for elem in self._required]
+        writerTemplate.setMainDataTo(mainDataTags)
         return writerTemplate
     
     def _determineTemplate(self):

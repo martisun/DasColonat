@@ -1,5 +1,3 @@
-import re
-
 from source.writers import AllWriter,TemplaterWriter,ListingWriter
 from source.language_template import LanguageTemplateCollections
 from source.pattern_parsers import PatternParser,TemplaterPatternParser
@@ -20,18 +18,11 @@ class WriterMaker(object):
     def getTemplateQueueWithName(self,name):
         return self.__templateCollection.setupTemplateQueueWithName(name)
     
-    def parse(self,templateText,tmp):
-        specifications = re.findall('(\$(\w+)\(([\,\w]+)\))',templateText)
-        if len(specifications) > 0:
-            return [self.__initTemplaterWriterFrom(specification,tmp)\
-                    for specification in specifications]  
-        else:
-            specifications = re.findall('(\$(\w+)\(\+([\,\w]+)\))',templateText)
-            if len(specifications) > 0:
-                return [self.__initTemplaterWriterFrom(specifications[0],tmp)]
-            else: return []
+    def parse(self,template):
+        return [self.__initTemplaterWriterFrom(specification)\
+                for specification in template.getSubWriterSpecifications()]
     
-    def __initTemplaterWriterFrom(self,specification,tmp):
+    def __initTemplaterWriterFrom(self,specification):
         blank,name,arguments = specification
         arguments = arguments.split(',')
         queue     = self.getTemplateQueueWithName(name)

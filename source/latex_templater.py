@@ -12,8 +12,8 @@ class LatexTemplater(object):
         return '\textbf{%s}'%text
     
     @staticmethod
-    def compileListingOf(items):
-        prefixedItems = LatexTemplater.__itemsWithPrefix(items)
+    def compileListingOf(templateItems):
+        prefixedItems = LatexTemplater.__itemsWithPrefix(templateItems)
         joinedItems   = '\n'.join(prefixedItems)
         return '\begin{itemize}\n%s\n\end{itemize}'%joinedItems
     
@@ -73,8 +73,14 @@ class LatexTemplater(object):
         return '\pids{%s}'%pid
     
     @staticmethod
-    def __itemsWithPrefix(items):
-        return ['\item[\emph{\rom{%d}.}] %s'%(i+1,item) for i,item in enumerate(items)]
+    def __itemsWithPrefix(templateItems):
+        return [LatexTemplater.__itemWithPrefix(i,templateItem)
+                for i,templateItem in enumerate(templateItems)]
+    
+    @staticmethod
+    def __itemWithPrefix(index,templateItem):
+        templateItemText = templateItem.getText()
+        return '\item[\emph{\rom{%d}.}] %s'%(index+1,templateItemText)
     
     @staticmethod
     def __areAllArgumentsTrivial(arguments):
