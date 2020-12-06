@@ -2,6 +2,9 @@ import re
 
 from source.person_reference import PersonReference
 from source.writer_templates import WriterTemplate
+from source.record_data import WriterData
+
+from source.writers import TemplaterWriter
 
 class WriterAdapter(object):
     @staticmethod
@@ -13,14 +16,15 @@ class WriterAdapter(object):
     def setMakerTo(self,writerMaker):
         self.__writerMaker = writerMaker
         
-    def write(self,people):
-        processedPeople = self.__makePersonReferencesOf(people)
+    def write(self,data):
+        processedData = self.__makePersonReferencesOf(data)
         summaryWriter = self.__writerMaker.parse(self.__baseTemplate)[0]
-        summaryTemplate = summaryWriter.writeTo(processedPeople)
+        print('l.20 writerAdapter summaryWriter:',summaryWriter)
+        summaryTemplate = summaryWriter.writeTo(WriterData(processedData))
         return summaryTemplate.getText()
     
-    def __makePersonReferencesOf(self,people):
-        return {role:PersonReference.makeFrom(people[role]) for role in people}
+    def __makePersonReferencesOf(self,data):
+        return {role:PersonReference.makeFrom(data[role]) for role in data}
 
 
     

@@ -2,14 +2,15 @@ from source.extended_testcase import ExtendedTestCase
 
 from source.writer_adapter import WriterAdapter
 from source.writer_maker import WriterMaker
+from source.record_data import WriterData
 
 class whenUsingWriterMaker(ExtendedTestCase):
     def test_whenWritingTemplateWithAttribute(self):
         """Tests whether a template is accessible with a person
         attribute."""
-        peopleDataDict = {'main':{'day':'1','month':'2','year':'1823'}}
+        peopleDataDict = {'date':{'day':'1','month':'2','year':'1823'}}
         expectedOutput = 'on the 1\supscr{st} of February 1823'
-        summaryWriter = WriterAdapter.forTemplatePattern('$onTheDate(main)')
+        summaryWriter = WriterAdapter.forTemplatePattern('$onTheDate(date)')
         writerMaker  = WriterMaker.inLanguage('en')
         summaryWriter.setMakerTo(writerMaker)
         actualOutput = summaryWriter.write(peopleDataDict)
@@ -31,7 +32,7 @@ class whenUsingWriterMaker(ExtendedTestCase):
         self.__doTestWhenWritingDayWithOnlyDayAsAttribute(4,'th')
         
     def __doTestWhenWritingDayWithOnlyDayAsAttribute(self,day,ordinal):
-        peopleDataDict = {'main':{'day':day}}
+        peopleDataDict = {'date':{'day':day}}
         expectedOutput = '%d\supscr{%s}'%(day,ordinal)
         summaryWriter = WriterAdapter.forTemplatePattern('$dayOrdinal(+day)')
         writerMaker  = WriterMaker.inLanguage('en')

@@ -1,4 +1,5 @@
 from source.writer_templates import WriterTemplate
+from source.record_data import RecordData,CompositeRecordData
 
 class TemplateMaker(object):    
     def getWriterTemplateMakerFor(self,templateSpecification):
@@ -37,7 +38,7 @@ class TrivialWriterTemplateMaker(object):
         self._spec = writerTemplateSpecifications
     
     def select(self,candidateData):
-        self._selected = candidateData
+        self._selected = RecordData(candidateData)
     
     def getWriterTemplate(self):
         writerTemplate = WriterTemplate(self._getTemplateText())
@@ -52,12 +53,10 @@ class TrivialWriterTemplateMaker(object):
         
 class MappingWriterTemplateMaker(TrivialWriterTemplateMaker):
     def select(self,candidateData):
-        print('l.55 candidateData:',candidateData)
-        print('.. spec:',self._spec)
         if isinstance(candidateData,list): 
             self.__text = self._spec.mapData(candidateData[0])
         else: self.__text = self._spec.mapData(candidateData)
-        self._selected = candidateData
+        self._selected = RecordData(candidateData)
     
     def _getTemplateText(self):
         return self.__text
@@ -72,21 +71,23 @@ class SelectiveWriterTemplateMaker(object):
         return len(self._required) == len(self._selected) 
     
     def select(self,candidateData):
-        print('l.71 candidateData:',candidateData)
-        print('... self._spec:',self._spec)
-        print('... self._required:',self._required)
-        if not isinstance(candidateData,int) and not isinstance(candidateData,str):
-            candidateData = candidateData.copy() 
+        candidateData = CompositeRecordData(candidateData)     
         for keySpecification in self._required:
-            if isinstance(candidateData,list) and not candidateData: break
-            if not isinstance(candidateData,int) and not isinstance(candidateData,str):
-                self.__selectElementForSpecification(candidateData.pop(0),keySpecification) 
-            else:
-                self._selected.update({keySpecification.key:candidateData})
+            if candidateData.isEmptyList(): break
+            self.__updateSelectedElements(candidateData,keySpecification)        
     
-    def __selectElementForSpecification(self,dataElement,keySpecification):
-        if isinstance(dataElement,list) or dataElement.isSuitableGivenTag(keySpecification.tag):
-            self._selected.update({keySpecification.key:dataElement})     
+    def __updateSelectedElements(self,dataElements,keySpecification):
+        if dataElements.isPrimitive():
+            self.__updateSelectedElementWith(keySpecification,dataElements)
+        else: self.__selectElementForSpecification(dataElements,keySpecification) 
+    
+    def __selectElementForSpecification(self,dataElements,keySpecification):
+        dataElement = dataElements.pop()
+        if dataElement.isSuitableGivenKeySpecification(keySpecification):
+            self.__updateSelectedElementWith(keySpecification,dataElement) 
+    
+    def __updateSelectedElementWith(self,keySpecification,dataElement):
+        self._selected.update({keySpecification.key:dataElement})  
     
     def getText(self):
         if self.isComplete(): return self._determineTemplate()       
@@ -95,9 +96,7 @@ class SelectiveWriterTemplateMaker(object):
     def getWriterTemplate(self):
         writerTemplate = WriterTemplate(self.getText())
         writerTemplate.setDataTo(self._selected)
-        print('template_maker.py l.98 refactoring')
-        mainDataTags = [elem.key for elem in self._required]
-        writerTemplate.setMainDataTo(mainDataTags)
+        writerTemplate.setMainDataTo(self._required)
         return writerTemplate
     
     def _determineTemplate(self):
@@ -115,7 +114,7 @@ class SubMappingWriterTemplateMaker(SelectiveWriterTemplateMaker):
     
     def __getPrimaryData(self):
         primaryRequiredKey = self._required[0].key
-        return self._selected[primaryRequiredKey]
+        return self._selected[primaryRequiredKey].getData()
     
 class ModifiedSubMappingWriterTemplateMaker(SubMappingWriterTemplateMaker):    
     def _determineTemplate(self):
@@ -124,7 +123,7 @@ class ModifiedSubMappingWriterTemplateMaker(SubMappingWriterTemplateMaker):
     
     def __determineKeyValueForSelector(self):
         keyForMapping = self._spec.getKeyForMapping()
-        return self._selected[keyForMapping]
+        return self._selected[keyForMapping].getData()
     
 class ModifiedSubMappingWriterTemplateMakerOfPrimary(ModifiedSubMappingWriterTemplateMaker):
     def _determineTemplate(self):
@@ -138,4 +137,4 @@ class ModifiedSubMappingWriterTemplateMakerOfPrimary(ModifiedSubMappingWriterTem
     
     def __getPrimaryData(self):
         primaryRequiredKey = self._required[0].key
-        return self._selected[primaryRequiredKey]
+        return self._selected[primaryRequiredKey].getData()

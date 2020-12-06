@@ -65,7 +65,7 @@ class TemplateQueue(object):
         self.__queueData  = templateQueueData.copy()
         self.__maker      = TemplateMaker()
     
-    def setupTemplateCandidateFor(self,candidateData):
+    def setupTemplateCandidateFor(self,candidateData,flag=False):
         return self.__setupTemplateCandidateRecursively(self.__queueData.copy(),candidateData)
         
     def __setupTemplateCandidateRecursively(self,queueData,candidateData): 
