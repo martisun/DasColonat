@@ -65,7 +65,7 @@ class TemplateQueue(object):
         self.__queueData  = templateQueueData.copy()
         self.__maker      = TemplateMaker()
     
-    def setupTemplateCandidateFor(self,candidateData,flag=False):
+    def setupTemplateCandidateFor(self,candidateData):
         return self.__setupTemplateCandidateRecursively(self.__queueData.copy(),candidateData)
         
     def __setupTemplateCandidateRecursively(self,queueData,candidateData): 
@@ -155,9 +155,7 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
      'FromARelationshipOfCouple':[{'required':['father','mother'],'template':"""From a relationship between $nameWithPIDInText(father) and $nameWithPIDInText(mother)"""}],
      'baptismOnly':[{'required':['main'],'template':""" was baptised $onTheDate(main)"""+\
                      """$beforeTheChurches(main) at $town(main)."""}],
-     'onTheDate':[{'required':['main'],'template':"""$tmpDay(main) $tmpMonthYear(main)"""}],
-     'tmpDay':[{'required':['main'],'template':"""on the $dayOrdinal(+day)"""}],
-     'tmpMonthYear':[{'required':['main'],'template':"""of $month(+month) (+year)"""}],
+     'onTheDate':[{'required':['date'],'template':"""on the $dayOrdinal(+day) of $month(+month) (+year)"""}],
      'dayOrdinal':[{'required':['day'],'template':"""(day)$dayOrdinalOnly(day)"""}],
      'dayOrdinalOnly':[{'modifier':'ordinalSelector','map':{0:'t.superScript(th)',1:'t.superScript(st)', 2:'t.superScript(th)'}}],
      'month':[{'modifier':'toInt','map':{0:'',2:'February',5:'May',6:'June',7:'July',

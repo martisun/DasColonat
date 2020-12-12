@@ -12,12 +12,6 @@ class WriterMaker(object):
     def __init__(self,templateCollection):
         self.__templateCollection = templateCollection
     
-    def setTemplateCollectionTo(self,templateCollection):
-        self.__templateCollection = templateCollection
-    
-    def getTemplateQueueWithName(self,name):
-        return self.__templateCollection.setupTemplateQueueWithName(name)
-    
     def parse(self,template):
         return [self.__initTemplaterWriterFrom(specification)\
                 for specification in template.getSubWriterSpecifications()]
@@ -25,7 +19,7 @@ class WriterMaker(object):
     def __initTemplaterWriterFrom(self,specification):
         blank,name,arguments = specification
         arguments = arguments.split(',')
-        queue     = self.getTemplateQueueWithName(name)
+        queue     = self.__getTemplateQueueWithName(name)
         if len(arguments) == 1 and 'all' in arguments:
             templaterWriter = AllWriter(blank,queue)
         elif name == 'childrenListing':
@@ -34,3 +28,6 @@ class WriterMaker(object):
             templaterWriter = TemplaterWriter(blank,queue,arguments)
         templaterWriter.setMakerTo(self)
         return templaterWriter 
+    
+    def __getTemplateQueueWithName(self,name):
+        return self.__templateCollection.setupTemplateQueueWithName(name)

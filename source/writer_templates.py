@@ -1,6 +1,7 @@
 import re
 
 from source.latex_templater import LatexTemplater
+from source.record_data import WriterData
 
 class WriterTemplate(object): 
     blankArgument    = '+blank'
@@ -18,8 +19,8 @@ class WriterTemplate(object):
     def getText(self):
         return LatexTemplater.replaceSpecialCharacters(self.__text)
     
-    def getData(self):
-        return self.__selected
+    def getWriterData(self):
+        return WriterData(self.__selected)
     
     def getMainDataTags(self):
         return self.__mainDataTags
@@ -70,7 +71,10 @@ class WriterTemplate(object):
     
     def __replaceSingleSubSpecification(self,blank,parameter):
         mainTag = self.__mainDataTags[0]
-        value = self.__selected[mainTag].get(parameter)
+        print('writer_templates.py l.74 refactoring')
+        mainElement = self.__selected[mainTag]
+        if isinstance(mainElement,list): value = mainElement[0].get(parameter)
+        else:                            value = mainElement.get(parameter)
         self.replaceText(blank,value)
         
     def __replaceSpecification(self,blank,parameter):

@@ -1,6 +1,7 @@
 class WriterData(object):
     def __init__(self,data):
         self.__data = data
+        self.__index = 0
     
     def toDict(self):
         return self.__data             
@@ -9,12 +10,38 @@ class WriterData(object):
         self.__tagOrder = tagOrder
         
     def __getMainTag(self):
-        if len(self): return list(self.__data)[0]     
-        else:         return 'main'
+        if len(self) > 0: return list(self.__data)[0]     
+        else:             return 'main'
 
+    def get(self,namesOfAttributes):
+        if isinstance(namesOfAttributes,list):
+            return self.__getMultipleAttributes(namesOfAttributes)
+        else:
+            return self.__getSingleAttribute(namesOfAttributes)
+    
+    def __getMultipleAttributes(self,namesOfAttributes):
+        return [self.__getSingleAttribute(nameOfAttribute) for nameOfAttribute in namesOfAttributes]
+        
+    def __getSingleAttribute(self,nameOfAttribute):    
+        if nameOfAttribute in self.__data: 
+            return self.__data[nameOfAttribute]
+        else: return ''
+        
     def getMainData(self):
         tag = self.__getMainTag()
-        return WriterData(self.__data[tag].data)
+        mainData = self.__determineMainData(tag)
+        return WriterData(mainData)
+    
+    def __determineMainData(self,tag):
+        if isinstance(self.__data,dict):
+            print('record_data l.37 refactoring')
+            if isinstance(self.__data[tag],list):
+                return self.__data[tag][0].data
+            else: return self.__data[tag].data
+        else: return {tag:self.__data}
+    
+    def selectTag(self,desiredTag):
+        return WriterData(self.__data[desiredTag])
     
     def selectTags(self,desiredTags):
         data = self.__selectTags(desiredTags)
@@ -28,6 +55,19 @@ class WriterData(object):
     
     def __len__(self):
         return len(self.__data)
+    
+    def __contains__(self,tag):
+        return tag in self.__data
+    
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        if self.__index == len(self):
+            self.__index = 0
+            raise StopIteration
+        self.__index += 1
+        return WriterData(self.__data[self.__index-1])
 
 class RecordData(object):
     def __init__(self,data):

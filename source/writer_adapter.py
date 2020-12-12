@@ -19,7 +19,6 @@ class WriterAdapter(object):
     def write(self,data):
         processedData = self.__makePersonReferencesOf(data)
         summaryWriter = self.__writerMaker.parse(self.__baseTemplate)[0]
-        print('l.20 writerAdapter summaryWriter:',summaryWriter)
         summaryTemplate = summaryWriter.writeTo(WriterData(processedData))
         return summaryTemplate.getText()
     

@@ -38,7 +38,7 @@ class TrivialWriterTemplateMaker(object):
         self._spec = writerTemplateSpecifications
     
     def select(self,candidateData):
-        self._selected = RecordData(candidateData)
+        self._selected = RecordData(candidateData.toDict())
     
     def getWriterTemplate(self):
         writerTemplate = WriterTemplate(self._getTemplateText())
@@ -53,10 +53,13 @@ class TrivialWriterTemplateMaker(object):
         
 class MappingWriterTemplateMaker(TrivialWriterTemplateMaker):
     def select(self,candidateData):
+        self.__setText(candidateData.toDict())
+        super().select(candidateData)
+    
+    def __setText(self,candidateData):
         if isinstance(candidateData,list): 
             self.__text = self._spec.mapData(candidateData[0])
         else: self.__text = self._spec.mapData(candidateData)
-        self._selected = RecordData(candidateData)
     
     def _getTemplateText(self):
         return self.__text
@@ -71,10 +74,10 @@ class SelectiveWriterTemplateMaker(object):
         return len(self._required) == len(self._selected) 
     
     def select(self,candidateData):
-        candidateData = CompositeRecordData(candidateData)     
+        candidateData = CompositeRecordData(candidateData.toDict())     
         for keySpecification in self._required:
             if candidateData.isEmptyList(): break
-            self.__updateSelectedElements(candidateData,keySpecification)        
+            self.__updateSelectedElements(candidateData,keySpecification)       
     
     def __updateSelectedElements(self,dataElements,keySpecification):
         if dataElements.isPrimitive():
