@@ -20,7 +20,7 @@ class WriterTemplate(object):
         return LatexTemplater.replaceSpecialCharacters(self.__text)
     
     def getWriterData(self):
-        return WriterData(self.__selected)
+        return WriterData.makeFrom(self.__selected)
     
     def getMainDataTags(self):
         return self.__mainDataTags

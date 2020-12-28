@@ -8,21 +8,30 @@ class whenUsingWriterMaker(ExtendedTestCase):
     def test_whenWritingTemplateWithAttribute(self):
         """Tests whether a template is accessible with a person
         attribute."""
-        peopleDataDict = {'date':{'day':'1','month':'2','year':'1823'}}
-        self.__doTestWhenWritingTemplateWithDateAttribute(peopleDataDict)
+        dataDict = {'date':{'day':'1','month':'2','year':'1823'}}
+        self.__doTestWhenWritingTemplateWithDateAttribute(dataDict)
         
     def test_whenWritingTemplateWithLengthOneListAttribute(self):
         """Tests whether a template is accessible with a person
         attribute dict of list of length one."""
-        peopleDataDict = {'date':[{'day':'1','month':'2','year':'1823'}]}
-        self.__doTestWhenWritingTemplateWithDateAttribute(peopleDataDict)
+        dataDict = {'date':[{'day':'1','month':'2','year':'1823'}]}
+        self.__doTestWhenWritingTemplateWithDateAttribute(dataDict)
         
-    def __doTestWhenWritingTemplateWithDateAttribute(self,peopleDataDict):    
+    def __doTestWhenWritingTemplateWithDateAttribute(self,dataDict):    
         expectedOutput = 'on the 1\supscr{st} of February 1823'
-        summaryWriter = WriterAdapter.forTemplatePattern('$onTheDate(date)')
-        writerMaker  = WriterMaker.inLanguage('en')
-        summaryWriter.setMakerTo(writerMaker)
-        actualOutput = summaryWriter.write(peopleDataDict)
+        self.__assertOutputDateWrittenGivenInputDict(dataDict,expectedOutput)
+        
+    def test_whenWritingTemplateWithLengthOneListAttribute(self):
+        """Tests whether a double date-entry can be printed if provided
+        when only the day is differing."""
+        dataDict = {'date':[{'day':'30','month':'8','year':'1736'},
+                            {'day':'31','month':'8','year':'1736'}]}
+        expectedOutput = 'on the 30\supscr{th} and 31\supscr{st} of August 1736'
+        self.__assertOutputDateWrittenGivenInputDict(dataDict,expectedOutput)  
+        
+    def __assertOutputDateWrittenGivenInputDict(self,dataDict,expectedOutput): 
+        summaryWriter = self.__getTestSummaryWriterForTemplate('$onTheDate(date)')
+        actualOutput = summaryWriter.write(dataDict)
         self._assertActualEqualsExpected(actualOutput,expectedOutput)    
         
     def test_whenWritingDayWithOnlyDayAsAttribute(self):
@@ -41,11 +50,62 @@ class whenUsingWriterMaker(ExtendedTestCase):
         self.__doTestWhenWritingDayWithOnlyDayAsAttribute(4,'th')
         
     def __doTestWhenWritingDayWithOnlyDayAsAttribute(self,day,ordinal):
-        peopleDataDict = {'date':{'day':day}}
+        dataDict = {'date':{'day':day}}
         expectedOutput = '%d\supscr{%s}'%(day,ordinal)
-        summaryWriter = WriterAdapter.forTemplatePattern('$dayOrdinal(+day)')
-        writerMaker  = WriterMaker.inLanguage('en')
-        summaryWriter.setMakerTo(writerMaker)
-        actualOutput = summaryWriter.write(peopleDataDict)
+        summaryWriter = self.__getTestSummaryWriterForTemplate('$dayOrdinal(+day)')
+        actualOutput = summaryWriter.write(dataDict)
         self._assertActualEqualsExpected(actualOutput,expectedOutput)
         
+    def test_whenWritingBaptismClauseWithMultipleDates(self):
+        """Tests whether a double date-entry can be printed if provided
+        when only the day is differing."""
+        actualOutput = self.__getBaptismOnlyClauseOutputGivenDataDict(DOUBLE_BAPTISM_ENTRY_CHILD)
+        self._assertActualEqualsExpected(actualOutput,DOUBLE_BAPTISM_BAPTISM_ONLY_CLAUSE) 
+        
+    def test_whenWritingChildDescriptionWithMultipleDates(self):
+        """Tests whether a child description can be printed given a double 
+        date-entry with just the date differing."""
+        dataDict = DOUBLE_BAPTISM_ENTRY_CHILD
+        baptismOnlyOutput      = self.__getBaptismOnlyClauseOutputGivenDataDict(dataDict)
+        childDescriptionOutput = self.__getChildDescriptionClauseOutputGivenDataDict(dataDict)
+        expectedOutput = ADD_DOUBLE_BAPTISM_CHILD_DESCRIPTION+baptismOnlyOutput
+        self._assertActualEqualsExpected(childDescriptionOutput,expectedOutput)
+        
+    def test_whenWritingChildDescriptionWithSingleDate(self):
+        """Tests whether a child description can be printed given a single 
+        date-entry"""
+        dataDict = SINGLE_BAPTISM_ENTRY_CHILD
+        childDescriptionOutput = self.__getChildDescriptionClauseOutputGivenDataDict(dataDict)
+        self._assertActualEqualsExpected(childDescriptionOutput,SINGLE_BAPTISM_CHILD_DESCRIPTION)
+
+    def __getBaptismOnlyClauseOutputGivenDataDict(self,dataDict):
+        summaryWriter = self.__getTestSummaryWriterForTemplate('$baptismOnly(main)')
+        return summaryWriter.write(dataDict) 
+    
+    def __getChildDescriptionClauseOutputGivenDataDict(self,dataDict):
+        summaryWriter = self.__getTestSummaryWriterForTemplate('$childDescription(main)')
+        return summaryWriter.write(dataDict) 
+        
+    def __getTestSummaryWriterForTemplate(self,templateText):
+        summaryWriter = WriterAdapter.forTemplatePattern(templateText)
+        writerMaker  = WriterMaker.inLanguage('test')
+        summaryWriter.setMakerTo(writerMaker)
+        return summaryWriter
+        
+
+SINGLE_BAPTISM_ENTRY_CHILD = {'main':{'PID':'(Fr1.1.1)','foreNames':'Thele Marie','gender':'f',
+                              'date':[{'day':'18','month':'9','year':'1734'}],
+                              'denom':['ref']}}
+        
+DOUBLE_BAPTISM_ENTRY_CHILD = {'main':{'PID':'(Fr1.1.2)','foreNames':'Bernardus',
+                            'date':[{'day':'30','month':'8','year':'1736'},
+                                  {'day':'31','month':'8','year':'1736'}],
+                           'nameOfParish':'St. Vitus','denom':['rc','ref']}} 
+
+DOUBLE_BAPTISM_BAPTISM_ONLY_CLAUSE = ' was baptised on the 30\supscr{th} and 31\supscr{st}'+\
+                         ' of August 1736 before the catholic church of the {\it St. Vitus}'+\
+                         ' parish and the reformed church, both at Freren, respectively.'
+        
+ADD_DOUBLE_BAPTISM_CHILD_DESCRIPTION =  'Bernardus~(\textbf{?})~\pids{(Fr1.1.2)}'       
+
+SINGLE_BAPTISM_CHILD_DESCRIPTION = 'Thele Marie~(\textbf{\Venus})~\pids{(Fr1.1.1)} was baptised on the 18\supscr{th} of September 1734 before the reformed church at Freren.'

@@ -1,6 +1,6 @@
 import re
 
-from source.template_maker import TemplateMaker
+from source.template_maker import WriterTemplateMakerBuilder
         
 class TemplateSpec(object):
     def __init__(self,templateDict):
@@ -12,6 +12,13 @@ class TemplateSpec(object):
     
     def setTemplateTo(self,value):
         self.__dict['template'] = value
+    
+    def mapDataForCandidate(self,candidateData):
+        print('language_template.py l.17 refactoring')
+        candidateData = candidateData.toDict()
+        if isinstance(candidateData,list): 
+            return self.mapData(candidateData[0])
+        else: return self.mapData(candidateData)
     
     def mapData(self,data):
         key = self.__dict['modifier'](data)
@@ -34,6 +41,17 @@ class TemplateSpec(object):
     
     def getTemplate(self):
         return self.__dict['template']
+    
+    def matchesInLengthWith(self,dataElement):
+        haveLength = self.__hasNonTrivialLength()
+        return not haveLength or (haveLength and self.__matchesInLengthWith(dataElement))
+
+    def __hasNonTrivialLength(self):
+        return 'length' in self.__dict   
+    
+    def __matchesInLengthWith(self,recordDataElem):
+        dataContent = recordDataElem.getData()
+        return isinstance(dataContent,list) and len(dataContent) == self.__dict['length']
     
     def __setModifierInDict(self):
         if self.aModifierNeedsToBeSet(): self.__doSetModifier()
@@ -63,13 +81,13 @@ class TemplateSpec(object):
 class TemplateQueue(object):
     def __init__(self,templateQueueData):
         self.__queueData  = templateQueueData.copy()
-        self.__maker      = TemplateMaker()
+        self.__builder    = WriterTemplateMakerBuilder()
     
     def setupTemplateCandidateFor(self,candidateData):
         return self.__setupTemplateCandidateRecursively(self.__queueData.copy(),candidateData)
         
     def __setupTemplateCandidateRecursively(self,queueData,candidateData): 
-        writerTemplateMaker = self.__maker.getWriterTemplateMakerFor(self.__getNext(queueData))
+        writerTemplateMaker = self.__builder.getWriterTemplateMakerFor(self.__getNext(queueData))
         writerTemplateMaker.select(candidateData)
         if writerTemplateMaker.isComplete() or self.__isQueueEmpty(queueData): 
             return writerTemplateMaker.getWriterTemplate()
@@ -110,7 +128,8 @@ class LanguageTemplateCollections(object):
     def getWithLanguageTag(languageTag):
         templateCollections = {'en':EnglishTemplateCollection(),
                                'nl':DutchTemplateCollection(),
-                               'de':GermanTemplateCollection()}
+                               'de':GermanTemplateCollection(),
+                               'test':TestTemplateCollection()}
         return templateCollections[languageTag]      
 
 
@@ -128,7 +147,7 @@ $mainParagraph(main,father,mother)$lineBreak(main)$childListingIntro(main,spouse
     """t.space()t.genderSymbol(+gender)"""}],     
      'childrenListing':[{'template':"""$childDescription(main)"""}],                              
      'childDescription':[{'required':['main'],'template':"""$firstNameWithPIDAndGender"""+\
-                          """(main)$baptismOnly(main)"""}],
+                          """(main)$baptismOnly(main)"""}],                              
      'nameWithPIDInText':[{'required':['main'],'template':"""(+foreNames)t.space(+lastName)"""+\
                            """t.firstLetterBold(+lastName)t.textPID(+PID)"""}],
      'firstNameWithPIDAndGender':[{'required':['main'],'template':"""(+foreNames)"""+\
@@ -136,10 +155,10 @@ $mainParagraph(main,father,mother)$lineBreak(main)$childListingIntro(main,spouse
       'boldGender':[{'required':['main'],'template':"""t.bold($gender(main))"""}],
       'gender':[{'required':['main'],'template':"""t.genderSymbol(+gender)"""}]}
     def __init__(self):
-        self.__dataDict = {**self._generalSpecifications,**self._languageSpecificSpecifications}
+        self._dataDict = {**self._generalSpecifications,**self._languageSpecificSpecifications}
     
     def setupTemplateQueueWithName(self,name):
-        return TemplateQueue(self.__dataDict[name])  
+        return TemplateQueue(self._dataDict[name])  
 
 class EnglishTemplateCollection(GeneralTemplateCollection):
     _languageSpecificSpecifications =\
@@ -155,6 +174,7 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
      'FromARelationshipOfCouple':[{'required':['father','mother'],'template':"""From a relationship between $nameWithPIDInText(father) and $nameWithPIDInText(mother)"""}],
      'baptismOnly':[{'required':['main'],'template':""" was baptised $onTheDate(main)"""+\
                      """$beforeTheChurches(main) at $town(main)."""}],
+     'resp':[{'required':['date'],'length':2,'template':""", respectively"""}],
      'onTheDate':[{'required':['date'],'template':"""on the $dayOrdinal(+day) of $month(+month) (+year)"""}],
      'dayOrdinal':[{'required':['day'],'template':"""(day)$dayOrdinalOnly(day)"""}],
      'dayOrdinalOnly':[{'modifier':'ordinalSelector','map':{0:'t.superScript(th)',1:'t.superScript(st)', 2:'t.superScript(th)'}}],
@@ -169,6 +189,17 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
      'andChurchBoth':[{'required':['main'],'key':'denom','modifier':'secondaryListSelector',
                        'map':{'ref':' and the reformed church, both','rc':'','':''}}]}
 
+class TestTemplateCollection(EnglishTemplateCollection):
+    __additionalTestSpecificSpecifications =\
+    {'childDescription':[{'required':['main'],'template':"""$firstNameWithPIDAndGender"""+\
+                          """(main)$baptismOnly(main)"""}],
+     'baptismOnly':[{'required':['main'],'template':""" was baptised $onTheDate(+date)"""+\
+                     """$beforeTheChurches(main) at $town(main)$resp(+date)."""}],
+     'onTheDate':[{'required':['date'],'length':2,'template':"""on the $dayOrdinal(+day) and 31\supscr{st} of $month(+month) (+year)"""},{'required':['date'],'template':"""on the $dayOrdinal(+day) of $month(+month) (+year)"""}]}
+    def __init__(self):
+        self._dataDict = {**self._generalSpecifications,**self._languageSpecificSpecifications,
+                          **self.__additionalTestSpecificSpecifications}   
+    
 class DutchTemplateCollection(GeneralTemplateCollection):
     _languageSpecificSpecifications =\
     {'mainParagraph':[{'required':['main*','father','mother'],

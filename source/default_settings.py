@@ -8,7 +8,8 @@ PRIMAL_TEST_HEADER_DATA = 'father;;;mother;;infant;;;;;;\n'+\
 PRIMAL_TEST_INTERMED_INPUT_FOR_FATHER =\
 {'main':{'PID':'(Fr0)','foreNames':'Jois','lastName':'Sunder','gender':'m'},
  'spouse':{'PID':'x1(Fr0)','foreNames':'Alheid'},
- 'children':[{'PID':'(Fr0.1)','foreNames':'Wolterus','day':18,'month':12,'year':1661,'nameOfParish':'St. Vitus','denom':['rc']}]}   
+ 'children':[{'PID':'(Fr0.1)','foreNames':'Wolterus',
+              'day':18,'month':12,'year':1661,'nameOfParish':'St. Vitus','denom':['rc']}]}   
 
 PRIMAL_TEST_INTERMED_INPUT_FOR_MOTHER =\
 {'main':{'PID':'x1(Fr0)','foreNames':'Alheid','gender':'f'},

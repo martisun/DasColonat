@@ -1,7 +1,7 @@
 from source.writer_templates import WriterTemplate
-from source.record_data import RecordData,CompositeRecordData
+from source.record_data import WriterData
 
-class TemplateMaker(object):    
+class WriterTemplateMakerBuilder(object):    
     def getWriterTemplateMakerFor(self,templateSpecification):
         self.__spec = templateSpecification
         dataSelector = self.__selectWriterTemplateMaker()
@@ -13,7 +13,7 @@ class TemplateMaker(object):
         elif self.__spec.hasMappingDefined(): 
             return MappingWriterTemplateMaker(self.__spec)
         else: 
-            return TrivialWriterTemplateMaker(self.__spec)
+            return WriterTemplateMaker(self.__spec)
         
     def __selectSelectiveWriterTemplateMaker(self):
         if self.__spec.isTemplateDefined():
@@ -33,40 +33,38 @@ class TemplateMaker(object):
         else:
             return ModifiedSubMappingWriterTemplateMakerOfPrimary(self.__spec)    
 
-class TrivialWriterTemplateMaker(object):
+class WriterTemplateMaker(object):
     def __init__(self,writerTemplateSpecifications):
         self._spec = writerTemplateSpecifications
     
     def select(self,candidateData):
-        self._selected = RecordData(candidateData.toDict())
-    
+        self._selected = candidateData
+        
     def getWriterTemplate(self):
-        writerTemplate = WriterTemplate(self._getTemplateText())
+        writerTemplate = WriterTemplate(self.getText())
         writerTemplate.setDataTo(self._selected)
         return writerTemplate
     
     def isComplete(self):
         return True
     
+    def getText(self):
+        return self._getTemplateText()
+    
     def _getTemplateText(self):
         return self._spec.getTemplate()
-        
-class MappingWriterTemplateMaker(TrivialWriterTemplateMaker):
+
+class MappingWriterTemplateMaker(WriterTemplateMaker):
     def select(self,candidateData):
-        self.__setText(candidateData.toDict())
+        self.__text = self._spec.mapDataForCandidate(candidateData)
         super().select(candidateData)
     
-    def __setText(self,candidateData):
-        if isinstance(candidateData,list): 
-            self.__text = self._spec.mapData(candidateData[0])
-        else: self.__text = self._spec.mapData(candidateData)
-    
     def _getTemplateText(self):
-        return self.__text
-
-class SelectiveWriterTemplateMaker(object):        
-    def __init__(self,requiredKeySpecifications):
-        self._spec = requiredKeySpecifications
+        return self.__text    
+    
+class SelectiveWriterTemplateMaker(WriterTemplateMaker):        
+    def __init__(self,writerTemplateSpecifications):
+        super().__init__(writerTemplateSpecifications)
         self._required = self._spec.getRequiredKeySpecifications()
         self._selected = {}
     
@@ -74,39 +72,38 @@ class SelectiveWriterTemplateMaker(object):
         return len(self._required) == len(self._selected) 
     
     def select(self,candidateData):
-        candidateData = CompositeRecordData(candidateData.toDict())     
+        candidateData = candidateData.copy()
         for keySpecification in self._required:
-            if candidateData.isEmptyList(): break
-            self.__updateSelectedElements(candidateData,keySpecification)       
+            if candidateData.isEmpty(): break
+            self.__updateSelectedElements(candidateData,keySpecification)
     
     def __updateSelectedElements(self,dataElements,keySpecification):
         if dataElements.isPrimitive():
             self.__updateSelectedElementWith(keySpecification,dataElements)
-        else: self.__selectElementForSpecification(dataElements,keySpecification) 
+        else: 
+            self.__selectElementForSpecification(dataElements,keySpecification) 
     
     def __selectElementForSpecification(self,dataElements,keySpecification):
         dataElement = dataElements.pop()
-        if dataElement.isSuitableGivenKeySpecification(keySpecification):
+        if self._spec.matchesInLengthWith(dataElement) and\
+        dataElement.isSuitableGivenKeySpecification(keySpecification):
             self.__updateSelectedElementWith(keySpecification,dataElement) 
-    
+            
     def __updateSelectedElementWith(self,keySpecification,dataElement):
         self._selected.update({keySpecification.key:dataElement})  
     
     def getText(self):
-        if self.isComplete(): return self._determineTemplate()       
+        if self.isComplete(): return super().getText()       
         else:                 return ''
     
     def getWriterTemplate(self):
         writerTemplate = WriterTemplate(self.getText())
         writerTemplate.setDataTo(self._selected)
         writerTemplate.setMainDataTo(self._required)
-        return writerTemplate
+        return writerTemplate 
     
-    def _determineTemplate(self):
-        return self._spec.getTemplate()        
-
 class SubMappingWriterTemplateMaker(SelectiveWriterTemplateMaker):    
-    def _determineTemplate(self):
+    def _getTemplateText(self):
         keyValueForMapping = self.__getValueFromPrimaryDataKey()
         return self._spec.doMap(keyValueForMapping)
     
@@ -117,10 +114,10 @@ class SubMappingWriterTemplateMaker(SelectiveWriterTemplateMaker):
     
     def __getPrimaryData(self):
         primaryRequiredKey = self._required[0].key
-        return self._selected[primaryRequiredKey].getData()
+        return self._selected[primaryRequiredKey]
     
 class ModifiedSubMappingWriterTemplateMaker(SubMappingWriterTemplateMaker):    
-    def _determineTemplate(self):
+    def _getTemplateText(self):
         keyValueForSelector = self.__determineKeyValueForSelector()
         return self._spec.mapData(keyValueForSelector)
     
@@ -129,7 +126,7 @@ class ModifiedSubMappingWriterTemplateMaker(SubMappingWriterTemplateMaker):
         return self._selected[keyForMapping].getData()
     
 class ModifiedSubMappingWriterTemplateMakerOfPrimary(ModifiedSubMappingWriterTemplateMaker):
-    def _determineTemplate(self):
+    def _getTemplateText(self):
         keyValueForSelector = self.__determineKeyValueForSelector()
         return self._spec.mapData(keyValueForSelector)
     

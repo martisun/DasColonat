@@ -2,7 +2,6 @@ import re
 
 from source.writer_templates import WriterTemplate
 from source.latex_templater import LatexTemplater
-from source.record_data import WriterData
 
 class Writer(object):
     def __init__(self,blank,queue):
@@ -35,9 +34,9 @@ class SelectiveWriter(AllWriter):
     
     def writeTo(self,writerData):
         writerDataSelection = writerData.selectTags(self.__inputRoles) 
-        if writerDataSelection.isEmpty(): 
+        if writerDataSelection.isEmpty():
             mainWriterData = writerData.getMainData()
-            return self.writeTo(mainWriterData)    
+            return self.writeTo(mainWriterData)
         else:
             return super().writeTo(writerDataSelection)       
     
