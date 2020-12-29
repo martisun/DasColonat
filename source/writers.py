@@ -62,11 +62,15 @@ class ListingWriter(object):
     def writeIntoTemplateWith(self,superTemplate):
         writerData = superTemplate.getWriterData()
         if self.__argument in writerData:
-            writerDataElement = writerData.selectTag(self.__argument)
-            blankReplacement  = self.subWriterInListing(writerDataElement)
+            blankReplacement = self.writeTo(writerData).getText()
         else:
             blankReplacement = ''
         superTemplate.replaceText(self.__blank,blankReplacement)
+    
+    def writeTo(self,writerData):
+        writerDataElements = writerData.selectTag(self.__argument)
+        listingText = self.subWriterInListing(writerDataElements)
+        return WriterTemplate(listingText)
     
     def subWriterInListing(self,writerData):
         listingTemplates = [self.__compileListingElementOf(writerDataElement)\

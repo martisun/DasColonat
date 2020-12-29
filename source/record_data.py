@@ -123,4 +123,4 @@ class WriterDataDict(WriterData):
         return keySpecification.tag == '' or self._isMoreThanReference()
     
     def __repr__(self):
-        return 'WriterDataList[%s]'%(str(self._data))        
+        return 'WriterDataDict[%s]'%(str(self._data))        

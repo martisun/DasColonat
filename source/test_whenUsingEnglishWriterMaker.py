@@ -5,6 +5,8 @@ from source.writer_maker import WriterMaker
 
 from source.default_settings import getPrimalTestIntermediateInputForFather, getPrimalTestIntermediateInputForMother,PrimalTestOutput 
 
+from source.test_whenUsingWriterMaker import FILLED_OUT_CHILDREN_LISTING
+
 class whenUsingEnglishWriterMaker(ExtendedTestCase):
     def setUp(self):
         self.summaryWriter = WriterAdapter.forTemplatePattern('$summary(all)')
@@ -174,8 +176,5 @@ From a relationship between Jan \textbf{S}under\pids{(Fr1)} and Tela \textbf{M}o
 Jan \textbf{S}under\pids{(Fr1.1)}, son of Jan \textbf{S}under\pids{(Fr1)} and Tela \textbf{M}ouwe\pids{x1(Fr1)}, was baptised on the 13\supscr{th} of December 1711 before the catholic church of the {\it St. Vitus} parish and the reformed church, both at Freren.
 
 From a relationship between Jan \textbf{S}under\pids{(Fr1.1)} and Enne \textbf{T}ijs\pids{x1(Fr1.1)} were brought forth:
-\begin{itemize}
-\item[\emph{\rom{1}.}] Thele Marie~(\textbf{\Venus})~\pids{(Fr1.1.1)} was baptised on the 18\supscr{th} of September 1734 before the reformed church at Freren.
-\item[\emph{\rom{2}.}] Bernardus~(\textbf{\Mars})~\pids{(Fr1.1.2)} was baptised on the 30\supscr{th} and 31\supscr{st} of August 1736 before the catholic church of the {\it St. Vitus} parish and the reformed church, both at Freren, respectively.
-\end{itemize}
-"""}
+%s
+"""%FILLED_OUT_CHILDREN_LISTING}

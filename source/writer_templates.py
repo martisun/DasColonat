@@ -1,7 +1,7 @@
 import re
 
 from source.latex_templater import LatexTemplater
-from source.record_data import WriterData
+from source.record_data import WriterData,WriterDataList
 
 class WriterTemplate(object): 
     blankArgument    = '+blank'
@@ -20,7 +20,7 @@ class WriterTemplate(object):
         return LatexTemplater.replaceSpecialCharacters(self.__text)
     
     def getWriterData(self):
-        return WriterData.makeFrom(self.__selected)
+        return self.__selected
     
     def getMainDataTags(self):
         return self.__mainDataTags
@@ -69,26 +69,32 @@ class WriterTemplate(object):
         for specification in specifications:
             self.__replaceSingleSubSpecification(*specification)
     
-    def __replaceSingleSubSpecification(self,blank,parameter):
-        mainTag = self.__mainDataTags[0]
-        print('writer_templates.py l.74 refactoring')
-        mainElement = self.__selected[mainTag]
-        if isinstance(mainElement,list): value = mainElement[0].get(parameter)
-        else:                            value = mainElement.get(parameter)
+    def __replaceSingleSubSpecification(self,blank,parameter):                          
+        mainElement = self.__getMainElement()    
+        value = mainElement.get(parameter)
         self.replaceText(blank,value)
-        
+    
+    def __getMainElement(self):
+        mainTag = self.__mainDataTags[0]
+        mainElement = self.__selected.selectTag(mainTag)
+        if isinstance(mainElement,WriterDataList): 
+            print('l.81 writer_templates.py refactoring')
+            mainElement = mainElement.getMainData()
+        return mainElement.getData()
+    
     def __replaceSpecification(self,blank,parameter):
         if parameter in self.__mainDataTags:    
-            value = self.__selected[parameter]
-            self.replaceText(blank,value) 
+            value = self.__selected.selectTag(parameter)
+            self.replaceText(blank,value.getData()) 
     
     def setDataTo(self,data):
-        if isinstance(data,dict): self.__selected = {el:data[el].getData() for el in data}
-        else: self.__selected = data.getData()
+        if isinstance(data,dict): 
+            data = WriterData.makeFrom({el:data[el].getData() for el in data})
+        self.__selected = data
         
     def setMainDataTo(self,mainDataKeySpecs):
         mainDataTags = [elem.key for elem in mainDataKeySpecs]
         self.__mainDataTags = mainDataTags
         
     def __repr__(self):
-        return 'WriterTemplate[text=%s,data=%s]'%(self.__text,self.__selected.keys())
+        return 'WriterTemplate[text=%s,data=%s]'%(self.__text,self.__selected)

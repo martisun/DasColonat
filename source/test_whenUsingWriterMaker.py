@@ -77,7 +77,16 @@ class whenUsingWriterMaker(ExtendedTestCase):
         dataDict = SINGLE_BAPTISM_ENTRY_CHILD
         childDescriptionOutput = self.__getChildDescriptionClauseOutputGivenDataDict(dataDict)
         self._assertActualEqualsExpected(childDescriptionOutput,SINGLE_BAPTISM_CHILD_DESCRIPTION)
-
+    
+    def test_whenWritingChildDescriptionListing(self):
+        """Tests whether a child description listing can be printed given two children 
+        data-entries. """
+        dataDict = {'children':[SINGLE_BAPTISM_ENTRY_CHILD['main'], 
+                                DOUBLE_BAPTISM_ENTRY_CHILD['main']]}
+        childrenListing = self.__getChildDescriptionListingGivenDataDict(dataDict)
+        expectedChildrenListing = self.__getExpectedChildDescriptionListingGivenDataDict(dataDict)
+        self._assertActualEqualsExpected(childrenListing,expectedChildrenListing)   
+    
     def __getBaptismOnlyClauseOutputGivenDataDict(self,dataDict):
         summaryWriter = self.__getTestSummaryWriterForTemplate('$baptismOnly(main)')
         return summaryWriter.write(dataDict) 
@@ -85,6 +94,17 @@ class whenUsingWriterMaker(ExtendedTestCase):
     def __getChildDescriptionClauseOutputGivenDataDict(self,dataDict):
         summaryWriter = self.__getTestSummaryWriterForTemplate('$childDescription(main)')
         return summaryWriter.write(dataDict) 
+    
+    def __getChildDescriptionListingGivenDataDict(self,dataDict):
+        summaryWriter = self.__getTestSummaryWriterForTemplate('$childrenListing(children)')
+        return summaryWriter.write(dataDict) 
+    
+    def __getExpectedChildDescriptionListingGivenDataDict(self,dataDict):
+        firstChildOutput = self.__getChildDescriptionClauseOutputGivenDataDict( 
+            SINGLE_BAPTISM_ENTRY_CHILD)
+        secondChildOutput = self.__getChildDescriptionClauseOutputGivenDataDict( 
+            DOUBLE_BAPTISM_ENTRY_CHILD)
+        return CHILDREN_LISTING%(firstChildOutput,secondChildOutput)
         
     def __getTestSummaryWriterForTemplate(self,templateText):
         summaryWriter = WriterAdapter.forTemplatePattern(templateText)
@@ -97,15 +117,24 @@ SINGLE_BAPTISM_ENTRY_CHILD = {'main':{'PID':'(Fr1.1.1)','foreNames':'Thele Marie
                               'date':[{'day':'18','month':'9','year':'1734'}],
                               'denom':['ref']}}
         
-DOUBLE_BAPTISM_ENTRY_CHILD = {'main':{'PID':'(Fr1.1.2)','foreNames':'Bernardus',
+DOUBLE_BAPTISM_ENTRY_CHILD = {'main':{'PID':'(Fr1.1.2)','foreNames':'Bernardus','gender':'m',
                             'date':[{'day':'30','month':'8','year':'1736'},
                                   {'day':'31','month':'8','year':'1736'}],
-                           'nameOfParish':'St. Vitus','denom':['rc','ref']}} 
+                            'nameOfParish':'St. Vitus','denom':['rc','ref']}} 
 
 DOUBLE_BAPTISM_BAPTISM_ONLY_CLAUSE = ' was baptised on the 30\supscr{th} and 31\supscr{st}'+\
                          ' of August 1736 before the catholic church of the {\it St. Vitus}'+\
                          ' parish and the reformed church, both at Freren, respectively.'
         
-ADD_DOUBLE_BAPTISM_CHILD_DESCRIPTION =  'Bernardus~(\textbf{?})~\pids{(Fr1.1.2)}'       
+ADD_DOUBLE_BAPTISM_CHILD_DESCRIPTION =  'Bernardus~(\textbf{\Mars})~\pids{(Fr1.1.2)}'       
 
 SINGLE_BAPTISM_CHILD_DESCRIPTION = 'Thele Marie~(\textbf{\Venus})~\pids{(Fr1.1.1)} was baptised on the 18\supscr{th} of September 1734 before the reformed church at Freren.'
+
+CHILDREN_LISTING = """
+\begin{itemize}
+\item[\emph{\rom{1}.}] %s
+\item[\emph{\rom{2}.}] %s
+\end{itemize}"""
+
+FILLED_OUT_CHILDREN_LISTING = CHILDREN_LISTING%(SINGLE_BAPTISM_CHILD_DESCRIPTION,
+         ADD_DOUBLE_BAPTISM_CHILD_DESCRIPTION+DOUBLE_BAPTISM_BAPTISM_ONLY_CLAUSE)

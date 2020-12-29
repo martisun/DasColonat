@@ -17,7 +17,6 @@ PRIMAL_TEST_INTERMED_INPUT_FOR_MOTHER =\
  'children':[{'PID':'(Fr0.1)','foreNames':'Wolterus','day':18,'month':12,'year':1661, 
               'nameOfParish':'St. Vitus','denom':['rc']}]}
         
-
 def getDefaultTestSettings():
     return DEFAULT_TEST_SETTINGS_DATA.copy()
 
