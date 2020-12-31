@@ -87,6 +87,15 @@ class whenUsingWriterMaker(ExtendedTestCase):
         expectedChildrenListing = self.__getExpectedChildDescriptionListingGivenDataDict(dataDict)
         self._assertActualEqualsExpected(childrenListing,expectedChildrenListing)   
     
+    def test_whenWritingChildDescriptionListingWithIntro(self):
+        """Tests whether a child description listing with intro can be printed given 
+        two children and their parents name entries. """
+        dataDict = getTestInput()
+        childrenListing = self.__getChildDescriptionListingWithIntroGivenDataDict(dataDict)
+        expectedChildrenListing =\
+                  self.__getExpectedChildDescriptionListingWithIntroGivenDataDict(dataDict)
+        self._assertActualEqualsExpected(childrenListing,expectedChildrenListing) 
+    
     def __getBaptismOnlyClauseOutputGivenDataDict(self,dataDict):
         summaryWriter = self.__getTestSummaryWriterForTemplate('$baptismOnly(main)')
         return summaryWriter.write(dataDict) 
@@ -97,14 +106,24 @@ class whenUsingWriterMaker(ExtendedTestCase):
     
     def __getChildDescriptionListingGivenDataDict(self,dataDict):
         summaryWriter = self.__getTestSummaryWriterForTemplate('$childrenListing(children)')
-        return summaryWriter.write(dataDict) 
+        return summaryWriter.write(dataDict)
+    
+    def __getChildDescriptionListingWithIntroGivenDataDict(self,dataDict):
+        summaryWriter = self.__getTestSummaryWriterForTemplate('$childDescriptionWithIntro(all)')
+        return summaryWriter.write(dataDict)     
     
     def __getExpectedChildDescriptionListingGivenDataDict(self,dataDict):
-        firstChildOutput = self.__getChildDescriptionClauseOutputGivenDataDict( 
-            SINGLE_BAPTISM_ENTRY_CHILD)
+        firstChildOutput = self.__getChildDescriptionClauseOutputGivenDataDict(
+            dataDict['children'][0])
         secondChildOutput = self.__getChildDescriptionClauseOutputGivenDataDict( 
-            DOUBLE_BAPTISM_ENTRY_CHILD)
+            dataDict['children'][1])
         return CHILDREN_LISTING%(firstChildOutput,secondChildOutput)
+        
+    def __getExpectedChildDescriptionListingWithIntroGivenDataDict(self,dataDict):
+        writer = self.__getTestSummaryWriterForTemplate('$childListingIntro(main,spouse,children)')
+        childrenListingIntro = writer.write(dataDict)
+        childrenListing = self.__getChildDescriptionListingGivenDataDict(dataDict)
+        return childrenListingIntro+childrenListing
         
     def __getTestSummaryWriterForTemplate(self,templateText):
         summaryWriter = WriterAdapter.forTemplatePattern(templateText)
@@ -112,15 +131,14 @@ class whenUsingWriterMaker(ExtendedTestCase):
         summaryWriter.setMakerTo(writerMaker)
         return summaryWriter
         
-
 SINGLE_BAPTISM_ENTRY_CHILD = {'main':{'PID':'(Fr1.1.1)','foreNames':'Thele Marie','gender':'f',
-                              'date':[{'day':'18','month':'9','year':'1734'}],
+                              'date':[{'day':18,'month':9,'year':1734}],
                               'denom':['ref']}}
         
 DOUBLE_BAPTISM_ENTRY_CHILD = {'main':{'PID':'(Fr1.1.2)','foreNames':'Bernardus','gender':'m',
-                            'date':[{'day':'30','month':'8','year':'1736'},
-                                  {'day':'31','month':'8','year':'1736'}],
-                            'nameOfParish':'St. Vitus','denom':['rc','ref']}} 
+                              'date':[{'day':30,'month':8,'year':1736},
+                                      {'day':31,'month':8,'year':1736}],
+                              'nameOfParish':'St. Vitus','denom':['rc','ref']}} 
 
 DOUBLE_BAPTISM_BAPTISM_ONLY_CLAUSE = ' was baptised on the 30\supscr{th} and 31\supscr{st}'+\
                          ' of August 1736 before the catholic church of the {\it St. Vitus}'+\
@@ -136,5 +154,18 @@ CHILDREN_LISTING = """
 \item[\emph{\rom{2}.}] %s
 \end{itemize}"""
 
+FATHER_ENTRY = {'PID':'(Fr1.1)','foreNames':'Jan','lastName':'Sunder','gender':'m',
+                'date':[{'day':13,'month':12,'year':1711}],
+                'nameOfParish':'St. Vitus','denom':['rc','ref']}
+
+MOTHER_ENTRY = {'PID':'x1(Fr1.1)','foreNames':'Enne','lastName':'Tijs'}
+
 FILLED_OUT_CHILDREN_LISTING = CHILDREN_LISTING%(SINGLE_BAPTISM_CHILD_DESCRIPTION,
          ADD_DOUBLE_BAPTISM_CHILD_DESCRIPTION+DOUBLE_BAPTISM_BAPTISM_ONLY_CLAUSE)
+
+def getTestInput():
+    return {'main':FATHER_ENTRY,'spouse':MOTHER_ENTRY,
+            'father':{'PID':'(Fr1)','foreNames':'Jan','lastName':'Sunder'},
+            'mother':{'PID':'x1(Fr1)','foreNames':'Tela','lastName':'Mouwe'},
+            'children':[SINGLE_BAPTISM_ENTRY_CHILD['main'], 
+                        DOUBLE_BAPTISM_ENTRY_CHILD['main']]}

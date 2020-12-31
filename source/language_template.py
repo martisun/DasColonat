@@ -14,11 +14,8 @@ class TemplateSpec(object):
         self.__dict['template'] = value
     
     def mapDataForCandidate(self,candidateData):
-        print('language_template.py l.17 refactoring')
-        candidateData = candidateData.toDict()
-        if isinstance(candidateData,list): 
-            return self.mapData(candidateData[0])
-        else: return self.mapData(candidateData)
+        candidateData = candidateData.getMainData()
+        return self.mapData(candidateData.getData())
     
     def mapData(self,data):
         key = self.__dict['modifier'](data)
@@ -191,7 +188,9 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
 
 class TestTemplateCollection(EnglishTemplateCollection):
     __additionalTestSpecificSpecifications =\
-    {'childDescription':[{'required':['main'],'template':"""$firstNameWithPIDAndGender"""+\
+    {'childDescriptionWithIntro':[{'template':"""$childListingIntro(main,spouse,children)"""+\
+                                              """$childrenListing(children)"""}],
+     'childDescription':[{'required':['main'],'template':"""$firstNameWithPIDAndGender"""+\
                           """(main)$baptismOnly(main)"""}],
      'baptismOnly':[{'required':['main'],'template':""" was baptised $onTheDate(+date)"""+\
                      """$beforeTheChurches(main) at $town(main)$resp(+date)."""}],

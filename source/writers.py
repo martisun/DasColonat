@@ -3,6 +3,8 @@ import re
 from source.writer_templates import WriterTemplate
 from source.latex_templater import LatexTemplater
 
+from source.record_data import WriterDataDict
+
 class Writer(object):
     def __init__(self,blank,queue):
         self._blank         = blank
@@ -34,11 +36,14 @@ class SelectiveWriter(AllWriter):
     
     def writeTo(self,writerData):
         writerDataSelection = writerData.selectTags(self.__inputRoles) 
-        if writerDataSelection.isEmpty():
+        if writerDataSelection.isEmpty() and not self.__isMainDataSelectable(writerData):
             mainWriterData = writerData.getMainData()
             return self.writeTo(mainWriterData)
         else:
-            return super().writeTo(writerDataSelection)       
+            return super().writeTo(writerDataSelection)
+        
+    def __isMainDataSelectable(self,writerData):
+        return writerData.isMainNonTrivial() and not ('main' in self.__inputRoles)
     
 class TemplaterWriter(SelectiveWriter):    
     def __init__(self,*specification):

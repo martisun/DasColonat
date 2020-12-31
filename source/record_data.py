@@ -12,7 +12,7 @@ class WriterData(object):
         return (tag == '*' and self._isMoreThanReference()) or tag != '*'
       
     def _isMoreThanReference(self):
-        return 'year' in self._data    
+        return ('year' in self._data) or ('date' in self._data)
     
     def toDict(self):
         return self._data
@@ -74,6 +74,9 @@ class WriterData(object):
     def isEmpty(self):
         return (not self._data)
     
+    def isMainNonTrivial(self):
+        return False
+    
     def isPrimitive(self):
         raise Exception('Calling abstract method!')
         
@@ -116,6 +119,9 @@ class WriterDataDict(WriterData):
         else: 
             return self.makeFrom({'main':self._data})      
         
+    def isMainNonTrivial(self):
+        return len(self) != 1
+    
     def isPrimitive(self):
         return False
     

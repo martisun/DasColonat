@@ -5,13 +5,12 @@ from source.writer_maker import WriterMaker
 
 from source.default_settings import getPrimalTestIntermediateInputForFather, getPrimalTestIntermediateInputForMother,PrimalTestOutput 
 
-from source.test_whenUsingWriterMaker import FILLED_OUT_CHILDREN_LISTING
+from source.test_whenUsingWriterMaker import getTestInput,FILLED_OUT_CHILDREN_LISTING
 
 class whenUsingEnglishWriterMaker(ExtendedTestCase):
     def setUp(self):
         self.summaryWriter = WriterAdapter.forTemplatePattern('$summary(all)')
-        writerMaker  = WriterMaker.inLanguage('en')
-        self.summaryWriter.setMakerTo(writerMaker)
+        self.__setSummaryWriterToLanguage('test')
         
     def test_whenWritingSectionForFather(self):
         """Tests whether the summary writer puts out a correct section
@@ -87,11 +86,20 @@ class whenUsingEnglishWriterMaker(ExtendedTestCase):
     def test_whenWritingThirdSection(self):
         """This test asserts that the third section can be written, sub tests will be split of
         and this test will remain as acceptance test."""
-        actual = self.summaryWriter.write(TEST_INPUT['(Fr1.1)'])
-        self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1.1)'])          
+        actual = self.summaryWriter.write(getTestInput())
+        self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1.1)'])
+        
+    def __setSummaryWriterToLanguage(self,languageTag):
+        writerMaker  = WriterMaker.inLanguage(languageTag)
+        self.summaryWriter.setMakerTo(writerMaker)
+        
 
-WOLTER_INPUT = {'PID':'(Fr0.1)','foreNames':'Wolterus','day':18,'month':12,'year':1661, 'nameOfParish':'St. Vitus','denom':['rc']}
-HERMAN_INPUT = {'PID':'(Fr0.2)','foreNames':'Hermännus','day':1,'month':6,'year':1666, 'nameOfParish':'St. Vitus','denom':['rc']}
+WOLTER_INPUT = {'PID':'(Fr0.1)','foreNames':'Wolterus',
+                'date':{'day':18,'month':12,'year':1661},
+                'nameOfParish':'St. Vitus','denom':['rc']}
+HERMAN_INPUT = {'PID':'(Fr0.2)','foreNames':'Hermännus',
+                'date':{'day':1,'month':6,'year':1666},
+                'nameOfParish':'St. Vitus','denom':['rc']}
         
 FATHER_OUTPUT="""
 \section{\pidt{(Fr0)}-- Sunder, Jois --~\Mars}\label{sec:(Fr0)}
@@ -140,24 +148,16 @@ From a relationship between Jois \textbf{S}under\pids{(Fr0)} and Alheid\pids{x1(
 
 TEST_INPUT = {'(Fr1)':{'main':{'PID':'(Fr1)','foreNames':'Jan','lastName':'Sunder','gender':'m'},
               'spouse':{'PID':'x1(Fr1)','foreNames':'Tela','lastName':'Mouwe'},
-              'children':[{'PID':'(Fr1.1)','foreNames':'Jan','day':13,'month':12,'year':1711,
-                           'nameOfParish':'St. Vitus','gender':'m','denom':['rc','ref']},
-                          {'PID':'(Fr1.2)','foreNames':'Maria Elisabet',
-                           'day':8,'month':7,'year':1714,'gender':'f','denom':['ref']},
-                          {'PID':'(Fr1.3)','foreNames':'Berend',
-                           'day':31,'month':5,'year':1717,'gender':'m','denom':['ref']},
-                          {'PID':'(Fr1.4)','foreNames':'Berend',
-                           'day':12,'month':2,'year':1719,'gender':'m','denom':['ref']}]},
-             '(Fr1.1)':{'main':{'PID':'(Fr1.1)','foreNames':'Jan','lastName':'Sunder',
-                                'day':13,'month':12,'year':1711,'nameOfParish':'St. Vitus',
-                                'gender':'m','denom':['rc','ref']},
-                        'spouse':{'PID':'x1(Fr1.1)','foreNames':'Enne','lastName':'Tijs'},
-                        'father':{'PID':'(Fr1)','foreNames':'Jan','lastName':'Sunder'},
-                        'mother':{'PID':'x1(Fr1)','foreNames':'Tela','lastName':'Mouwe'},
-                        'children':[{'PID':'(Fr1.1.1)','foreNames':'Thele Marie','day':18,
-                                     'month':9,'year':1734,'gender':'f','denom':['ref']},
-                                    {'PID':'(Fr1.1.2)','foreNames':'Bernardus','day':30,
-                                     'month':8,'year':1736,'gender':'m','denom':['ref']}]}} 
+              'children':[{'PID':'(Fr1.1)','foreNames':'Jan','gender':'m',
+                           'date':{'day':13,'month':12,'year':1711},
+                           'nameOfParish':'St. Vitus','denom':['rc','ref']},
+                          {'PID':'(Fr1.2)','foreNames':'Maria Elisabet','gender':'f',
+                           'date':{'day':8,'month':7,'year':1714},'denom':['ref']},
+                          {'PID':'(Fr1.3)','foreNames':'Berend','gender':'m',
+                           'date':{'day':31,'month':5,'year':1717},'denom':['ref']},
+                          {'PID':'(Fr1.4)','foreNames':'Berend','gender':'m',
+                           'date':{'day':12,'month':2,'year':1719},'denom':['ref']}]},
+             '(Fr1.1)':getTestInput()} 
 
 TEST_OUTPUT = {'(Fr1)':"""
 \section{\pidt{(Fr1)}-- Sunder, Jan --~\Mars}\label{sec:(Fr1)}
@@ -175,6 +175,5 @@ From a relationship between Jan \textbf{S}under\pids{(Fr1)} and Tela \textbf{M}o
 
 Jan \textbf{S}under\pids{(Fr1.1)}, son of Jan \textbf{S}under\pids{(Fr1)} and Tela \textbf{M}ouwe\pids{x1(Fr1)}, was baptised on the 13\supscr{th} of December 1711 before the catholic church of the {\it St. Vitus} parish and the reformed church, both at Freren.
 
-From a relationship between Jan \textbf{S}under\pids{(Fr1.1)} and Enne \textbf{T}ijs\pids{x1(Fr1.1)} were brought forth:
-%s
+From a relationship between Jan \textbf{S}under\pids{(Fr1.1)} and Enne \textbf{T}ijs\pids{x1(Fr1.1)} were brought forth:%s
 """%FILLED_OUT_CHILDREN_LISTING}
