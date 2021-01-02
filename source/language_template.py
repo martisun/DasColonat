@@ -169,10 +169,10 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
                'map':{1:"""$FromARelationshipOfCouple(father,mother) was brought forth:""",
                       2:"""$FromARelationshipOfCouple(father,mother) were brought forth:"""}}],
      'FromARelationshipOfCouple':[{'required':['father','mother'],'template':"""From a relationship between $nameWithPIDInText(father) and $nameWithPIDInText(mother)"""}],
-     'baptismOnly':[{'required':['main'],'template':""" was baptised $onTheDate(main)"""+\
-                     """$beforeTheChurches(main) at $town(main)."""}],
+     'baptismOnly':[{'required':['main'],'template':""" was baptised $onTheDate(+date)"""+\
+                     """$beforeTheChurches(main) at $town(main)$resp(+date)."""}],
      'resp':[{'required':['date'],'length':2,'template':""", respectively"""}],
-     'onTheDate':[{'required':['date'],'template':"""on the $dayOrdinal(+day) of $month(+month) (+year)"""}],
+     'onTheDate':[{'required':['date'],'length':2,'template':"""on the $dayOrdinal(+day) and 31\supscr{st} of $month(+month) (+year)"""},{'required':['date'],'template':"""on the $dayOrdinal(+day) of $month(+month) (+year)"""}],
      'dayOrdinal':[{'required':['day'],'template':"""(day)$dayOrdinalOnly(day)"""}],
      'dayOrdinalOnly':[{'modifier':'ordinalSelector','map':{0:'t.superScript(th)',1:'t.superScript(st)', 2:'t.superScript(th)'}}],
      'month':[{'modifier':'toInt','map':{0:'',2:'February',5:'May',6:'June',7:'July',
@@ -189,12 +189,7 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
 class TestTemplateCollection(EnglishTemplateCollection):
     __additionalTestSpecificSpecifications =\
     {'childDescriptionWithIntro':[{'template':"""$childListingIntro(main,spouse,children)"""+\
-                                              """$childrenListing(children)"""}],
-     'childDescription':[{'required':['main'],'template':"""$firstNameWithPIDAndGender"""+\
-                          """(main)$baptismOnly(main)"""}],
-     'baptismOnly':[{'required':['main'],'template':""" was baptised $onTheDate(+date)"""+\
-                     """$beforeTheChurches(main) at $town(main)$resp(+date)."""}],
-     'onTheDate':[{'required':['date'],'length':2,'template':"""on the $dayOrdinal(+day) and 31\supscr{st} of $month(+month) (+year)"""},{'required':['date'],'template':"""on the $dayOrdinal(+day) of $month(+month) (+year)"""}]}
+                                              """$childrenListing(children)"""}]}
     def __init__(self):
         self._dataDict = {**self._generalSpecifications,**self._languageSpecificSpecifications,
                           **self.__additionalTestSpecificSpecifications}   

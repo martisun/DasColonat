@@ -6,12 +6,17 @@ class FileParser(object):
     
     @staticmethod
     def withFileToParseSetTo(fileToParse):
-        fileParser = FileParser()
-        fileParser.__setFileToParseTo(fileToParse)
+        stringContent = fileToParse.getContent()
+        fileParser = FileParser(stringContent)
         return fileParser
     
-    def __setFileToParseTo(self,fileToParse):
-        self.__stringContent = fileToParse.getContent()
+    @staticmethod
+    def parseString(content):
+        fileParser = FileParser(content)
+        return fileParser.parse()
+    
+    def __init__(self,stringContent):
+        self.__stringContent = stringContent
     
     def parse(self):
         if self.__isContentParseable():
@@ -50,6 +55,12 @@ class CellReader(object):
     def getAllRecords(self):
         return [self.__header.buildWith(record) for record in self.__records]
     
+    def __readLine(self,lineOfCells):
+        self.__selection = Selection.withLengthOf(lineOfCells)
+        
+        for index,cell in self.__getReversedEnumeratedOf(lineOfCells):
+            self.__addCellAtIndexToHeader(cell,index)
+    
     def __addCellAtIndexToHeader(self,cell,index):
         if cell != '':
             self.__selection.addBound(index)
@@ -57,11 +68,6 @@ class CellReader(object):
             
     def __len__(self):      
         return len(self.__records)
-    
-    def __readLine(self,lineOfCells):
-        self.__selection = Selection.withLengthOf(lineOfCells)
-        for index,cell in self.__getReversedEnumeratedOf(lineOfCells):
-            self.__addCellAtIndexToHeader(cell,index)
         
     @staticmethod
     def __getReversedEnumeratedOf(lineOfCells):

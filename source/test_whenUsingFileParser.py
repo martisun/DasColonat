@@ -19,7 +19,7 @@ class whenUsingFileParser(whenUsingMockFile):
         of the baptism record in a string representation of the summary writer 
         input to a Mockfile the expected output is returned."""
         self.__test_whenWritingSectionForParentGivenAll('father',FATHER_OUTPUT)
-        
+    
     def test_whenWritingSectionForMotherGivenAll(self):
         """Tests whether given the minimal input for both father and mother
         of the baptism record in a string representation of the summary writer 
@@ -101,17 +101,18 @@ class whenUsingFileParser(whenUsingMockFile):
         return self._readContentFromFileWithName(fileNameWithSavedData)
 
         
-STR_WOLTERUS  = '\n(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.1);Wolterus;18;12;1661;rc;St. Vitus' 
-STR_HERMANNUS = '\n(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.2);Hermännus;1;6;1666;rc;St. Vitus'       
+STR_WOLTERUS  = '\n(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.1);Wolterus;rc;St. Vitus;18;12;1661' 
+STR_HERMANNUS = '\n(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.2);Hermännus;rc;St. Vitus;1;6;1666'       
         
-TEST_INPUT = 'father;;;mother;;;infant;;;;;;;;\n'+\
-             'PID;foreNames;lastName;PID;foreNames;lastName;PID;'+\
-             'foreNames;gender;day;month;year;denom_0;denom_1;nameOfParish'+\
-             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.1);Jan;m;13;12;1711;rc;ref;St. Vitus'+\
-             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.2);Maria Elisabet;f;8;7;1714;ref;;'+\
-             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.3);Berend;m;31;5;1717;ref;;'+\
-             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.4);Berend;m;12;2;1719;ref;;'+\
-             '\n(Fr1.1);Jan;Sunder;x1(Fr1.1);Enne;Tijs;(Fr1.1.1);Thele Marie;f;18;9;1734;ref;;'  
+TEST_INPUT = 'father;;;mother;;;infant;;;;;;;;'+\
+             '\nPID;foreNames;lastName;PID;foreNames;lastName;PID;'+\
+             'foreNames;gender;denom_0;denom_1;nameOfParish;date;;'+\
+             '\n;;;;;;;;;;;;day;month;year'+\
+             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.1);Jan;m;rc;ref;St. Vitus;13;12;1711'+\
+             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.2);Maria Elisabet;f;ref;;;8;7;1714'+\
+             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.3);Berend;m;ref;;;31;5;1717'+\
+             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.4);Berend;m;ref;;;12;2;1719'+\
+             '\n(Fr1.1);Jan;Sunder;x1(Fr1.1);Enne;Tijs;(Fr1.1.1);Thele Marie;f;ref;;;18;9;1734'  
                 
 
     

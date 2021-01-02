@@ -1,9 +1,10 @@
 DEFAULT_TEST_SETTINGS_DATA = {'filesToLoadFrom':['baptism.csv'],\
                               'filesToSaveTo':'summary.tex'}
 
-PRIMAL_TEST_HEADER_DATA = 'father;;;mother;;infant;;;;;;\n'+\
-                          'PID;foreNames;lastName;PID;foreNames;PID;'+\
-                          'foreNames;day;month;year;denom_0;nameOfParish' 
+PRIMAL_TEST_HEADER_DATA = 'father;;;mother;;infant;;;;;;'+\
+                          '\nPID;foreNames;lastName;PID;foreNames;PID;'+\
+                          'foreNames;denom_0;nameOfParish;date;;'+\
+                          '\n;;;;;;;;;day;month;year'
 
 PRIMAL_TEST_INTERMED_INPUT_FOR_FATHER =\
 {'main':{'PID':'(Fr0)','foreNames':'Jois','lastName':'Sunder','gender':'m'},

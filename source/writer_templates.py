@@ -88,8 +88,6 @@ class WriterTemplate(object):
             self.replaceText(blank,value.getData()) 
     
     def setDataTo(self,data):
-        if isinstance(data,dict): 
-            data = WriterData.makeFrom({el:data[el].getData() for el in data})
         self.__selected = data
         
     def setMainDataTo(self,mainDataKeySpecs):

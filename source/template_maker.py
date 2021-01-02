@@ -66,13 +66,14 @@ class SelectiveWriterTemplateMaker(WriterTemplateMaker):
     def __init__(self,writerTemplateSpecifications):
         super().__init__(writerTemplateSpecifications)
         self._required = self._spec.getRequiredKeySpecifications()
-        self._selected = {}
+        self._selected = WriterData.makeFrom({})
     
     def isComplete(self):
         return len(self._required) == len(self._selected) 
     
     def select(self,candidateData):
         candidateData = candidateData.copy()
+        print('l.76 template_maker.py refactoring')
         for keySpecification in self._required:
             if candidateData.isEmpty(): break
             self.__updateSelectedElements(candidateData,keySpecification)
@@ -90,7 +91,7 @@ class SelectiveWriterTemplateMaker(WriterTemplateMaker):
             self.__updateSelectedElementWith(keySpecification,dataElement) 
             
     def __updateSelectedElementWith(self,keySpecification,dataElement):
-        self._selected.update({keySpecification.key:dataElement})  
+        self._selected.update({keySpecification.key:dataElement.getData()})  
     
     def getText(self):
         if self.isComplete(): return super().getText()       
@@ -114,7 +115,7 @@ class SubMappingWriterTemplateMaker(SelectiveWriterTemplateMaker):
     
     def __getPrimaryData(self):
         primaryRequiredKey = self._required[0].key
-        return self._selected[primaryRequiredKey]
+        return self._selected.selectTag(primaryRequiredKey)
     
 class ModifiedSubMappingWriterTemplateMaker(SubMappingWriterTemplateMaker):    
     def _getTemplateText(self):
@@ -123,7 +124,8 @@ class ModifiedSubMappingWriterTemplateMaker(SubMappingWriterTemplateMaker):
     
     def __determineKeyValueForSelector(self):
         keyForMapping = self._spec.getKeyForMapping()
-        return self._selected[keyForMapping].getData()
+        print('l.126 template_maker.py refactoring')
+        return self._selected.selectTag(keyForMapping).getData()
     
 class ModifiedSubMappingWriterTemplateMakerOfPrimary(ModifiedSubMappingWriterTemplateMaker):
     def _getTemplateText(self):
@@ -137,4 +139,5 @@ class ModifiedSubMappingWriterTemplateMakerOfPrimary(ModifiedSubMappingWriterTem
     
     def __getPrimaryData(self):
         primaryRequiredKey = self._required[0].key
-        return self._selected[primaryRequiredKey].getData()
+        print('l.140 template_maker.py refactoring')
+        return self._selected.selectTag(primaryRequiredKey).getData()
