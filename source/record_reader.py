@@ -29,7 +29,17 @@ class RecordReader(object):
         self.__peopleCollected[role] = inputData
         
     def __addNonUniqueRoleWithData(self,role,inputData):
-        self.__peopleCollected[role] += inputData
+        candidate      = inputData[0]
+        pidOfCandidate = candidate['PID']
+        alreadyPIDs = [person for person in self.__peopleCollected[role]
+                       if pidOfCandidate == person['PID']]
+        if not alreadyPIDs:
+            self.__peopleCollected[role].append(candidate)
+        else:
+            personToAddTo = alreadyPIDs[0]
+            personToAddTo['denom'] = [(personToAddTo['denom'][count]+candidate['denom'][count])
+                                      for count in range(2)]
+            personToAddTo['date'] = [personToAddTo['date'],candidate['date']]
     
     def __isRoleRecorded(self,role):
         return (role in self.__peopleCollected)
