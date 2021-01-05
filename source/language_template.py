@@ -27,28 +27,26 @@ class TemplateSpec(object):
     def getKeyForMapping(self):
         return self.__dict['key']
     
+    def getLength(self):
+        return self.__dict['length']
+    
     def getModifier(self):
         return self.__dict['modifier']
     
     def getRequiredKeys(self):
         return self.__dict['required']
     
-    def getRequiredKeySpecifications(self):
-        return KeySpecification.parseList(self.__dict['required'])
+#    def getRequiredKeySpecifications(self):
+#        listOfKeySpecs = KeySpecification.parseList(self.__dict['required'])
+#        for el in listOfKeySpecs:
+#            el.setDesiredLengthSpec(self)
+#        return listOfKeySpecs
     
     def getTemplate(self):
         return self.__dict['template']
     
-    def matchesInLengthWith(self,dataElement):
-        haveLength = self.__hasNonTrivialLength()
-        return not haveLength or (haveLength and self.__matchesInLengthWith(dataElement))
-
-    def __hasNonTrivialLength(self):
-        return 'length' in self.__dict   
-    
-    def __matchesInLengthWith(self,recordDataElem):
-        dataContent = recordDataElem.getData()
-        return isinstance(dataContent,list) and len(dataContent) == self.__dict['length']
+    def hasNonTrivialLength(self):
+        return 'length' in self.__dict
     
     def __setModifierInDict(self):
         if self.aModifierNeedsToBeSet(): self.__doSetModifier()
@@ -97,28 +95,6 @@ class TemplateQueue(object):
     
     def __isQueueEmpty(self,queueData):
         return not bool(queueData)
-
-class KeySpecification(object):
-    __pattern = '(\w+)(.?)'
-    
-    @staticmethod
-    def parseList(parsableTextList):
-        return [KeySpecification.parse(parsableText) 
-                for parsableText in parsableTextList]
-    
-    @staticmethod
-    def parse(parsableText):
-        key,tag = re.findall(KeySpecification.__pattern,parsableText)[0]
-        return KeySpecification(key,tag)
-    
-    def __init__(self,key,tag):
-        self.key = key
-        self.tag = tag
-        
-    def __repr__(self):
-        if self.tag == '': tagRepr = 'EMPTY'
-        else:              tagRepr = self.tag
-        return 'KeySpecification[key=%s,tag=%s]'%(self.key,tagRepr)
     
 class LanguageTemplateCollections(object):
     @staticmethod

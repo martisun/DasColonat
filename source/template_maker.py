@@ -1,5 +1,5 @@
 from source.writer_templates import WriterTemplate
-from source.record_data import WriterData
+from source.record_data import WriterData, KeySpecification
 
 class WriterTemplateMakerBuilder(object):    
     def getWriterTemplateMakerFor(self,templateSpecification):
@@ -65,34 +65,21 @@ class MappingWriterTemplateMaker(WriterTemplateMaker):
 class SelectiveWriterTemplateMaker(WriterTemplateMaker):        
     def __init__(self,writerTemplateSpecifications):
         super().__init__(writerTemplateSpecifications)
-        self._required = self._spec.getRequiredKeySpecifications()
+        self._required = KeySpecification.setupFrom(self._spec)
         self._selected = WriterData.makeFrom({})
     
     def isComplete(self):
         return len(self._required) == len(self._selected) 
     
     def select(self,candidateData):
+        self.__setupRequiredKeyedData(candidateData)
+        self._selected.selectData(self._required)
+        
+    def __setupRequiredKeyedData(self,candidateData):
         candidateData = candidateData.copy()
-        print('l.76 template_maker.py refactoring')
-        for keySpecification in self._required:
-            if candidateData.isEmpty(): break
-            self.__updateSelectedElements(candidateData,keySpecification)
-    
-    def __updateSelectedElements(self,dataElements,keySpecification):
-        if dataElements.isPrimitive():
-            self.__updateSelectedElementWith(keySpecification,dataElements)
-        else: 
-            self.__selectElementForSpecification(dataElements,keySpecification) 
-    
-    def __selectElementForSpecification(self,dataElements,keySpecification):
-        dataElement = dataElements.pop()
-        if self._spec.matchesInLengthWith(dataElement) and\
-        dataElement.isSuitableGivenKeySpecification(keySpecification):
-            self.__updateSelectedElementWith(keySpecification,dataElement) 
-            
-    def __updateSelectedElementWith(self,keySpecification,dataElement):
-        self._selected.update({keySpecification.key:dataElement.getData()})  
-    
+        for keyedData in self._required: 
+            keyedData.setWriterData(candidateData)
+        
     def getText(self):
         if self.isComplete(): return super().getText()       
         else:                 return ''
