@@ -6,7 +6,7 @@ from source.record_data import WriterData,WriterDataList
 class WriterTemplate(object): 
     blankArgument    = '+blank'
     __subWriterPattern = ['(\$(\w+)\(([\,\w]+)\))',
-                          '(\$(\w+)\(\+([\,\w]+)\))']
+                          '(\$(\w+)\(\+([\+\,\w]+)\))']
     
     @staticmethod
     def makeListingOf(templateItems):

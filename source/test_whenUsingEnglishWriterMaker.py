@@ -175,5 +175,6 @@ From a relationship between Jan \textbf{S}under\pids{(Fr1)} and Tela \textbf{M}o
 
 Jan \textbf{S}under\pids{(Fr1.1)}, son of Jan \textbf{S}under\pids{(Fr1)} and Tela \textbf{M}ouwe\pids{x1(Fr1)}, was baptised on the 13\supscr{th} of December 1711 before the catholic church of the {\it St. Vitus} parish and the reformed church, both at Freren.
 
-From a relationship between Jan \textbf{S}under\pids{(Fr1.1)} and Enne \textbf{T}ijs\pids{x1(Fr1.1)} were brought forth:%s
+From a relationship between Jan \textbf{S}under\pids{(Fr1.1)} and Anna Maria \textbf{T}ijs\pids{x1(Fr1.1)} were brought forth:%s
+His spouse Anna Maria \textbf{T}ijs\pids{x1(Fr1.1)}, daughter of Herman \textbf{T}ijs and Fenne \textbf{W}emerschlage, was baptised on the 8\supscr{th} of July 1712 before the reformed church at Freren.
 """%FILLED_OUT_CHILDREN_LISTING}

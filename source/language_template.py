@@ -5,7 +5,6 @@ from source.template_maker import WriterTemplateMakerBuilder
 class TemplateSpec(object):
     def __init__(self,templateDict):
         self.__dict = templateDict.copy()
-        self.__setModifierInDict()
         
     def getDict(self):
         return self.__dict
@@ -18,8 +17,8 @@ class TemplateSpec(object):
         return self.mapData(candidateData.getData())
     
     def mapData(self,data):
-        key = self.__dict['modifier'](data)
-        return self.doMap(key)
+        data = KeyModifiers.modifyData(self,data)
+        return self.doMap(data)
     
     def doMap(self,key):
         return self.__dict['map'][key]
@@ -36,24 +35,11 @@ class TemplateSpec(object):
     def getRequiredKeys(self):
         return self.__dict['required']
     
-#    def getRequiredKeySpecifications(self):
-#        listOfKeySpecs = KeySpecification.parseList(self.__dict['required'])
-#        for el in listOfKeySpecs:
-#            el.setDesiredLengthSpec(self)
-#        return listOfKeySpecs
-    
     def getTemplate(self):
         return self.__dict['template']
     
     def hasNonTrivialLength(self):
         return 'length' in self.__dict
-    
-    def __setModifierInDict(self):
-        if self.aModifierNeedsToBeSet(): self.__doSetModifier()
-    
-    def __doSetModifier(self):
-        method = KeyModifiers.getWithName(self.__dict['modifier'])
-        self.__dict = {**self.__dict,'modifier':method()}
     
     def isKeyForMappingRequired(self):
         return self.getKeyForMapping() in self.getRequiredKeys()
@@ -61,7 +47,7 @@ class TemplateSpec(object):
     def isTemplateDefined(self):
         return 'template' in self.__dict
     
-    def aModifierNeedsToBeSet(self):
+    def aModifierIsSpecified(self):
         return 'modifier' in self.__dict 
     
     def hasDataSelection(self):
@@ -99,7 +85,8 @@ class TemplateQueue(object):
 class LanguageTemplateCollections(object):
     @staticmethod
     def getWithLanguageTag(languageTag):
-        templateCollections = {'en':EnglishTemplateCollection(),
+        print('l.88 language_template.py REFACTORING!!!')
+        templateCollections = {'en':TestTemplateCollection(),
                                'nl':DutchTemplateCollection(),
                                'de':GermanTemplateCollection(),
                                'test':TestTemplateCollection()}
@@ -136,9 +123,10 @@ $mainParagraph(main,father,mother)$lineBreak(main)$childListingIntro(main,spouse
 class EnglishTemplateCollection(GeneralTemplateCollection):
     _languageSpecificSpecifications =\
     {'mainParagraph':[{'required':['main*','father','mother'],
-                       'template':"""$nameWithPIDInText(main)"""+\
-    """, son of $nameWithPIDInText(father) and $nameWithPIDInText(mother),$baptismOnly(main)"""},{'required':['main','father','mother'],
-                       'template':"""$nameWithPIDInText(main) is a $child(main) of $nameWithPIDInText(father) and $nameWithPIDInText(mother)."""},
+     'template':"""$nameWithPIDInText(main),"""+\
+                """ $child(main)$parentRef(father,mother),$baptismOnly(main)"""}
+                      ,{'required':['main','father','mother'],
+     'template':"""$nameWithPIDInText(main) is a $child(main)$parentRef(father,mother)."""},
                       {'required':['main*'],'template':"""$nameWithPIDInText(main)$baptismOnly(main)"""}],
      'childListingIntro':[{'required':['father','mother','children'],'key':'children',
                            'modifier':'lengthOneOrMore',
@@ -151,9 +139,11 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
      'onTheDate':[{'required':['date'],'length':2,'template':"""on the $dayOrdinal(+day) and 31\supscr{st} of $month(+month) (+year)"""},{'required':['date'],'template':"""on the $dayOrdinal(+day) of $month(+month) (+year)"""}],
      'dayOrdinal':[{'required':['day'],'template':"""(day)$dayOrdinalOnly(day)"""}],
      'dayOrdinalOnly':[{'modifier':'ordinalSelector','map':{0:'t.superScript(th)',1:'t.superScript(st)', 2:'t.superScript(th)'}}],
-     'month':[{'modifier':'toInt','map':{0:'',2:'February',5:'May',6:'June',7:'July',
-                                         8:'August',9:'September',12:'December'}}],
-     'child':[{'required':['main'],'key':'gender','map':{'m':'son','':'child'}}],
+     'month':[{'modifier':'toInt','map':{0:'',1:'January',2:'February',5:'May',6:'June',
+                                         7:'July',8:'August',9:'September',11:'November',
+                                         12:'December'}}],
+     'child':[{'required':['main'],'key':'gender','map':{'m':'son','f':'daughter','':'child'}}],
+      'parentRef':[{'required':['father','mother'],'template':""" of $nameWithPIDInText(father) and $nameWithPIDInText(mother)"""}],
      'town':[{'template':"""Freren"""}],
      'beforeTheChurches':[{'required':['main'],'key':'denom','modifier':'primalListSelector',
                            'map':{'rc':""" before the catholic church$ofTheNamedParish(main)$andChurchBoth(main)""",'ref':""" before the reformed church$ofTheNamedParish(main)$andChurchBoth(main)""",'':''}}],
@@ -164,8 +154,14 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
 
 class TestTemplateCollection(EnglishTemplateCollection):
     __additionalTestSpecificSpecifications =\
-    {'childDescriptionWithIntro':[{'template':"""$childListingIntro(main,spouse,children)"""+\
-                                              """$childrenListing(children)"""}]}
+    {'summary':[{'template':"""
+$sectionHeader(main)
+
+$mainParagraph(main,father,mother)$lineBreak(main)$childListingIntro(main,spouse,children)$childrenListing(children)$tmpSpouseParagraph(spouse)
+"""}],'childDescriptionWithIntro':[{'template':"""$childListingIntro(main,spouse,children)"""+\
+                                               """$childrenListing(children)"""}],
+      'tmpSpouseParagraph':[{'required':['main*'],'template':"""\nHis spouse $nameWithPIDInText(main), $tmpChild(+gender)$parentRef(+father,+mother),$baptismOnly(main)"""}],
+     'tmpChild':[{'map':{'m':'son','f':'daughter','':'child'}}]}
     def __init__(self):
         self._dataDict = {**self._generalSpecifications,**self._languageSpecificSpecifications,
                           **self.__additionalTestSpecificSpecifications}   
@@ -201,8 +197,16 @@ class GermanTemplateCollection(GeneralTemplateCollection):
 
 class KeyModifiers(object):
     @staticmethod
-    def getWithName(modifierName):
-        return getattr(KeyModifiers(),modifierName)
+    def modifyData(templateSpec,data):
+        if templateSpec.aModifierIsSpecified(): 
+            modifierName = templateSpec.getModifier()
+            return KeyModifiers.__doModifyData(modifierName,data)
+        else: return data
+    
+    @staticmethod
+    def __doModifyData(modifierName,data):
+        method = getattr(KeyModifiers(),modifierName)()
+        return method(data)
         
     @staticmethod
     def ordinalSelector():

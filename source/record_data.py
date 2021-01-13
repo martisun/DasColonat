@@ -94,7 +94,7 @@ class WriterData(object):
         else: return self._data
         
     def copy(self):
-        if self.isPrimitive(): return self
+        if self.isEmpty() or self.isPrimitive(): return self
         else: 
             copiedData = self._data.copy()
             return self.makeFrom(copiedData)

@@ -18,6 +18,7 @@ class WriterMaker(object):
     
     def __initTemplaterWriterFrom(self,specification):
         blank,name,arguments = specification
+        arguments = arguments.replace('+','')
         arguments = arguments.split(',')
         queue     = self.__getTemplateQueueWithName(name)
         if len(arguments) == 1 and 'all' in arguments:

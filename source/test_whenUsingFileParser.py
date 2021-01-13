@@ -109,13 +109,19 @@ TEST_INPUT ='father;;;mother;;;infant;;;;;;;;'+\
             'foreNames;gender;denom_0;denom_1;nameOfParish;date;;'+\
             '\n;;;;;;;;;;;;day;month;year'+\
             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.1);Jan;m;rc;ref;St. Vitus;13;12;1711'+\
+            '\n;Herman;Tijs;;Fenne;Wemerschlage;x1(Fr1.1);'+\
+            'Anna Maria;f;ref;;;8;7;1712'+\
             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.2);Maria Elisabet;f;ref;;;8;7;1714'+\
             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.3);Berend;m;ref;;;31;5;1717'+\
             '\n(Fr1);Jan;Sunder;x1(Fr1);Tela;Mouwe;(Fr1.4);Berend;m;ref;;;12;2;1719'+\
-            '\n(Fr1.1);Jan;Sunder;x1(Fr1.1);Enne;Tijs;(Fr1.1.1);Thele Marie;f;ref;;;18;9;1734'+\
+            '\n(Fr1.1);Jan;Sunder;x1(Fr1.1);Anna Maria;Tijs;(Fr1.1.1);'+\
+            'Thele Marie;f;ref;;;18;9;1734'+\
             '\n(Fr1.1);;;x1(Fr1.1);;;(Fr1.1.2);Bernardus;m;rc;;St.Vitus;30;8;1736'+\
-            '\n(Fr1.1);;;x1(Fr1.1);;;(Fr1.1.2);Bernardus;m;;ref;;31;8;1736'
-                
+            '\n(Fr1.1);;;x1(Fr1.1);;;(Fr1.1.2);Bernardus;m;;ref;;31;8;1736'+\
+            '\n(Fr1.1);;;x1(Fr1.1);;;(Fr1.1.3);Maria;f;rc;ref;St. Vitus;6;12;1738'+\
+            '\n(Fr1.1);;;x1(Fr1.1);;;(Fr1.1.4);Joh. Christoph;m;rc;ref;St. Vitus;15;1;1741'+\
+            '\n(Fr1.1);;;x1(Fr1.1);;;(Fr1.1.5);Joannis;m;rc;ref;St. Vitus;8;9;1743'+\
+            '\n(Fr1.1);;;x1(Fr1.1);;;(Fr1.1.6);Henricus;m;rc;ref;St. Vitus;17;11;1747'       
 
     
     

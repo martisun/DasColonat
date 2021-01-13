@@ -7,9 +7,21 @@ class RecordReader(object):
         self.__peopleCollected = {}
         
     def readPeopleFrom(self,parsedRecords):
+        # main run
+        print('l.11 record_reader.py REFACTORING!!!')
         for record in parsedRecords:
             peopleData = self.__collectPeopleDataFrom(record)
             self.__addPeople(peopleData)   
+        # spouse run
+        spousePID = self.__peopleCollected['spouse']['PID']
+        for record in parsedRecords:
+            roleOfSpouse = [role for role in record if 'PID' in record[role]\
+                            and record[role]['PID'] == spousePID]
+            if roleOfSpouse and roleOfSpouse[0] == 'infant':
+                interpreter = RecordInterpreterMaker.forRoleOfMain(roleOfSpouse[0])
+                interpreter.setParsedRecordTo(record)
+                people = interpreter.interpret()
+                self.__peopleCollected['spouse'] = {**self.__peopleCollected['spouse'], **people['main'],'father':people['father'],'mother':people['mother']}
         return self.__peopleCollected
     
     def __collectPeopleDataFrom(self,parsedRecord):
@@ -33,6 +45,7 @@ class RecordReader(object):
         pidOfCandidate = candidate['PID']
         alreadyPIDs = [person for person in self.__peopleCollected[role]
                        if pidOfCandidate == person['PID']]
+        print('l.48 record_reader.py refactoring!')
         if not alreadyPIDs:
             self.__peopleCollected[role].append(candidate)
         else:

@@ -22,7 +22,7 @@ class WriterTemplateMakerBuilder(object):
             return self.__selectMappingWriterTemplateMaker()
         
     def __selectMappingWriterTemplateMaker(self):
-        if self.__spec.aModifierNeedsToBeSet():
+        if self.__spec.aModifierIsSpecified():
             return self.__selectModifiedMappingWriterTemplateMaker()
         else:
             return SubMappingWriterTemplateMaker(self.__spec)
