@@ -3,56 +3,66 @@ from source.role_interpreter import RoleInterpreter
 
 class RecordReader(object):    
     def __init__(self,roleOfMain):
-        self.__interpreter = RecordInterpreterMaker.forRoleOfMain(roleOfMain)
-        self.__peopleCollected = {}
+        self.__roleOfMain = roleOfMain
         
     def readPeopleFrom(self,parsedRecords):
         # main run
         print('l.11 record_reader.py REFACTORING!!!')
-        for record in parsedRecords:
-            peopleData = self.__collectPeopleDataFrom(record)
-            self.__addPeople(peopleData)   
+        mainPID = [record[self.__roleOfMain]['PID'] for record in parsedRecords\
+                   if self.__roleOfMain in record][0]
+        peopleCollected = self.__readPersonWithPIDFrom(mainPID,parsedRecords)
         # spouse run
-        spousePID = self.__peopleCollected['spouse']['PID']
+        spousePID = peopleCollected['spouse']['PID']
+        tmpCollected = self.__readPersonWithPIDFrom(spousePID,parsedRecords)
+        spouseEntry = {**peopleCollected['spouse'],**tmpCollected['main']}
+        if 'father' in tmpCollected:
+            spouseEntry = {**spouseEntry,'father':tmpCollected['father']}
+        if 'mother' in tmpCollected:
+            spouseEntry = {**spouseEntry,'mother':tmpCollected['mother']}
+        self.__addUniqueRoleWithData('spouse',spouseEntry,peopleCollected)
+        return peopleCollected
+    
+    def __readPersonWithPIDFrom(self,mainPID,parsedRecords):
+        peopleCollected = {}
         for record in parsedRecords:
-            roleOfSpouse = [role for role in record if 'PID' in record[role]\
-                            and record[role]['PID'] == spousePID]
-            if roleOfSpouse and roleOfSpouse[0] == 'infant':
-                interpreter = RecordInterpreterMaker.forRoleOfMain(roleOfSpouse[0])
-                interpreter.setParsedRecordTo(record)
-                people = interpreter.interpret()
-                self.__peopleCollected['spouse'] = {**self.__peopleCollected['spouse'], **people['main'],'father':people['father'],'mother':people['mother']}
-        return self.__peopleCollected
+            roleOfMain = [role for role in record if 'PID' in record[role]\
+                            and record[role]['PID'] == mainPID]
+            if roleOfMain:
+                self.__interpreter = RecordInterpreterMaker.forRoleOfMain(roleOfMain[0])
+                peopleData = self.__collectPeopleDataFrom(record)
+                self.__addPeople(peopleData,peopleCollected)
+        return peopleCollected
     
     def __collectPeopleDataFrom(self,parsedRecord):
         self.__interpreter.setParsedRecordTo(parsedRecord)
         return self.__interpreter.interpret()    
     
-    def __addPeople(self,peopleData):
-        for role in peopleData: self.__addRoleWithData(role,peopleData[role])
+    def __addPeople(self,peopleData,peopleCollected):
+        for role in peopleData: self.__addRoleWithData(role,peopleData[role],peopleCollected)
         
-    def __addRoleWithData(self,role,inputData):
-        if not self.__isRoleRecorded(role):
-            self.__addUniqueRoleWithData(role,inputData)
+    def __addRoleWithData(self,role,inputData,peopleCollected):
+        if not self.__isRoleRecorded(role,peopleCollected):
+            self.__addUniqueRoleWithData(role,inputData,peopleCollected)
         elif role == RoleInterpreter.nonUniqueRole:
-            self.__addNonUniqueRoleWithData(role,inputData)
+            self.__addNonUniqueRoleWithData(role,inputData,peopleCollected)
         
-    def __addUniqueRoleWithData(self,role,inputData):
-        self.__peopleCollected[role] = inputData
+    def __addUniqueRoleWithData(self,role,inputData,peopleCollected):
+        peopleCollected[role] = inputData
         
-    def __addNonUniqueRoleWithData(self,role,inputData):
+    def __addNonUniqueRoleWithData(self,role,inputData,peopleCollected):
         candidate      = inputData[0]
         pidOfCandidate = candidate['PID']
-        alreadyPIDs = [person for person in self.__peopleCollected[role]
+        alreadyPIDs = [person for person in peopleCollected[role]
                        if pidOfCandidate == person['PID']]
         print('l.48 record_reader.py refactoring!')
         if not alreadyPIDs:
-            self.__peopleCollected[role].append(candidate)
+            peopleCollected[role].append(candidate)
         else:
             personToAddTo = alreadyPIDs[0]
-            personToAddTo['denom'] = [(personToAddTo['denom'][count]+candidate['denom'][count])
-                                      for count in range(2)]
-            personToAddTo['date'] = [personToAddTo['date'],candidate['date']]
+            if not isinstance(personToAddTo['date'],list): 
+                personToAddTo['denom'] = [(personToAddTo['denom'][count]+candidate['denom'][count])
+                                          for count in range(2)]
+                personToAddTo['date'] = [personToAddTo['date'],candidate['date']]
     
-    def __isRoleRecorded(self,role):
-        return (role in self.__peopleCollected)
+    def __isRoleRecorded(self,role,peopleCollected):
+        return (role in peopleCollected)
