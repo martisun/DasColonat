@@ -61,9 +61,9 @@ class PeopleDataDeriver(object):
             self.__updateLastNameOfMainWithLastNameOfFather()
     
     def __isLastNameOfMainDerivable(self):
-        return (not 'lastName' in self.__data['main'] and 'father' in self.__data)
+        return (not 'lastName' in self.__data['main'] and 'father' in self.__data['main'])
         
     def __updateLastNameOfMainWithLastNameOfFather(self):
-        self.__data['main']['lastName'] = self.__data['father']['lastName']   
+        self.__data['main']['lastName'] = self.__data['main']['father']['lastName']   
         
     

@@ -91,7 +91,7 @@ class WriterTemplate(object):
         self.__selected = data
         
     def setMainDataTo(self,mainDataKeySpecs):
-        mainDataTags = [elem.key for elem in mainDataKeySpecs]
+        mainDataTags = [elem.writerKey for elem in mainDataKeySpecs]
         self.__mainDataTags = mainDataTags
         
     def __repr__(self):

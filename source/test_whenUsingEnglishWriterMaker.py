@@ -71,9 +71,9 @@ class whenUsingEnglishWriterMaker(ExtendedTestCase):
     def test_whenParentsRecordedButNoLifeEvent(self):
         """Tests whether the summary writer puts out a section for a child
         with known parents but no other known life-events."""
-        peopleData = {'father':{'PID':'(Fr0)','foreNames':'Jois','lastName':'Sunder'},
-                      'mother':{'PID':'x1(Fr0)','foreNames':'Alheid'},
-                      'main':{'PID':'(Fr0.1)','foreNames':'Wolterus','lastName':'Sunder'}}
+        peopleData = {'main':{'PID':'(Fr0.1)','foreNames':'Wolterus','lastName':'Sunder',
+                             'father':{'PID':'(Fr0)','foreNames':'Jois','lastName':'Sunder'},
+                             'mother':{'PID':'x1(Fr0)','foreNames':'Alheid'}}}
         actual = self.summaryWriter.write(peopleData)
         self._assertActualEqualsExpected(actual,CHILD_LISTINGS['no life-events'])         
         

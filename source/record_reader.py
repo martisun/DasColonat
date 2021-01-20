@@ -15,12 +15,21 @@ class RecordReader(object):
         spousePID = peopleCollected['spouse']['PID']
         tmpCollected = self.__readPersonWithPIDFrom(spousePID,parsedRecords)
         spouseEntry = {**peopleCollected['spouse'],**tmpCollected['main']}
-        if 'father' in tmpCollected:
-            spouseEntry = {**spouseEntry,'father':tmpCollected['father']}
-        if 'mother' in tmpCollected:
-            spouseEntry = {**spouseEntry,'mother':tmpCollected['mother']}
+        #if 'father' in tmpCollected:
+        #    spouseEntry = {**spouseEntry,'father':tmpCollected['father']}
+        #if 'mother' in tmpCollected:
+        #    spouseEntry = {**spouseEntry,'mother':tmpCollected['mother']}
         self.__addUniqueRoleWithData('spouse',spouseEntry,peopleCollected)
         return peopleCollected
+    
+    def __addRelativeRolesToData(self,data):
+        dataWithRelativeRoles = {'main':data['main']}
+        for key in data:
+            if key in ['father','mother']:
+                dataWithRelativeRoles['main'][key] = data[key]
+            elif key != 'main':
+                dataWithRelativeRoles[key] = data[key]
+        return dataWithRelativeRoles
     
     def __readPersonWithPIDFrom(self,mainPID,parsedRecords):
         peopleCollected = {}
@@ -31,6 +40,7 @@ class RecordReader(object):
                 self.__interpreter = RecordInterpreterMaker.forRoleOfMain(roleOfMain[0])
                 peopleData = self.__collectPeopleDataFrom(record)
                 self.__addPeople(peopleData,peopleCollected)
+        peopleCollected = self.__addRelativeRolesToData(peopleCollected)
         return peopleCollected
     
     def __collectPeopleDataFrom(self,parsedRecord):

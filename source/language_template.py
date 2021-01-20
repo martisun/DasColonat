@@ -1,6 +1,5 @@
-import re
-
 from source.template_maker import WriterTemplateMakerBuilder
+from source.record_data import KeySpecification
         
 class TemplateSpec(object):
     def __init__(self,templateDict):
@@ -33,7 +32,7 @@ class TemplateSpec(object):
         return self.__dict['modifier']
     
     def getRequiredKeys(self):
-        return self.__dict['required']
+        return self.__dict['required'].copy()
     
     def getTemplate(self):
         return self.__dict['template']
@@ -42,6 +41,7 @@ class TemplateSpec(object):
         return 'length' in self.__dict
     
     def isKeyForMappingRequired(self):
+        print('l.45 language_template.py refactoring')
         return self.getKeyForMapping() in self.getRequiredKeys()
     
     def isTemplateDefined(self):
@@ -56,9 +56,13 @@ class TemplateSpec(object):
     def hasMappingDefined(self):
         return 'map' in self.__dict 
     
+    def getWriterKeySpecifications(self):
+        print('l.68 language_template.py refactoring')
+        return KeySpecificationBuilder.buildFrom(self)       
+    
     def __repr__(self):
-        return 'TemplateSpec[%s]'%(str(self.__dict))
-        
+        return 'TemplateSpec[%s]'%(str(self.__dict))         
+    
 class TemplateQueue(object):
     def __init__(self,templateQueueData):
         self.__queueData  = templateQueueData.copy()
@@ -85,8 +89,7 @@ class TemplateQueue(object):
 class LanguageTemplateCollections(object):
     @staticmethod
     def getWithLanguageTag(languageTag):
-        print('l.88 language_template.py REFACTORING!!!')
-        templateCollections = {'en':TestTemplateCollection(),
+        templateCollections = {'en':EnglishTemplateCollection(),
                                'nl':DutchTemplateCollection(),
                                'de':GermanTemplateCollection(),
                                'test':TestTemplateCollection()}
@@ -97,17 +100,19 @@ class GeneralTemplateCollection(object):
     _generalSpecifications = {'summary':[{'template':"""
 $sectionHeader(main)
 
-$mainParagraph(main,father,mother)$lineBreak(main)$childListingIntro(main,spouse,children)$childrenListing(children)
+$mainParagraph(main)$lineBreak(main)$childListingIntro(main,spouse,children)$childrenListing(children)$tmpSpouseParagraph(spouse)
 """}],
-    'lineBreak':[{'required':['main*'],'template':"""\n\n"""}],
+    'lineBreak':[{'required':['main','+date'],'template':"""\n\n"""}],
     'sectionHeader':[{'required':['main'],
                       'template':"""t.section($sectionTitle(main))t.label(+PID)"""}],
     'sectionTitle':[{'required':['main'],
                      'template':"""t.titlePID(+PID)t.nameInTitle(+foreNames,+lastName)"""+\
-    """t.space()t.genderSymbol(+gender)"""}],     
+    """t.space()t.genderSymbol(+gender)"""}], 
+     'childDescriptionWithIntro':[{'template':"""$childListingIntro(main,spouse,children)"""+\
+                                               """$childrenListing(children)"""}],     
      'childrenListing':[{'template':"""$childDescription(main)"""}],                              
      'childDescription':[{'required':['main'],'template':"""$firstNameWithPIDAndGender"""+\
-                          """(main)$baptismOnly(main)"""}],                              
+                          """(main)$baptismOnly(main)"""}],              
      'nameWithPIDInText':[{'required':['main'],'template':"""(+foreNames)t.space(+lastName)"""+\
                            """t.firstLetterBold(+lastName)t.textPID(+PID)"""}],
      'firstNameWithPIDAndGender':[{'required':['main'],'template':"""(+foreNames)"""+\
@@ -122,12 +127,12 @@ $mainParagraph(main,father,mother)$lineBreak(main)$childListingIntro(main,spouse
 
 class EnglishTemplateCollection(GeneralTemplateCollection):
     _languageSpecificSpecifications =\
-    {'mainParagraph':[{'required':['main*','father','mother'],
+    {'mainParagraph':[{'required':['main','+father','+mother','+date'],
      'template':"""$nameWithPIDInText(main),"""+\
-                """ $child(main)$parentRef(father,mother),$baptismOnly(main)"""}
-                      ,{'required':['main','father','mother'],
-     'template':"""$nameWithPIDInText(main) is a $child(main)$parentRef(father,mother)."""},
-                      {'required':['main*'],'template':"""$nameWithPIDInText(main)$baptismOnly(main)"""}],
+                """ $child(main)$parentRef(+father,+mother),$baptismOnly(main)"""}
+                      ,{'required':['main','+father','+mother'],
+     'template':"""$nameWithPIDInText(main) is a $child(main)$parentRef(+father,+mother)."""},
+                      {'required':['main','+date'], 'template':"""$nameWithPIDInText(main)$baptismOnly(main)"""}],
      'childListingIntro':[{'required':['father','mother','children'],'key':'children',
                            'modifier':'lengthOneOrMore',
                'map':{1:"""$FromARelationshipOfCouple(father,mother) was brought forth:""",
@@ -150,18 +155,12 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
      'ofTheNamedParish':[{'required':['main'],'key':'denom','modifier':'primalListSelector',
                           'map':{'rc':' of the t.italic(St. Vitus) parish','ref':'','':''}}],
      'andChurchBoth':[{'required':['main'],'key':'denom','modifier':'secondaryListSelector',
-                       'map':{'ref':' and the reformed church, both','rc':'','':''}}]}
+                       'map':{'ref':' and the reformed church, both','rc':'','':''}}],
+    'tmpSpouseParagraph':[{'required':['main','+date'],'template':"""\nHis spouse $nameWithPIDInText(main), $tmpChild(+gender)$parentRef(+father,+mother),$baptismOnly(main)"""}],
+     'tmpChild':[{'map':{'m':'son','f':'daughter','':'child'}}]}
 
 class TestTemplateCollection(EnglishTemplateCollection):
-    __additionalTestSpecificSpecifications =\
-    {'summary':[{'template':"""
-$sectionHeader(main)
-
-$mainParagraph(main,father,mother)$lineBreak(main)$childListingIntro(main,spouse,children)$childrenListing(children)$tmpSpouseParagraph(spouse)
-"""}],'childDescriptionWithIntro':[{'template':"""$childListingIntro(main,spouse,children)"""+\
-                                               """$childrenListing(children)"""}],
-      'tmpSpouseParagraph':[{'required':['main*'],'template':"""\nHis spouse $nameWithPIDInText(main), $tmpChild(+gender)$parentRef(+father,+mother),$baptismOnly(main)"""}],
-     'tmpChild':[{'map':{'m':'son','f':'daughter','':'child'}}]}
+    __additionalTestSpecificSpecifications = {}
     def __init__(self):
         self._dataDict = {**self._generalSpecifications,**self._languageSpecificSpecifications,
                           **self.__additionalTestSpecificSpecifications}   
@@ -198,7 +197,7 @@ class GermanTemplateCollection(GeneralTemplateCollection):
 class KeyModifiers(object):
     @staticmethod
     def modifyData(templateSpec,data):
-        if templateSpec.aModifierIsSpecified(): 
+        if templateSpec.aModifierIsSpecified():
             modifierName = templateSpec.getModifier()
             return KeyModifiers.__doModifyData(modifierName,data)
         else: return data

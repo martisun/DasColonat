@@ -1,5 +1,5 @@
 from source.writer_templates import WriterTemplate
-from source.record_data import WriterData, KeySpecification
+from source.record_data import WriterData, KeySpecificationBuilder
 
 class WriterTemplateMakerBuilder(object):    
     def getWriterTemplateMakerFor(self,templateSpecification):
@@ -65,7 +65,7 @@ class MappingWriterTemplateMaker(WriterTemplateMaker):
 class SelectiveWriterTemplateMaker(WriterTemplateMaker):        
     def __init__(self,writerTemplateSpecifications):
         super().__init__(writerTemplateSpecifications)
-        self._required = KeySpecification.setupFrom(self._spec)
+        self._required = KeySpecificationBuilder.buildFrom(self._spec)
         self._selected = WriterData.makeFrom({})
     
     def isComplete(self):
@@ -101,7 +101,7 @@ class SubMappingWriterTemplateMaker(SelectiveWriterTemplateMaker):
         return primaryRequiredData.get(keyForMapping)
     
     def __getPrimaryData(self):
-        primaryRequiredKey = self._required[0].key
+        primaryRequiredKey = self._required[0].writerKey
         return self._selected.selectTag(primaryRequiredKey)
     
 class ModifiedSubMappingWriterTemplateMaker(SubMappingWriterTemplateMaker):    
@@ -125,6 +125,5 @@ class ModifiedSubMappingWriterTemplateMakerOfPrimary(ModifiedSubMappingWriterTem
         return primaryRequiredData.get(keyForMapping)
     
     def __getPrimaryData(self):
-        primaryRequiredKey = self._required[0].key
-        print('l.140 template_maker.py refactoring')
+        primaryRequiredKey = self._required[0].writerKey
         return self._selected.selectTag(primaryRequiredKey).getData()

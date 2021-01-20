@@ -170,10 +170,10 @@ FILLED_OUT_CHILDREN_LISTING = CHILDREN_LISTING%(SINGLE_BAPTISM_CHILD_DESCRIPTION
          ADD_DOUBLE_BAPTISM_CHILD_DESCRIPTION+DOUBLE_BAPTISM_BAPTISM_ONLY_CLAUSE)
 
 def getTestInput():
-    return {'main':FATHER_ENTRY,'spouse':MOTHER_ENTRY,
-            'father':{'PID':'(Fr1)','foreNames':'Jan','lastName':'Sunder'},
-            'mother':{'PID':'x1(Fr1)','foreNames':'Tela','lastName':'Mouwe'},
-            'children':[SINGLE_BAPTISM_ENTRY_CHILD['main'], 
+    return {'main':{**FATHER_ENTRY,
+                    'father':{'PID':'(Fr1)','foreNames':'Jan','lastName':'Sunder'},
+                    'mother':{'PID':'x1(Fr1)','foreNames':'Tela','lastName':'Mouwe'}},     
+            'spouse':MOTHER_ENTRY,'children':[SINGLE_BAPTISM_ENTRY_CHILD['main'], 
                         DOUBLE_BAPTISM_ENTRY_CHILD['main'],
                         {'PID':'(Fr1.1.3)','foreNames':'Maria','gender':'f',
                          'date':{'day':6,'month':12,'year':1738},

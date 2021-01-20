@@ -125,21 +125,47 @@ class WriterDataDict(WriterData):
     
     def __repr__(self):
         return 'WriterDataDict[%s]'%(str(self._data))    
-    
-class KeySpecification(object):
-    __pattern = '(\w+)(.?)'
-    
-    @staticmethod
-    def setupFrom(templateSpecification):
-        return [KeySpecification(parsableText,templateSpecification)
-                for parsableText in templateSpecification.getRequiredKeys()]
+
+class KeySpecificationBuilder(object):
+    __pattern = '(\+?)(\w+)'
     
     @staticmethod
-    def parse(parsableText):
-        return re.findall(KeySpecification.__pattern,parsableText)[0]
+    def __parse(parsableText):
+        return re.findall(KeySpecificationBuilder.__pattern,parsableText)[0]    
     
-    def __init__(self,parsableText,templateSpecification):
-        self.key, self.tag = self.parse(parsableText)
+    @staticmethod
+    def buildFrom(templateSpecification):
+        keySpecificationBuilder = KeySpecificationBuilder(templateSpecification)
+        return keySpecificationBuilder.build()
+    
+    def __init__(self,templateSpecification):
+        self.__spec = templateSpecification
+        self.__data = []
+        
+    def build(self):
+        parsableTexts = self.__spec.getRequiredKeys()
+        return self.__buildRecursively(parsableTexts)
+    
+    def __buildRecursively(self,parsableTexts):
+        if parsableTexts:
+            self.__handleSingleElement(parsableTexts)
+            return self.__buildRecursively(parsableTexts)  
+        else: 
+            return self.__data
+    
+    def __handleSingleElement(self,parsableTexts):
+        subItemTag, writerKey = self.__parse(parsableTexts.pop(0))
+        if subItemTag == '+': 
+            keySpecification = self.__data[-1]
+            keySpecification.addRequiredSubElementKey(writerKey)
+        else: 
+            keySpecification = KeySpecification(writerKey,self.__spec)
+            self.__data.append(keySpecification)     
+    
+class KeySpecification(object):    
+    def __init__(self,writerKey,templateSpecification):
+        self.writerKey = writerKey
+        self.__required = []
         self.__setDesiredLength(templateSpecification)
     
     def __setDesiredLength(self,templateSpecification):
@@ -150,18 +176,21 @@ class KeySpecification(object):
     def setWriterData(self,writerData):
         self.__data = writerData
     
+    def addRequiredSubElementKey(self,requiredSubElementKey):
+        self.__required.append(requiredSubElementKey)         
+    
     def getWriterData(self):
-        return {self.key:self.__data.getData()}
+        return {self.writerKey:self.__data.getData()}
     
     def isNextSuitable(self):
         if not self.__data.isEmpty():
             if not self.__data.isPrimitive(): 
                 self.__data = self.__data.pop()
-            return self.__dataMatches() and self.__tagMatches()
+            return self.__dataMatches() and self.__requiredMatches()
         else: return False
     
-    def __tagMatches(self):
-        return self.tag == '' or self.__data.hasDateReference()                
+    def __requiredMatches(self):
+        return all([(key in self.__data) for key in self.__required])                  
     
     def __dataMatches(self):
         return self.__data.isPrimitive() or self.__lengthMatches()
@@ -170,6 +199,4 @@ class KeySpecification(object):
         return self.__desiredLength is None or len(self.__data) == self.__desiredLength
     
     def __repr__(self):
-        if self.tag == '': tagRepr = 'EMPTY'
-        else:              tagRepr = self.tag
-        return 'KeySpecification[key=%s,tag=%s]'%(self.key,tagRepr)    
+        return 'KeySpecification[key=%s,required=%s]'%(self.writerKey,self.__required)    
