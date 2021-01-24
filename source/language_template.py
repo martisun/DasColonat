@@ -129,35 +129,34 @@ class EnglishTemplateCollection(GeneralTemplateCollection):
     _languageSpecificSpecifications =\
     {'mainParagraph':[{'required':['main','+father','+mother','+date'],
      'template':"""$nameWithPIDInText(main),"""+\
-                """ $child(main)$parentRef(+father,+mother),$baptismOnly(main)"""}
+                """ $child(+gender)$parentRef(+father,+mother),$baptismOnly(main)"""}
                       ,{'required':['main','+father','+mother'],
-     'template':"""$nameWithPIDInText(main) is a $child(main)$parentRef(+father,+mother)."""},
+     'template':"""$nameWithPIDInText(main) is a $child(+gender)$parentRef(+father,+mother)."""},
                       {'required':['main','+date'], 'template':"""$nameWithPIDInText(main)$baptismOnly(main)"""}],
      'childListingIntro':[{'required':['father','mother','children'],'key':'children',
                            'modifier':'lengthOneOrMore',
                'map':{1:"""$FromARelationshipOfCouple(father,mother) was brought forth:""",
                       2:"""$FromARelationshipOfCouple(father,mother) were brought forth:"""}}],
      'FromARelationshipOfCouple':[{'required':['father','mother'],'template':"""From a relationship between $nameWithPIDInText(father) and $nameWithPIDInText(mother)"""}],
-     'baptismOnly':[{'required':['main'],'template':""" was baptised $onTheDate(+date)"""+\
-                     """$beforeTheChurches(main) at $town(main)$resp(+date)."""}],
+     'baptismOnly':[{'required':['main','+town'],'template':""" was baptised $onTheDate(+date)"""+\
+                     """$beforeTheChurches(main) at (+town)$resp(+date)."""}],
      'resp':[{'required':['date'],'length':2,'template':""", respectively"""}],
      'onTheDate':[{'required':['date'],'length':2,'template':"""on the $dayOrdinal(+day) and 31\supscr{st} of $month(+month) (+year)"""},{'required':['date'],'template':"""on the $dayOrdinal(+day) of $month(+month) (+year)"""}],
      'dayOrdinal':[{'required':['day'],'template':"""(day)$dayOrdinalOnly(day)"""}],
      'dayOrdinalOnly':[{'modifier':'ordinalSelector','map':{0:'t.superScript(th)',1:'t.superScript(st)', 2:'t.superScript(th)'}}],
-     'month':[{'modifier':'toInt','map':{0:'',1:'January',2:'February',5:'May',6:'June',
-                                         7:'July',8:'August',9:'September',11:'November',
-                                         12:'December'}}],
-     'child':[{'required':['main'],'key':'gender','map':{'m':'son','f':'daughter','':'child'}}],
+     'month':[{'modifier':'toInt','map':{0:'',1:'January',2:'February',4:'April',5:'May',
+                                         6:'June',7:'July',8:'August',9:'September',
+                                         11:'November',12:'December'}}],
+     'child':[{'map':{'m':'son','f':'daughter','':'child'}}],
       'parentRef':[{'required':['father','mother'],'template':""" of $nameWithPIDInText(father) and $nameWithPIDInText(mother)"""}],
-     'town':[{'template':"""Freren"""}],
      'beforeTheChurches':[{'required':['main'],'key':'denom','modifier':'primalListSelector',
                            'map':{'rc':""" before the catholic church$ofTheNamedParish(main)$andChurchBoth(main)""",'ref':""" before the reformed church$ofTheNamedParish(main)$andChurchBoth(main)""",'':''}}],
-     'ofTheNamedParish':[{'required':['main'],'key':'denom','modifier':'primalListSelector',
-                          'map':{'rc':' of the t.italic(St. Vitus) parish','ref':'','':''}}],
+     'ofTheNamedParish':[{'required':['main','+nameOfParish'],'key':'denom',
+                          'modifier':'primalListSelector',
+                          'map':{'rc':' of the t.italic(+nameOfParish) parish','ref':'','':''}}],
      'andChurchBoth':[{'required':['main'],'key':'denom','modifier':'secondaryListSelector',
                        'map':{'ref':' and the reformed church, both','rc':'','':''}}],
-    'tmpSpouseParagraph':[{'required':['main','+date'],'template':"""\nHis spouse $nameWithPIDInText(main), $tmpChild(+gender)$parentRef(+father,+mother),$baptismOnly(main)"""}],
-     'tmpChild':[{'map':{'m':'son','f':'daughter','':'child'}}]}
+    'tmpSpouseParagraph':[{'required':['main','+date'],'template':"""\nHis spouse $nameWithPIDInText(main), $child(+gender)$parentRef(+father,+mother),$baptismOnly(main)"""}]}
 
 class TestTemplateCollection(EnglishTemplateCollection):
     __additionalTestSpecificSpecifications = {}

@@ -1,24 +1,24 @@
 DEFAULT_TEST_SETTINGS_DATA = {'filesToLoadFrom':['baptism.csv'],\
                               'filesToSaveTo':'summary.tex'}
 
-PRIMAL_TEST_HEADER_DATA = 'father;;;mother;;infant;;;;;;'+\
+PRIMAL_TEST_HEADER_DATA = 'father;;;mother;;infant;;;;;;;'+\
                           '\nPID;foreNames;lastName;PID;foreNames;PID;'+\
-                          'foreNames;denom_0;nameOfParish;date;;'+\
-                          '\n;;;;;;;;;day;month;year'
+                          'foreNames;denom_0;nameOfParish;town;date;;'+\
+                          '\n;;;;;;;;;;day;month;year'
 
 PRIMAL_TEST_INTERMED_INPUT_FOR_FATHER =\
 {'main':{'PID':'(Fr0)','foreNames':'Jois','lastName':'Sunder','gender':'m'},
  'spouse':{'PID':'x1(Fr0)','foreNames':'Alheid'},
  'children':[{'PID':'(Fr0.1)','foreNames':'Wolterus',
               'date':{'day':18,'month':12,'year':1661},
-              'nameOfParish':'St. Vitus','denom':['rc']}]}   
+              'nameOfParish':'St. Vitus','denom':['rc'],'town':'Freren'}]}   
 
 PRIMAL_TEST_INTERMED_INPUT_FOR_MOTHER =\
 {'main':{'PID':'x1(Fr0)','foreNames':'Alheid','gender':'f'},
  'spouse':{'PID':'(Fr0)','foreNames':'Jois','lastName':'Sunder'},
  'children':[{'PID':'(Fr0.1)','foreNames':'Wolterus',
               'date':{'day':18,'month':12,'year':1661}, 
-              'nameOfParish':'St. Vitus','denom':['rc']}]}
+              'nameOfParish':'St. Vitus','denom':['rc'],'town':'Freren'}]}
         
 def getDefaultTestSettings():
     return DEFAULT_TEST_SETTINGS_DATA.copy()

@@ -5,7 +5,7 @@ from source.writer_maker import WriterMaker
 
 from source.default_settings import getPrimalTestIntermediateInputForFather, getPrimalTestIntermediateInputForMother,PrimalTestOutput 
 
-from source.test_whenUsingWriterMaker import getTestInput,FILLED_OUT_CHILDREN_LISTING
+from source.test_whenUsingWriterMaker import getTestInput,FILLED_OUT_CHILDREN_LISTING, DOUBLE_BAPTISM_ENTRY_CHILD
 
 class whenUsingEnglishWriterMaker(ExtendedTestCase):
     def setUp(self):
@@ -89,6 +89,12 @@ class whenUsingEnglishWriterMaker(ExtendedTestCase):
         actual = self.summaryWriter.write(getTestInput())
         self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1.1)'])
         
+    def test_whenWritingFourthSection(self):
+        """This test asserts that the fourth section can be written, sub tests will be split of
+        and this test will remain as acceptance test."""
+        actual = self.summaryWriter.write(TEST_INPUT['(Fr1.1.2)'])
+        self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1.1.2)'])        
+        
     def __setSummaryWriterToLanguage(self,languageTag):
         writerMaker  = WriterMaker.inLanguage(languageTag)
         self.summaryWriter.setMakerTo(writerMaker)
@@ -96,10 +102,10 @@ class whenUsingEnglishWriterMaker(ExtendedTestCase):
 
 WOLTER_INPUT = {'PID':'(Fr0.1)','foreNames':'Wolterus',
                 'date':{'day':18,'month':12,'year':1661},
-                'nameOfParish':'St. Vitus','denom':['rc']}
+                'nameOfParish':'St. Vitus','denom':['rc'],'town':'Freren'}
 HERMAN_INPUT = {'PID':'(Fr0.2)','foreNames':'Hermännus',
                 'date':{'day':1,'month':6,'year':1666},
-                'nameOfParish':'St. Vitus','denom':['rc']}
+                'nameOfParish':'St. Vitus','denom':['rc'],'town':'Freren'}
         
 FATHER_OUTPUT="""
 \section{\pidt{(Fr0)}-- Sunder, Jois --~\Mars}\label{sec:(Fr0)}
@@ -150,14 +156,43 @@ TEST_INPUT = {'(Fr1)':{'main':{'PID':'(Fr1)','foreNames':'Jan','lastName':'Sunde
               'spouse':{'PID':'x1(Fr1)','foreNames':'Tela','lastName':'Mouwe'},
               'children':[{'PID':'(Fr1.1)','foreNames':'Jan','gender':'m',
                            'date':{'day':13,'month':12,'year':1711},
-                           'nameOfParish':'St. Vitus','denom':['rc','ref']},
+                           'nameOfParish':'St. Vitus','denom':['rc','ref'],'town':'Freren'},
                           {'PID':'(Fr1.2)','foreNames':'Maria Elisabet','gender':'f',
-                           'date':{'day':8,'month':7,'year':1714},'denom':['ref']},
+                           'date':{'day':8,'month':7,'year':1714},'denom':['ref'],'town':'Freren'},
                           {'PID':'(Fr1.3)','foreNames':'Berend','gender':'m',
-                           'date':{'day':31,'month':5,'year':1717},'denom':['ref']},
+                           'date':{'day':31,'month':5,'year':1717},'denom':['ref'],
+                           'town':'Freren'},
                           {'PID':'(Fr1.4)','foreNames':'Berend','gender':'m',
-                           'date':{'day':12,'month':2,'year':1719},'denom':['ref']}]},
-             '(Fr1.1)':getTestInput()} 
+                           'date':{'day':12,'month':2,'year':1719},'denom':['ref'],
+                           'town':'Freren'}]},
+             '(Fr1.1)':getTestInput(),
+             '(Fr1.1.2)':{'main':{'PID':'(Fr1.1.2)','foreNames':'Joes Bernardus',
+                                  'lastName':'Sunder','gender':'m',
+                       'date':[{'day':30,'month':8,'year':1736},{'day':31,'month':8,'year':1736}],
+                       'nameOfParish':'St. Vitus','denom':['rc','ref'],'town':'Freren',
+                       'father':{'PID':'(Fr1.1)','foreNames':'Joannis','lastName':'Sunder'},
+                       'mother':{'PID':'x1(Fr1.1)','foreNames':'Anna Maria','lastName':'Tijes'}},
+                'children':[{'PID':'(Fr1.1.2.1)','foreNames':'Anna',
+                           'date':{'day':18,'month':12,'year':1762},
+                           'nameOfParish':'St. Vitus','denom':['rc'],'town':'Freren'},      
+                            {'PID':'(Fr1.1.2.2)','foreNames':'Thecla Gesina','gender':'f',
+                           'date':{'day':18,'month':12,'year':1762},
+                           'nameOfParish':'St. Vitus','denom':['rc'],'town':'Freren'},
+                            {'PID':'(Fr1.1.2.3)','foreNames':'Joannes Hermannus',
+                           'date':{'day':25,'month':5,'year':1765},
+                           'nameOfParish':'St. Vitus','denom':['rc'],'town':'Freren'},
+                           {'PID':'(Fr1.1.2.4)','foreNames':'Joannes Bernardus',
+                           'date':{'day':21,'month':4,'year':1767},
+                           'nameOfParish':'St. Vitus','denom':['rc'],'town':'Freren'},
+                           {'PID':'(Fr1.1.2.5)','foreNames':'Hermannus Henericus',
+                           'date':{'day':16,'month':9,'year':1769},
+                           'nameOfParish':'St. Vitus','denom':['rc'],'town':'Freren'}],
+                'spouse':{'PID':'x1(Fr1.1.2)','foreNames':'Helena','lastName':'M\"{o}llers',
+                          'gender':'f','nameOfParish':'St. Jodocus',
+                'date':{'day':24,'month':2,'year':1741},'denom':['rc'],'town':'B\"{o}rger',
+                'father':{'PID':'Vx1(Fr1.1.2)','foreNames':'Hermannus','lastName':'M\"{o}ller'},
+                'mother':{'PID':'Mx1(Fr1.1.2)','foreNames':'Anna Adelheidis',
+                          'lastName':'Tieken'}}}}
 
 TEST_OUTPUT = {'(Fr1)':"""
 \section{\pidt{(Fr1)}-- Sunder, Jan --~\Mars}\label{sec:(Fr1)}
@@ -177,4 +212,19 @@ Jan \textbf{S}under\pids{(Fr1.1)}, son of Jan \textbf{S}under\pids{(Fr1)} and Te
 
 From a relationship between Jan \textbf{S}under\pids{(Fr1.1)} and Anna Maria \textbf{T}ijs\pids{x1(Fr1.1)} were brought forth:%s
 His spouse Anna Maria \textbf{T}ijs\pids{x1(Fr1.1)}, daughter of Herman \textbf{T}ijs and Fenne \textbf{W}emerschlage, was baptised on the 8\supscr{th} of July 1712 before the reformed church at Freren.
-"""%FILLED_OUT_CHILDREN_LISTING}
+"""%FILLED_OUT_CHILDREN_LISTING,
+              '(Fr1.1.2)':"""
+\section{\pidt{(Fr1.1.2)}-- Sunder, Joes Bernardus --~\Mars}\label{sec:(Fr1.1.2)}
+
+Joes Bernardus \textbf{S}under\pids{(Fr1.1.2)}, son of Joannis \textbf{S}under\pids{(Fr1.1)} and Anna Maria \textbf{T}ijes\pids{x1(Fr1.1)}, was baptised on the 30\supscr{th} and 31\supscr{st} of August 1736 before the catholic church of the {\it St. Vitus} parish and the reformed church, both at Freren, respectively.
+
+From a relationship between Joes Bernardus \textbf{S}under\pids{(Fr1.1.2)} and Helena \textbf{M}"{o}llers\pids{x1(Fr1.1.2)} were brought forth:
+\begin{itemize}
+\item[\emph{\rom{1}.}] Anna~(\textbf{?})~\pids{(Fr1.1.2.1)} was baptised on the 18\supscr{th} of December 1762 before the catholic church of the {\it St. Vitus} parish at Freren.
+\item[\emph{\rom{2}.}] Thecla Gesina~(\textbf{\Venus})~\pids{(Fr1.1.2.2)} was baptised on the 18\supscr{th} of December 1762 before the catholic church of the {\it St. Vitus} parish at Freren.
+\item[\emph{\rom{3}.}] Joannes Hermannus~(\textbf{?})~\pids{(Fr1.1.2.3)} was baptised on the 25\supscr{th} of May 1765 before the catholic church of the {\it St. Vitus} parish at Freren.
+\item[\emph{\rom{4}.}] Joannes Bernardus~(\textbf{?})~\pids{(Fr1.1.2.4)} was baptised on the 21\supscr{st} of April 1767 before the catholic church of the {\it St. Vitus} parish at Freren.
+\item[\emph{\rom{5}.}] Hermannus Henericus~(\textbf{?})~\pids{(Fr1.1.2.5)} was baptised on the 16\supscr{th} of September 1769 before the catholic church of the {\it St. Vitus} parish at Freren.
+\end{itemize}
+His spouse Helena \textbf{M}\"{o}llers\pids{x1(Fr1.1.2)}, daughter of Hermannus \textbf{M}\"{o}ller\pids{Vx1(Fr1.1.2)} and Anna Adelheidis \textbf{T}ieken\pids{Mx1(Fr1.1.2)}, was baptised on the 24\supscr{th} of February 1741 before the catholic church of the {\it St. Jodocus} parish at B\"{o}rger.
+"""}

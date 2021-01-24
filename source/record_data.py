@@ -101,6 +101,8 @@ class WriterData(object):
     
 class WriterDataList(WriterData):    
     def getMainData(self):
+        print('l.104 record_data.py refactoring')
+        if self.isEmpty(): return self.makeFrom('')
         return self.makeFrom(self._data[0])
     
     def isPrimitive(self):

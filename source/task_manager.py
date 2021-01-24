@@ -42,7 +42,7 @@ class TaskManager(FileHandler):
         return fileParser.parse()
      
     def __readPeopleFromRecords(self,parsedRecords):
-        recordReader = RecordReader(self._settings.roleOfMain)
+        recordReader = RecordReader(self._settings.pidOfMain)
         return recordReader.readPeopleFrom(parsedRecords) 
     
     def __deriveAdditionalInformationFrom(self,peopleData):

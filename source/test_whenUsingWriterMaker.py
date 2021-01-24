@@ -132,18 +132,18 @@ class whenUsingWriterMaker(ExtendedTestCase):
         
 SINGLE_BAPTISM_ENTRY_CHILD = {'main':{'PID':'(Fr1.1.1)','foreNames':'Thele Marie','gender':'f',
                               'date':[{'day':18,'month':9,'year':1734}],
-                              'denom':['ref']}}
+                              'denom':['ref'],'town':'Freren'}}
         
-DOUBLE_BAPTISM_ENTRY_CHILD = {'main':{'PID':'(Fr1.1.2)','foreNames':'Bernardus','gender':'m',
+DOUBLE_BAPTISM_ENTRY_CHILD = {'main':{'PID':'(Fr1.1.2)','foreNames':'Joes Bernardus','gender':'m',
                               'date':[{'day':30,'month':8,'year':1736},
                                       {'day':31,'month':8,'year':1736}],
-                              'nameOfParish':'St. Vitus','denom':['rc','ref']}} 
+                              'nameOfParish':'St. Vitus','denom':['rc','ref'],'town':'Freren'}} 
 
 DOUBLE_BAPTISM_BAPTISM_ONLY_CLAUSE = ' was baptised on the 30\supscr{th} and 31\supscr{st}'+\
                          ' of August 1736 before the catholic church of the {\it St. Vitus}'+\
                          ' parish and the reformed church, both at Freren, respectively.'
         
-ADD_DOUBLE_BAPTISM_CHILD_DESCRIPTION =  'Bernardus~(\textbf{\Mars})~\pids{(Fr1.1.2)}'       
+ADD_DOUBLE_BAPTISM_CHILD_DESCRIPTION =  'Joes Bernardus~(\textbf{\Mars})~\pids{(Fr1.1.2)}'       
 
 SINGLE_BAPTISM_CHILD_DESCRIPTION = 'Thele Marie~(\textbf{\Venus})~\pids{(Fr1.1.1)} was baptised on the 18\supscr{th} of September 1734 before the reformed church at Freren.'
 
@@ -159,10 +159,10 @@ CHILDREN_LISTING = """
 
 FATHER_ENTRY = {'PID':'(Fr1.1)','foreNames':'Jan','lastName':'Sunder','gender':'m',
                 'date':[{'day':13,'month':12,'year':1711}],
-                'nameOfParish':'St. Vitus','denom':['rc','ref']}
+                'nameOfParish':'St. Vitus','denom':['rc','ref'],'town':'Freren'}
 
 MOTHER_ENTRY = {'PID':'x1(Fr1.1)','foreNames':'Anna Maria','lastName':'Tijs','gender':'f',
-                'date':{'day':8,'month':7,'year':1712},'denom':['ref'],
+                'date':{'day':8,'month':7,'year':1712},'denom':['ref'],'town':'Freren',
                 'father':{'foreNames':'Herman','lastName':'Tijs'},
                 'mother':{'foreNames':'Fenne','lastName':'Wemerschlage'}}
 
@@ -177,13 +177,13 @@ def getTestInput():
                         DOUBLE_BAPTISM_ENTRY_CHILD['main'],
                         {'PID':'(Fr1.1.3)','foreNames':'Maria','gender':'f',
                          'date':{'day':6,'month':12,'year':1738},
-                         'nameOfParish':'St. Vitus','denom':['rc','ref']},
+                         'nameOfParish':'St. Vitus','denom':['rc','ref'],'town':'Freren'},
                         {'PID':'(Fr1.1.4)','foreNames':'Joh. Christoph','gender':'m',
                          'date':{'day':15,'month':1,'year':1741},
-                         'nameOfParish':'St. Vitus','denom':['rc','ref']},
+                         'nameOfParish':'St. Vitus','denom':['rc','ref'],'town':'Freren'},
                         {'PID':'(Fr1.1.5)','foreNames':'Joannis','gender':'m',
                          'date':{'day':8,'month':9,'year':1743},
-                         'nameOfParish':'St. Vitus','denom':['rc','ref']},
+                         'nameOfParish':'St. Vitus','denom':['rc','ref'],'town':'Freren'},
                         {'PID':'(Fr1.1.6)','foreNames':'Henricus','gender':'m',
                          'date':{'day':17,'month':11,'year':1747},
-                         'nameOfParish':'St. Vitus','denom':['rc','ref']}]}
+                         'nameOfParish':'St. Vitus','denom':['rc','ref'],'town':'Freren'}]}
