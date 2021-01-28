@@ -1,19 +1,7 @@
-from source.test_whenUsingMockFile import whenUsingMockFile
+from source.whenUsingTaskManager import whenUsingTaskManager
 from source.test_whenUsingEnglishWriterMaker import FATHER_OUTPUT,MOTHER_OUTPUT,CHILD_LISTINGS,OTHER_CHILD_LISTING,COMBINED_CHILDREN_LISTING,TEST_OUTPUT
 
-from source.task_manager import TaskManager
-from source.settings import Settings
-from source.mock_gui import MockGUI
-from source.mock_file import MockFolderAdapter
-
-from source.default_settings import getDefaultTestSettings,getPrimalTestHeader
-
-class whenUsingFileParser(whenUsingMockFile):
-    def setUp(self):
-        self.folderAdapter = MockFolderAdapter()
-        defaultTestSettings = getDefaultTestSettings()
-        self.defaultTestFileToLoadFrom = defaultTestSettings['filesToLoadFrom'][0]
-    
+class whenUsingFileParser(whenUsingTaskManager):    
     def test_whenWritingSectionForFatherGivenAll(self):
         """Tests whether given the minimal input for both father and mother
         of the baptism record in a string representation of the summary writer 
@@ -29,24 +17,24 @@ class whenUsingFileParser(whenUsingMockFile):
     def test_whenWritingSectionForFatherGivenOtherChild(self):
         """Tests the same as `test_whenWritingSectionForFatherGivenAll` for a
         different baptism record of the same couple."""
-        desiredFileContent = getPrimalTestHeader()+STR_HERMANNUS
-        self.__writeContentToDefaultFile(desiredFileContent)
-        actual = self.__setupAndRunTaskManagerThenGetOutputAsText('(Fr0)')
+        desiredFileContent = self._testInput.forHermannus()
+        self._writeContentToDefaultFile(desiredFileContent)
+        actual = self._setupAndRunTaskManagerThenGetOutputAsText('(Fr0)')
         self._assertActualEqualsExpected(actual,FATHER_OUTPUT+OTHER_CHILD_LISTING) 
         
     def test_whenWritingSectionForFatherOfBothChildren(self):
         """Tests whether given baptism input for two children, we can write a 
         single summary section that includes them both."""
-        desiredFileContent = getPrimalTestHeader()+STR_WOLTERUS+STR_HERMANNUS
-        self.__writeContentToDefaultFile(desiredFileContent)
-        actual = self.__setupAndRunTaskManagerThenGetOutputAsText('(Fr0)')
-        self._assertActualEqualsExpected(actual,COMBINED_CHILDREN_LISTING) 
+        desiredFileContent = self._testInput.forChildren()
+        self._writeContentToDefaultFile(desiredFileContent)
+        actual = self._setupAndRunTaskManagerThenGetOutputAsText('(Fr0)')
+        self._assertActualEqualsExpected(actual,COMBINED_CHILDREN_LISTING)         
         
     def test_whenWritingSecondSection(self):
         """This test asserts that the second section can be written, sub tests will be split of
         and this test will remain as acceptance test."""
-        self.__writeContentToDefaultFile(TEST_INPUT)
-        actual = self.__setupAndRunTaskManagerThenGetOutputAsText('(Fr1)')
+        self._writeContentToDefaultFile(TEST_INPUT)
+        actual = self._setupAndRunTaskManagerThenGetOutputAsText('(Fr1)')
         self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1)']) 
         
     def test_whenWritingThirdSection(self):
@@ -55,64 +43,30 @@ class whenUsingFileParser(whenUsingMockFile):
         infant in a record as our person of focus.
          * the test-input includes records of spanning multiple generations, ensure that the
            children listing does not include possible grandchildren."""
-        self.__writeContentToDefaultFile(TEST_INPUT)
-        actual = self.__setupAndRunTaskManagerThenGetOutputAsText('(Fr1.1)')
+        self._writeContentToDefaultFile(TEST_INPUT)
+        actual = self._setupAndRunTaskManagerThenGetOutputAsText('(Fr1.1)')
         self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1.1)'])         
     
     def test_whenWritingFourthSection(self):
         """This test asserts that a (simplified version) of the fourth section can be written, 
         sub tests will be split of and this test will remain as acceptance test. This test will
         show that we can also have a grandchild as summary."""
-        self.__writeContentToDefaultFile(TEST_INPUT)
-        actual = self.__setupAndRunTaskManagerThenGetOutputAsText('(Fr1.1.2)')
-        self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1.1.2)'])
+        self._writeContentToDefaultFile(TEST_INPUT)
+        actual = self._setupAndRunTaskManagerThenGetOutputAsText('(Fr1.1.2)')
+        self._assertActualEqualsExpected(actual,TEST_OUTPUT['(Fr1.1.2)'])            
         
     def __test_whenWritingSectionForParentGivenAll(self,parentPID,parentOutput):
         self.__writeDefaultContentToDefaultFile() 
         self.__assertActualOutputForParentWithParentOutputEqualsDesiredOutput(parentPID, parentOutput)
     
     def __writeDefaultContentToDefaultFile(self):
-        desiredFileContent = getPrimalTestHeader()+STR_WOLTERUS
-        self.__writeContentToDefaultFile(desiredFileContent)
-    
-    def __writeContentToDefaultFile(self,desiredFileContent):
-        desiredFileName    = self.defaultTestFileToLoadFrom
-        self._writeContentToFileWithName(desiredFileContent,desiredFileName)
+        desiredFileContent = self._testInput.forWolterus()
+        self._writeContentToDefaultFile(desiredFileContent)
     
     def __assertActualOutputForParentWithParentOutputEqualsDesiredOutput(self,parentPID, parentOutput):
-        actualOutput  = self.__setupAndRunTaskManagerThenGetOutputAsText(parentPID)
+        actualOutput  = self._setupAndRunTaskManagerThenGetOutputAsText(parentPID)
         desiredOutput = parentOutput+CHILD_LISTINGS['default']
-        self._assertActualEqualsExpected(actualOutput,desiredOutput) 
-    
-    def __setupAndRunTaskManagerThenGetOutputAsText(self,pidOfMain):
-        settings    = self.__setupGoldSettingsWithMain(pidOfMain)
-        taskManager = self.__setupTaskManagerWithSettings(settings) 
-        taskManager.run()
-        return self.__readContentFromDefaultFile()
-    
-    def __setupGoldSettingsWithMain(self,pidOfMain):
-        defaultTestSettings = getDefaultTestSettings()
-        settings = Settings.setTo(defaultTestSettings)
-        settings.updateWith({'pidOfMain':pidOfMain})
-        return settings
-    
-    def __setupTaskManagerWithSettings(self,settings):
-        taskManager = TaskManager()
-        taskManager.setGUITo(MockGUI())
-        taskManager.setFolderAdapterTo(self.folderAdapter)
-        taskManager.setSettingsTo(settings)
-        return taskManager
-    
-    def __readContentFromDefaultFile(self):
-        defaultTestSettings = getDefaultTestSettings()
-        fileNameWithSavedData = defaultTestSettings['filesToSaveTo']
-        return self._readContentFromFileWithName(fileNameWithSavedData)
-
-        
-STR_WOLTERUS  = '\n(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.1);Wolterus;rc;'+\
-                'St. Vitus;Freren;18;12;1661' 
-STR_HERMANNUS = '\n(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.2);Hermännus;rc;'+\
-                'St. Vitus;Freren;1;6;1666'       
+        self._assertActualEqualsExpected(actualOutput,desiredOutput)      
         
 TEST_INPUT ='father;;;mother;;;infant;;;;;;;;;'+\
             '\nPID;foreNames;lastName;PID;foreNames;lastName;PID;'+\

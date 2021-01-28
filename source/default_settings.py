@@ -1,11 +1,6 @@
 DEFAULT_TEST_SETTINGS_DATA = {'filesToLoadFrom':['baptism.csv'],\
                               'filesToSaveTo':'summary.tex'}
 
-PRIMAL_TEST_HEADER_DATA = 'father;;;mother;;infant;;;;;;;'+\
-                          '\nPID;foreNames;lastName;PID;foreNames;PID;'+\
-                          'foreNames;denom_0;nameOfParish;town;date;;'+\
-                          '\n;;;;;;;;;;day;month;year'
-
 PRIMAL_TEST_INTERMED_INPUT_FOR_FATHER =\
 {'main':{'PID':'(Fr0)','foreNames':'Jois','lastName':'Sunder','gender':'m'},
  'spouse':{'PID':'x1(Fr0)','foreNames':'Alheid'},
@@ -19,18 +14,36 @@ PRIMAL_TEST_INTERMED_INPUT_FOR_MOTHER =\
  'children':[{'PID':'(Fr0.1)','foreNames':'Wolterus',
               'date':{'day':18,'month':12,'year':1661}, 
               'nameOfParish':'St. Vitus','denom':['rc'],'town':'Freren'}]}
+
+STR_WOLTERUS  = '\n(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.1);Wolterus;rc;'+\
+                'St. Vitus;Freren;18;12;1661' 
+    
+STR_HERMANNUS = '\n(Fr0);Jois;Sunder;x1(Fr0);Alheid;(Fr0.2);Hermännus;rc;'+\
+                'St. Vitus;Freren;1;6;1666'     
         
 def getDefaultTestSettings():
-    return DEFAULT_TEST_SETTINGS_DATA.copy()
-
-def getPrimalTestHeader():
-    return PRIMAL_TEST_HEADER_DATA
+    return DEFAULT_TEST_SETTINGS_DATA.copy()  
 
 def getPrimalTestIntermediateInputForFather():
     return PRIMAL_TEST_INTERMED_INPUT_FOR_FATHER.copy() 
 
 def getPrimalTestIntermediateInputForMother():
     return PRIMAL_TEST_INTERMED_INPUT_FOR_MOTHER.copy()
+
+class PrimalTestInput(object):
+    __primalTestHeader = 'father;;;mother;;infant;;;;;;;'+\
+                          '\nPID;foreNames;lastName;PID;foreNames;PID;'+\
+                          'foreNames;denom_0;nameOfParish;town;date;;'+\
+                          '\n;;;;;;;;;;day;month;year'
+    
+    def forWolterus(self):
+        return self.__primalTestHeader+STR_WOLTERUS
+    
+    def forHermannus(self):
+        return self.__primalTestHeader+STR_HERMANNUS
+    
+    def forChildren(self):
+        return self.__primalTestHeader+STR_WOLTERUS+STR_HERMANNUS        
 
 class PrimalTestOutput(object):
     __headerForFather = """

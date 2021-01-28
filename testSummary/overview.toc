@@ -1,0 +1,3 @@
+\select@language {english}
+\contentsline {chapter}{\numberline {1}The lineage of (Fr0)}{1}{chapter.0.1}
+\contentsline {section}{\ensuremath {\vcenter {\hbox {\textbf {{\relax \fontsize {9}{11}\selectfont \abovedisplayskip 8.5\p@ plus3\p@ minus4\p@ \abovedisplayshortskip \z@ plus2\p@ \belowdisplayshortskip 4\p@ plus2\p@ minus2\p@ \def \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ {\leftmargin \leftmargini \topsep 4\p@ plus2\p@ minus2\p@ \parsep 2\p@ plus\p@ minus\p@ \itemsep \parsep }\belowdisplayskip \abovedisplayskip \texttt {(Fr0)}}}}}}-- Sunder, Jois --~{\fontfamily {mvs}\fontencoding {U}\fontseries {m}\fontshape {n}\selectfont \char 196}}{1}{section*.2}
